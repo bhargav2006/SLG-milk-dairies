@@ -1,4 +1,16 @@
 const Product = require("../models/Product");
+const categoryDefaults = {
+  Milk: "/uploads/defaults/milk.jpg",
+  Curd: "/uploads/defaults/curd.jpg",
+  Butter: "/uploads/defaults/butter.jpg",
+  Ghee: "/uploads/defaults/ghee.jpg",
+  Paneer: "/uploads/defaults/paneer.jpg",
+  Cheese: "/uploads/defaults/cheese.jpg",
+  Cream: "/uploads/defaults/cream.jpg",
+  Lassi: "/uploads/defaults/lassi.jpg",
+  "Flavoured Milk": "/uploads/defaults/flavoured-milk.jpg",
+  "Ice Cream": "/uploads/defaults/ice-cream.jpg",
+};
 
 // @desc    Get all products
 // @route   GET /api/products/
@@ -78,12 +90,22 @@ const getProducts = async (req, res) => {
 
     const [products, total] = await Promise.all([
       Product.find(filter).sort(sort).skip(skip).limit(limitNum),
-
       Product.countDocuments(filter),
     ]);
 
+    const productsWithImages = products.map((product) => {
+      const productObj = product.toObject();
+      return {
+        ...productObj,
+        image:
+          productObj.image ||
+          categoryDefaults[productObj.category] ||
+          "/uploads/defaults/logo.jpg",
+      };
+    });
+
     res.json({
-      products,
+      products: productsWithImages,
       total,
       page: pageNum,
       pages: Math.ceil(total / limitNum),
@@ -104,7 +126,12 @@ const getProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.json(product);
+    const productObj = product.toObject();
+    productObj.image =
+      productObj.image ||
+      categoryDefaults[productObj.category] ||
+      "/uploads/defaults/logo.jpg";
+    res.json(productObj);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -116,10 +143,11 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const { name, serialNumber, price, description, category } = req.body;
+    const image = req.file ? `/uploads/products/${req.file.filename}` : null;
     if (!name || !serialNumber || price === undefined || !category) {
-      return res
-        .status(400)
-        .json({ message: "Name, serial number, category, and price are required" });
+      return res.status(400).json({
+        message: "Name, serial number, category, and price are required",
+      });
     }
     const existingProduct = await Product.findOne({ serialNumber });
     if (existingProduct) {
@@ -127,7 +155,14 @@ const createProduct = async (req, res) => {
         .status(400)
         .json({ message: "Product with this serial number already exists" });
     }
-    const product = new Product({ name, serialNumber, price, description: description || "", category });
+    const product = new Product({
+      name,
+      serialNumber,
+      price,
+      description: description || "",
+      category,
+      image,
+    });
     await product.save();
     res.status(201).json(product);
   } catch (error) {
@@ -161,8 +196,17 @@ const updateProduct = async (req, res) => {
       }
       product.serialNumber = serialNumber;
     }
+    if (req.file) {
+      product.image = `/uploads/products/${req.file.filename}`;
+    }
     await product.save();
-    res.json(product);
+    const productObj = product.toObject();
+
+    productObj.image =
+      productObj.image ||
+      categoryDefaults[productObj.category] ||
+      "/uploads/defaults/logo.jpg";
+    res.json(productObj);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -185,10 +229,63 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const categoryPrefixes = {
+  Milk: "MILK",
+  Cheese: "CHS",
+  Butter: "BTR",
+  Yogurt: "YGT",
+  Ghee: "GHEE",
+  Paneer: "PANR",
+  Cream: "CRM",
+  Lassi: "LSI",
+  "Flavoured Milk": "FLV",
+  "Ice Cream": "ICE",
+};
+
+// @desc    Get next serial number for a category
+// @route   GET /api/products/next-serial
+const getNextSerialNumber = async (req, res) => {
+  try {
+    const { category } = req.query;
+    if (!category) {
+      return res.status(400).json({ message: "Category query parameter is required" });
+    }
+
+    const prefix = categoryPrefixes[category] || category.substring(0, 3).toUpperCase();
+    
+    // Find all products in this category
+    const products = await Product.find({ category }).select("serialNumber");
+    
+    let maxNum = 0;
+    const regex = new RegExp(`^${prefix}(\\d+)$`, 'i');
+
+    products.forEach((prod) => {
+      if (prod.serialNumber) {
+        const match = prod.serialNumber.match(regex);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) {
+            maxNum = num;
+          }
+        }
+      }
+    });
+
+    const nextNum = maxNum + 1;
+    const nextSerial = `${prefix}${nextNum.toString().padStart(2, '0')}`;
+
+    res.json({ nextSerial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
+  getNextSerialNumber,
 };

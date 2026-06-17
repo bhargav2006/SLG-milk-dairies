@@ -47,7 +47,7 @@ const MainLayout = ({ children }) => {
     }
     if (path.startsWith("/users")) return "User Accounts Management";
     if (path.startsWith("/profile")) return "Account Profile";
-    return "Sri Sai Dairy Parlour System";
+    return "SLG MILK DAIRYS System";
   };
 
   const menuItems = [
@@ -100,9 +100,9 @@ const MainLayout = ({ children }) => {
       >
         <div className="sidebar-brand">
           <div className="sidebar-logo">
-            <Milk size={28} strokeWidth={2.5} />
+            <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "28px", height: "28px", objectFit: "contain", borderRadius: "50%" }} />
           </div>
-          <span className="brand-name">Sri Sai Dairy Parlour</span>
+          <span className="brand-name">SLG MILK DAIRYS</span>
         </div>
 
         <ul className="sidebar-menu">

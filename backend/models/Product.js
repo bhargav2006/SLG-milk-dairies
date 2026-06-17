@@ -23,6 +23,10 @@ const ProductSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    image: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true, // adds createdAt and updatedAt automatically

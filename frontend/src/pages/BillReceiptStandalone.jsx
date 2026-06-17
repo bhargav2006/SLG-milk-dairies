@@ -101,12 +101,17 @@ const BillReceiptStandalone = () => {
         <div className="print-invoice-sheet" style={{ fontFamily: "var(--font-family)", color: "var(--color-text-primary)" }}>
           {/* Store Receipt Header */}
           <div style={{ textAlign: "center", borderBottom: "2px solid var(--color-border)", paddingBottom: "20px", marginBottom: "24px" }}>
-            <div style={{ color: "var(--color-primary)", display: "flex", justifyContent: "center", marginBottom: "8px" }}>
-              <Milk size={48} />
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "8px" }}>
+              <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
             </div>
-            <h2 style={{ fontSize: "1.6rem", fontWeight: 700, letterSpacing: "-0.5px" }}>SRI SAI DAIRY PARLOUR</h2>
-            <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)", marginTop: "4px" }}>Fresh Milk & Dairy Products Daily</p>
-            <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)" }}>123 Dairy Farm Avenue, Anand, Gujarat</p>
+            <h2 style={{ fontSize: "1.6rem", fontWeight: 700, letterSpacing: "-0.5px" }}>SLG MILK DAIRYS</h2>
+            <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)", fontWeight: 600, marginTop: "4px" }}>VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2000❤️</p>
+            <p style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)", marginTop: "4px" }}>Shopping & retail | AC Handle: @manikondaswamy</p>
+            <div style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)", marginTop: "8px", borderTop: "1px dashed var(--color-border)", paddingTop: "8px" }}>
+              <strong>Branches:</strong><br />
+              1) Near SBI, opposite P.Gannavaram 🔥<br />
+              2) Honda Showroom, opposite Pothavaram 😍
+            </div>
           </div>
 
           {/* Bill Meta Details */}
@@ -173,7 +178,7 @@ const BillReceiptStandalone = () => {
           {/* Payment receipt footer details */}
           <div style={{ marginTop: "32px", borderTop: "1px dashed var(--color-border)", paddingTop: "16px", textAlign: "center", fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
             <p>Payment Mode: <strong style={{ textTransform: "uppercase", color: "var(--color-text-primary)" }}>{bill.paymentMethod}</strong></p>
-            <p style={{ marginTop: "10px" }}>Thank you for shopping at Sri Sai Dairy Parlour!</p>
+            <p style={{ marginTop: "10px" }}>Thank you for shopping at SLG MILK DAIRYS!</p>
             <p>Please visit us again.</p>
           </div>
         </div>

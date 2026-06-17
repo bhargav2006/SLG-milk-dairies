@@ -124,10 +124,6 @@ const CreateBill = () => {
 
   const handleGenerateBill = async () => {
     // Validation
-    if (!customerNumber) {
-      showWarning("Please enter customer phone number");
-      return;
-    }
     if (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber)) {
       showWarning("Customer phone number must be exactly 10 digits");
       return;
@@ -278,13 +274,19 @@ const CreateBill = () => {
                 className="catalog-item-card"
                 onClick={() => addToCart(product)}
               >
-                <div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flexGrow: 1,
+                  }}
+                >
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "flex-start",
-                      marginBottom: "4px",
+                      marginBottom: "6px",
                     }}
                   >
                     <span
@@ -306,6 +308,34 @@ const CreateBill = () => {
                       {product.serialNumber}
                     </span>
                   </div>
+
+                  {/* Responsive image wrapper */}
+                  <div
+                    style={{
+                      height: "120px",
+                      width: "100%",
+                      overflow: "hidden",
+                      borderRadius: "8px",
+                      marginBottom: "8px",
+                      background: "var(--color-bg)",
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={`${import.meta.env.VITE_BACKEND_URI}${product.image}`}
+                      alt={product.name}
+                      onError={(e) => {
+                        e.target.src = `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/logo.jpg`;
+                      }}
+                      className="catalog-product-image"
+                      style={{
+                        height: "100%",
+                        width: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+
                   <h4
                     style={{
                       fontSize: "0.85rem",
@@ -315,6 +345,7 @@ const CreateBill = () => {
                       WebkitLineClamp: 1,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
+                      marginBottom: "4px",
                     }}
                   >
                     {product.name}
@@ -325,20 +356,29 @@ const CreateBill = () => {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    marginTop: "8px",
+                    marginTop: "auto",
+                    paddingTop: "6px",
                   }}
                 >
-                  <span style={{ fontSize: "1rem", fontWeight: 700 }}>
+                  <span
+                    style={{
+                      fontSize: "1.1rem",
+                      fontWeight: 700,
+                      color: "var(--color-text-primary)",
+                    }}
+                  >
                     ₹{product.price.toFixed(2)}
                   </span>
                   <span
                     style={{
-                      fontSize: "0.7rem",
-                      backgroundColor: "var(--color-primary-light)",
-                      color: "var(--color-primary)",
-                      padding: "2px 6px",
-                      borderRadius: "4px",
+                      fontSize: "0.75rem",
+                      backgroundColor: "var(--color-primary)",
+                      color: "#FFFFFF",
+                      padding: "4px 10px",
+                      borderRadius: "6px",
                       fontWeight: 600,
+                      boxShadow: "0 2px 4px rgba(74, 144, 226, 0.25)",
+                      transition: "all var(--transition-fast) ease",
                     }}
                   >
                     Add +
@@ -395,7 +435,7 @@ const CreateBill = () => {
                 gap: "4px",
               }}
             >
-              <UserCheck size={14} /> Customer Number (10 Digits) *
+              <UserCheck size={14} /> Customer Number (10 Digits)
             </label>
             <input
               type="text"
@@ -600,33 +640,49 @@ const CreateBill = () => {
             >
               <div
                 style={{
-                  color: "var(--color-primary)",
                   display: "flex",
                   justifyContent: "center",
                   marginBottom: "8px",
                 }}
               >
-                <Milk size={40} />
+                <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
               </div>
               <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-                SRI SAI DAIRY PARLOUR
+                SLG MILK DAIRYS
               </h2>
               <p
                 style={{
                   fontSize: "0.85rem",
                   color: "var(--color-text-secondary)",
+                  fontWeight: 600,
+                  marginBottom: "4px",
                 }}
               >
-                Fresh Milk & Dairy Products Daily
+                VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2000❤️
               </p>
               <p
                 style={{
                   fontSize: "0.85rem",
                   color: "var(--color-text-secondary)",
+                  lineHeight: "1.4",
                 }}
               >
-                123 Dairy Farm Avenue, Anand, Gujarat
+                Shopping & retail | AC Handle: @manikondaswamy
               </p>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "var(--color-text-secondary)",
+                  marginTop: "6px",
+                  borderTop: "1px dashed var(--color-border)",
+                  paddingTop: "6px",
+                  textAlign: "center",
+                }}
+              >
+                <strong>Branches:</strong><br />
+                1) Near SBI, opposite P.Gannavaram 🔥<br />
+                2) Honda Showroom, opposite Pothavaram 😍
+              </div>
             </div>
 
             {/* Bill Meta Data */}
@@ -777,7 +833,7 @@ const CreateBill = () => {
                 </strong>
               </p>
               <p style={{ marginTop: "8px" }}>
-                Thank you for shopping at Sri Sai Dairy Parlour!
+                Thank you for shopping at SLG MILK DAIRYS!
               </p>
               <p>Please visit us again.</p>
             </div>

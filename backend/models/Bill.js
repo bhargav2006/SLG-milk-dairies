@@ -9,8 +9,7 @@ const BillSchema = new mongoose.Schema(
     },
     customerNumber: {
       type: String,
-      ref: "CustomerNumber",
-      required: true,
+      default: null,
     },
     customerMail: {
       type: String,

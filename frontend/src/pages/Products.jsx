@@ -15,7 +15,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  FilterX
+  FilterX,
 } from "lucide-react";
 
 const Products = () => {
@@ -62,11 +62,20 @@ const Products = () => {
         category: category || undefined,
         minPrice: minPrice || undefined,
         maxPrice: maxPrice || undefined,
-        sortBy: sortBy === "name-asc" || sortBy === "name-desc" ? "name" : 
-                sortBy === "price-asc" || sortBy === "price-desc" ? "price" : 
-                sortBy === "serialNumber-asc" || sortBy === "serialNumber-desc" ? "serialNumber" : 
-                sortBy,
-        order: sortBy === "name-desc" || sortBy === "price-desc" || sortBy === "serialNumber-desc" ? "desc" : "asc",
+        sortBy:
+          sortBy === "name-asc" || sortBy === "name-desc"
+            ? "name"
+            : sortBy === "price-asc" || sortBy === "price-desc"
+              ? "price"
+              : sortBy === "serialNumber-asc" || sortBy === "serialNumber-desc"
+                ? "serialNumber"
+                : sortBy,
+        order:
+          sortBy === "name-desc" ||
+          sortBy === "price-desc" ||
+          sortBy === "serialNumber-desc"
+            ? "desc"
+            : "asc",
       };
 
       const data = await productService.getProducts(params);
@@ -124,15 +133,50 @@ const Products = () => {
     }
   };
 
-  const categoriesList = ["Milk", "Cheese", "Butter", "Yogurt", "Ghee", "Paneer", "Cream", "Lassi", "Flavoured Milk", "Ice Cream"];
+  const categoriesList = [
+    "Milk",
+    "Cheese",
+    "Butter",
+    "Yogurt",
+    "Ghee",
+    "Paneer",
+    "Cream",
+    "Lassi",
+    "Flavoured Milk",
+    "Ice Cream",
+  ];
 
   return (
     <div>
       {/* Title Header bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+          gap: "12px",
+        }}
+      >
         <div>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--color-text-primary)" }}>Products Catalog</h1>
-          <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)" }}>Manage your Sri Sai Dairy Parlour inventory here.</p>
+          <h1
+            style={{
+              fontSize: "1.5rem",
+              fontWeight: 700,
+              color: "var(--color-text-primary)",
+            }}
+          >
+            Products Catalog
+          </h1>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "var(--color-text-secondary)",
+            }}
+          >
+            Manage your SLG MILK DAIRYS inventory here.
+          </p>
         </div>
 
         {user?.role === "admin" && (
@@ -144,12 +188,24 @@ const Products = () => {
       </div>
 
       {/* Control panel and filters */}
-      <div className="card-panel" style={{ padding: "16px", marginBottom: "20px" }}>
+      <div
+        className="card-panel"
+        style={{ padding: "16px", marginBottom: "20px" }}
+      >
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          
           {/* Search bar & Grid Table Toggle */}
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-            <div className="search-input-wrapper" style={{ flexGrow: 1, maxWidth: "400px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              className="search-input-wrapper"
+              style={{ flexGrow: 1, maxWidth: "400px" }}
+            >
               <Search size={16} className="search-icon" />
               <input
                 type="text"
@@ -181,11 +237,24 @@ const Products = () => {
           </div>
 
           {/* Filters Line */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", borderTop: "1px solid var(--color-border)", paddingTop: "12px" }}>
-            
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "12px",
+              alignItems: "center",
+              borderTop: "1px solid var(--color-border)",
+              paddingTop: "12px",
+            }}
+          >
             {/* Category Filter */}
             <div className="filter-group">
-              <label className="form-label" style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>Category:</label>
+              <label
+                className="form-label"
+                style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              >
+                Category:
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -194,14 +263,21 @@ const Products = () => {
               >
                 <option value="">All Categories</option>
                 {categoriesList.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Price Range Filter */}
             <div className="filter-group">
-              <label className="form-label" style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>Price:</label>
+              <label
+                className="form-label"
+                style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              >
+                Price:
+              </label>
               <input
                 type="number"
                 placeholder="Min"
@@ -223,7 +299,12 @@ const Products = () => {
 
             {/* Sorting Filter */}
             <div className="filter-group">
-              <label className="form-label" style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>Sort By:</label>
+              <label
+                className="form-label"
+                style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              >
+                Sort By:
+              </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -242,19 +323,26 @@ const Products = () => {
             </div>
 
             {/* Clear Filters Button */}
-            {(search || category || minPrice || maxPrice || sortBy !== "newest") && (
+            {(search ||
+              category ||
+              minPrice ||
+              maxPrice ||
+              sortBy !== "newest") && (
               <button
                 onClick={handleClearFilters}
                 className="btn btn-secondary btn-sm"
-                style={{ display: "flex", gap: "4px", padding: "6px 12px", marginLeft: "auto" }}
+                style={{
+                  display: "flex",
+                  gap: "4px",
+                  padding: "6px 12px",
+                  marginLeft: "auto",
+                }}
               >
                 <FilterX size={14} />
                 Clear
               </button>
             )}
-
           </div>
-
         </div>
       </div>
 
@@ -262,7 +350,11 @@ const Products = () => {
       {loading ? (
         viewMode === "grid" ? (
           <div className="products-grid">
-            {Array(limit).fill(0).map((_, i) => <CardSkeleton key={i} />)}
+            {Array(limit)
+              .fill(0)
+              .map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
           </div>
         ) : (
           <div className="card-panel">
@@ -270,23 +362,56 @@ const Products = () => {
           </div>
         )
       ) : products.length === 0 ? (
-        <EmptyState title="No Products Available" subtitle="We couldn't find any products matching those criteria. Add or edit products to see items." />
+        <EmptyState
+          title="No Products Available"
+          subtitle="We couldn't find any products matching those criteria. Add or edit products to see items."
+        />
       ) : viewMode === "grid" ? (
         /* GRID VIEW LAYOUT */
         <div className="products-grid">
           {products.map((product) => (
-            <div key={product._id} className="product-card">
-              <div className="product-card-header">
-                <span className="product-category-tag">{product.category}</span>
-                <span className="product-serial">{product.serialNumber}</span>
+            <div key={product._id} className="product-card" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div
+                style={{
+                  height: "180px",
+                  overflow: "hidden",
+                  borderRadius: "10px",
+                  marginBottom: "12px",
+                  position: "relative",
+                }}
+              >
+                <img
+                  src={`${import.meta.env.VITE_BACKEND_URI}${product.image}`}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.target.src = `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/logo.jpg`;
+                  }}
+                  className="product-card-image"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
               </div>
-              <div>
+
+              {/* Group all text elements together to expand and push the footer down */}
+              <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, marginBottom: "16px" }}>
+                <div className="product-card-header">
+                  <span className="product-category-tag">{product.category}</span>
+                  <span className="product-serial">{product.serialNumber}</span>
+                </div>
                 <h3 className="product-card-title">{product.name}</h3>
-                <p className="product-card-desc">{product.description || "No description provided."}</p>
+                <p className="product-card-desc" style={{ flexGrow: 1, marginBottom: 0 }}>
+                  {product.description || "No description provided."}
+                </p>
               </div>
-              <div className="product-card-footer">
-                <span className="product-card-price">₹{product.price.toFixed(2)}</span>
-                
+
+              <div className="product-card-footer" style={{ marginTop: "auto" }}>
+                <span className="product-card-price">
+                  ₹{product.price.toFixed(2)}
+                </span>
+
                 {user?.role === "admin" && (
                   <div className="product-actions-btn-group">
                     <Link
@@ -323,17 +448,34 @@ const Products = () => {
                   <th>Category</th>
                   <th>Price</th>
                   <th>Description</th>
-                  {user?.role === "admin" && <th style={{ textAlign: "center" }}>Actions</th>}
+                  {user?.role === "admin" && (
+                    <th style={{ textAlign: "center" }}>Actions</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
                   <tr key={product._id}>
-                    <td data-label="Serial No." style={{ fontWeight: 600 }}>{product.serialNumber}</td>
-                    <td data-label="Product Name" style={{ fontWeight: 500 }}>{product.name}</td>
+                    <td data-label="Serial No." style={{ fontWeight: 600 }}>
+                      {product.serialNumber}
+                    </td>
+                    <td data-label="Product Name" style={{ fontWeight: 500 }}>
+                      {product.name}
+                    </td>
                     <td data-label="Category">{product.category}</td>
-                    <td data-label="Price" style={{ fontWeight: 600 }}>₹{product.price.toFixed(2)}</td>
-                    <td data-label="Description" style={{ color: "var(--color-text-secondary)", maxWidth: "240px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <td data-label="Price" style={{ fontWeight: 600 }}>
+                      ₹{product.price.toFixed(2)}
+                    </td>
+                    <td
+                      data-label="Description"
+                      style={{
+                        color: "var(--color-text-secondary)",
+                        maxWidth: "240px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {product.description || "No description"}
                     </td>
                     {user?.role === "admin" && (
@@ -371,7 +513,8 @@ const Products = () => {
         <div className="pagination">
           <span className="pagination-info">
             Showing <strong>{(page - 1) * limit + 1}</strong> to{" "}
-            <strong>{Math.min(page * limit, totalProducts)}</strong> of <strong>{totalProducts}</strong> products
+            <strong>{Math.min(page * limit, totalProducts)}</strong> of{" "}
+            <strong>{totalProducts}</strong> products
           </span>
 
           <div className="pagination-controls">
@@ -383,7 +526,9 @@ const Products = () => {
             >
               <ChevronLeft size={16} />
             </button>
-            <span style={{ fontSize: "0.85rem", padding: "0 8px", fontWeight: 600 }}>
+            <span
+              style={{ fontSize: "0.85rem", padding: "0 8px", fontWeight: 600 }}
+            >
               Page {page} of {totalPages}
             </span>
             <button
@@ -425,9 +570,17 @@ const Products = () => {
         {productToDelete && (
           <div>
             <p style={{ fontSize: "0.95rem" }}>
-              Are you sure you want to delete the product <strong>"{productToDelete.name}"</strong>?
+              Are you sure you want to delete the product{" "}
+              <strong>"{productToDelete.name}"</strong>?
             </p>
-            <p style={{ fontSize: "0.85rem", color: "var(--color-danger)", marginTop: "8px", fontWeight: 500 }}>
+            <p
+              style={{
+                fontSize: "0.85rem",
+                color: "var(--color-danger)",
+                marginTop: "8px",
+                fontWeight: 500,
+              }}
+            >
               Warning: This action is permanent and cannot be undone.
             </p>
           </div>

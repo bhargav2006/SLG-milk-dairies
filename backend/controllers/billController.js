@@ -9,19 +9,17 @@ exports.createBill = async (req, res) => {
   try {
     let { customerNumber, customerMail, products, paymentMethod } = req.body;
     customerMail = customerMail || null; // Set to null if not provided
-    if (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber)) {
-      return res
-        .status(400)
-        .json({ message: "Customer number must be 10 digits" });
-    }
     if (
-      !customerNumber ||
-      !products ||
-      products.length === 0 ||
-      !paymentMethod
+      customerNumber &&
+      (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber))
     ) {
       return res.status(400).json({
-        message: "Customer number, products, and payment method are required",
+        message: "Customer number must be 10 digits",
+      });
+    }
+    if (!products || products.length === 0 || !paymentMethod) {
+      return res.status(400).json({
+        message: "products, and payment method are required",
       });
     }
     // Calculate total amount and keep the resolved product details for the email
@@ -53,7 +51,7 @@ exports.createBill = async (req, res) => {
     const counter = await Counter.findOneAndUpdate(
       { name: counterName },
       { $inc: { sequence: 1 } },
-      { returnDocument: "after", upsert: true }
+      { returnDocument: "after", upsert: true },
     );
 
     const sequence = counter.sequence.toString().padStart(4, "0");
@@ -154,9 +152,11 @@ exports.createBill = async (req, res) => {
     }
 
     // Send WhatsApp message (simulated)
-    sendWhatsapp(customerNumber, invoiceNumber, totalAmount).catch((err) => {
-      console.error("Failed to send WhatsApp message:", err);
-    });
+    if (customerNumber) {
+      sendWhatsapp(customerNumber, invoiceNumber, totalAmount).catch((err) => {
+        console.error("Failed to send WhatsApp message:", err);
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

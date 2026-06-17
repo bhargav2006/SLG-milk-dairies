@@ -1,6 +1,8 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
+const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const { connectDB } = require("./config/db");
@@ -27,6 +29,22 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/bill", billRoutes);
+
+// Serve static files from the uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Ensure uploads directory exists
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+if (!fs.existsSync("uploads/products")) {
+  fs.mkdirSync("uploads/products", { recursive: true });
+}
+
+if (!fs.existsSync("uploads/defaults")) {
+  fs.mkdirSync("uploads/defaults", { recursive: true });
+}
 
 //Health check route
 app.get("/api/health", (req, res) => {

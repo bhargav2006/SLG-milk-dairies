@@ -66,20 +66,20 @@ const Register = () => {
               width: "60px",
               height: "60px",
               borderRadius: "50%",
-              backgroundColor: "var(--color-primary-light)",
+              backgroundColor: "transparent",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--color-primary)",
-              marginBottom: "8px"
+              marginBottom: "8px",
+              overflow: "hidden"
             }}
           >
-            <Milk size={32} strokeWidth={2} />
+            <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           <h1 className="brand-name" style={{ fontSize: "1.75rem", textAlign: "center" }}>
             Create Account
           </h1>
-          <p className="login-subtitle">Sri Sai Dairy Parlour Billing & Management</p>
+          <p className="login-subtitle">SLG MILK DAIRYS Billing & Management</p>
         </div>
 
         {validationError && (
