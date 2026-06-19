@@ -1,15 +1,15 @@
 const Product = require("../models/Product");
 const categoryDefaults = {
-  Milk: "/uploads/defaults/milk.jpg",
-  Curd: "/uploads/defaults/curd.jpg",
-  Butter: "/uploads/defaults/butter.jpg",
-  Ghee: "/uploads/defaults/ghee.jpg",
-  Paneer: "/uploads/defaults/paneer.jpg",
-  Cheese: "/uploads/defaults/cheese.jpg",
-  Cream: "/uploads/defaults/cream.jpg",
-  Lassi: "/uploads/defaults/lassi.jpg",
-  "Flavoured Milk": "/uploads/defaults/flavoured-milk.jpg",
-  "Ice Cream": "/uploads/defaults/ice-cream.jpg",
+  Milk: "/uploads/defaults/Milk.jpg",
+  Curd: "/uploads/defaults/Curd.jpg",
+  Butter: "/uploads/defaults/Butter.jpg",
+  Ghee: "/uploads/defaults/Ghee.jpg",
+  Paneer: "/uploads/defaults/Paneer.jpg",
+  Cheese: "/uploads/defaults/Cheese.jpg",
+  Cream: "/uploads/defaults/Cream.jpg",
+  Lassi: "/uploads/defaults/Lassi.jpg",
+  "Flavoured Milk": "/uploads/defaults/Flavoured-Milk.jpg",
+  "Ice Cream": "/uploads/defaults/Ice-Cream.jpg",
 };
 
 // @desc    Get all products
@@ -248,16 +248,19 @@ const getNextSerialNumber = async (req, res) => {
   try {
     const { category } = req.query;
     if (!category) {
-      return res.status(400).json({ message: "Category query parameter is required" });
+      return res
+        .status(400)
+        .json({ message: "Category query parameter is required" });
     }
 
-    const prefix = categoryPrefixes[category] || category.substring(0, 3).toUpperCase();
-    
+    const prefix =
+      categoryPrefixes[category] || category.substring(0, 3).toUpperCase();
+
     // Find all products in this category
     const products = await Product.find({ category }).select("serialNumber");
-    
+
     let maxNum = 0;
-    const regex = new RegExp(`^${prefix}(\\d+)$`, 'i');
+    const regex = new RegExp(`^${prefix}(\\d+)$`, "i");
 
     products.forEach((prod) => {
       if (prod.serialNumber) {
@@ -272,7 +275,7 @@ const getNextSerialNumber = async (req, res) => {
     });
 
     const nextNum = maxNum + 1;
-    const nextSerial = `${prefix}${nextNum.toString().padStart(2, '0')}`;
+    const nextSerial = `${prefix}${nextNum.toString().padStart(2, "0")}`;
 
     res.json({ nextSerial });
   } catch (error) {
