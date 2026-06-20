@@ -1,8 +1,8 @@
 import api from "./api";
 
 const billService = {
-  getBills: async () => {
-    const response = await api.get("/api/bill");
+  getBills: async (params = {}) => {
+    const response = await api.get("/api/bill", { params });
     return response.data;
   },
 
@@ -16,8 +16,8 @@ const billService = {
     return response.data;
   },
 
-  getBillsByAccountant: async (accountantId) => {
-    const response = await api.get(`/api/bill/accountant/${accountantId}`);
+  getBillsByAccountant: async (accountantId, params = {}) => {
+    const response = await api.get(`/api/bill/accountant/${accountantId}`, { params });
     return response.data;
   },
 

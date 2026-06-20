@@ -18,7 +18,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-const CreateBill = () => {
+const CreateBill = ({ billType = "retail" }) => {
   const { user } = useAuth();
   const { showSuccess, showError, showWarning } = useToast();
 
@@ -96,6 +96,7 @@ const CreateBill = () => {
       const data = await productService.getProducts({
         search: search.trim() || undefined,
         category: category || undefined,
+        productType: billType,
         limit: 100, // Load all for POS selection
       });
       setProducts(data.products || []);
@@ -105,7 +106,7 @@ const CreateBill = () => {
     } finally {
       setLoadingCatalog(false);
     }
-  }, [search, category, showError]);
+  }, [search, category, billType, showError]);
 
   useEffect(() => {
     loadCatalog();
@@ -183,6 +184,7 @@ const CreateBill = () => {
         })),
         paymentMethod,
         customerMail,
+        billType,
       };
 
       const newBill = await billService.createBill(billData);
@@ -737,6 +739,12 @@ const CreateBill = () => {
                 <p>
                   <strong>Invoice Number:</strong>{" "}
                   {createdBill.invoiceNumber || "N/A"}
+                </p>
+                <p>
+                  <strong>Bill Type:</strong>{" "}
+                  <span style={{ textTransform: "capitalize", fontWeight: 600 }}>
+                    {createdBill.billType || billType}
+                  </span>
                 </p>
                 <p>
                   <strong>Customer Phone:</strong> {createdBill.customerNumber}

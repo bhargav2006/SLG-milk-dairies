@@ -42,6 +42,11 @@ const BillSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    billType: {
+      type: String,
+      enum: ["retail", "wholesale"],
+      default: "retail",
+    },
   },
   {
     timestamps: true,

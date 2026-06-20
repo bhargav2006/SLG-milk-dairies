@@ -25,9 +25,22 @@ const getProducts = async (req, res) => {
       order = "asc",
       page = 1,
       limit = 20,
+      productType,
     } = req.query;
 
     const filter = {};
+
+    // Product Type filter
+    if (productType) {
+      if (productType === "retail") {
+        filter.$or = [
+          { productType: "retail" },
+          { productType: { $exists: false } },
+        ];
+      } else {
+        filter.productType = productType;
+      }
+    }
 
     // Search by name
     if (search) {
@@ -142,7 +155,7 @@ const getProductById = async (req, res) => {
 // @route   POST /api/products/
 const createProduct = async (req, res) => {
   try {
-    const { name, serialNumber, price, description, category } = req.body;
+    const { name, serialNumber, price, description, category, productType } = req.body;
     const image = req.file ? `/uploads/products/${req.file.filename}` : null;
     if (!name || !serialNumber || price === undefined || !category) {
       return res.status(400).json({
@@ -162,6 +175,7 @@ const createProduct = async (req, res) => {
       description: description || "",
       category,
       image,
+      productType: productType || "retail",
     });
     await product.save();
     res.status(201).json(product);
@@ -175,7 +189,7 @@ const createProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 const updateProduct = async (req, res) => {
   try {
-    const { name, serialNumber, price, description, category } = req.body;
+    const { name, serialNumber, price, description, category, productType } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -184,6 +198,7 @@ const updateProduct = async (req, res) => {
     if (description !== undefined) product.description = description;
     if (category !== undefined) product.category = category;
     if (name) product.name = name;
+    if (productType !== undefined) product.productType = productType;
     if (serialNumber) {
       const existingProduct = await Product.findOne({
         serialNumber,

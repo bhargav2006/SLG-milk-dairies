@@ -118,6 +118,12 @@ const BillReceiptStandalone = () => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px", fontSize: "0.875rem" }}>
             <div>
               <p style={{ marginBottom: "4px" }}><strong>Invoice Number:</strong> {bill.invoiceNumber || "N/A"}</p>
+              <p style={{ marginBottom: "4px" }}>
+                <strong>Bill Type:</strong>{" "}
+                <span style={{ textTransform: "capitalize", fontWeight: 600 }}>
+                  {bill.billType || "retail"}
+                </span>
+              </p>
               <p><strong>Customer Phone:</strong> {bill.customerNumber}</p>
             </div>
             <div style={{ textAlign: "right" }}>

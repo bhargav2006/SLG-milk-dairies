@@ -19,6 +19,7 @@ const AddEditProduct = () => {
     category: "",
     price: "",
     description: "",
+    productType: "retail",
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,6 +40,7 @@ const AddEditProduct = () => {
           category: product.category || "",
           price: product.price ? product.price.toString() : "",
           description: product.description || "",
+          productType: product.productType || "retail",
         });
         setPreview(
           product.image
@@ -104,6 +106,7 @@ const AddEditProduct = () => {
       payload.append("category", formData.category);
       payload.append("price", formData.price);
       payload.append("description", formData.description.trim());
+      payload.append("productType", formData.productType);
 
       if (image) {
         payload.append("image", image);
@@ -339,6 +342,24 @@ const AddEditProduct = () => {
             {errors.price && (
               <span className="form-error-msg">{errors.price}</span>
             )}
+          </div>
+
+          {/* Product Type (Retail / Wholesale) */}
+          <div className="form-group">
+            <label className="form-label" htmlFor="productType">
+              Product Type *
+            </label>
+            <select
+              id="productType"
+              name="productType"
+              value={formData.productType}
+              onChange={handleChange}
+              className="form-input"
+              disabled={submitting}
+            >
+              <option value="retail">Retail</option>
+              <option value="wholesale">Wholesale</option>
+            </select>
           </div>
 
           {/* Description */}

@@ -36,6 +36,7 @@ const Products = () => {
   // Filters State
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [productTypeFilter, setProductTypeFilter] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -97,6 +98,7 @@ const Products = () => {
         limit,
         search: search.trim() || undefined,
         category: category || undefined,
+        productType: productTypeFilter || undefined,
         minPrice: minPrice || undefined,
         maxPrice: maxPrice || undefined,
         sortBy:
@@ -125,12 +127,12 @@ const Products = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, search, category, minPrice, maxPrice, sortBy, showError]);
+  }, [page, search, category, productTypeFilter, minPrice, maxPrice, sortBy, showError]);
 
   useEffect(() => {
     // Reset page to 1 when filters change to avoid paging issues
     setPage(1);
-  }, [search, category, minPrice, maxPrice, sortBy]);
+  }, [search, category, productTypeFilter, minPrice, maxPrice, sortBy]);
 
   useEffect(() => {
     loadProducts();
@@ -140,6 +142,7 @@ const Products = () => {
   const handleClearFilters = () => {
     setSearch("");
     setCategory("");
+    setProductTypeFilter("");
     setMinPrice("");
     setMaxPrice("");
     setSortBy("newest");
@@ -284,6 +287,25 @@ const Products = () => {
               paddingTop: "12px",
             }}
           >
+            {/* Product Type Filter */}
+            <div className="filter-group">
+              <label
+                className="form-label"
+                style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              >
+                Product Type:
+              </label>
+              <select
+                value={productTypeFilter}
+                onChange={(e) => setProductTypeFilter(e.target.value)}
+                className="form-input"
+                style={{ width: "130px", padding: "6px 8px" }}
+              >
+                <option value="">All</option>
+                <option value="retail">Retail</option>
+                <option value="wholesale">Wholesale</option>
+              </select>
+            </div>
             {/* Category Filter */}
             <div className="filter-group">
               <label
@@ -362,6 +384,7 @@ const Products = () => {
             {/* Clear Filters Button */}
             {(search ||
               category ||
+              productTypeFilter ||
               minPrice ||
               maxPrice ||
               sortBy !== "newest") && (
@@ -448,9 +471,30 @@ const Products = () => {
                 }}
               >
                 <div className="product-card-header">
-                  <span className="product-category-tag">
-                    {product.category}
-                  </span>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <span className="product-category-tag">
+                      {product.category}
+                    </span>
+                    <span
+                      style={{
+                        textTransform: "capitalize",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        backgroundColor:
+                          product.productType === "wholesale"
+                            ? "var(--color-primary-light)"
+                            : "var(--color-success-light)",
+                        color:
+                          product.productType === "wholesale"
+                            ? "var(--color-primary)"
+                            : "var(--color-success)",
+                        padding: "0.25rem 0.5rem",
+                        borderRadius: "var(--radius-sm)",
+                      }}
+                    >
+                      {product.productType || "retail"}
+                    </span>
+                  </div>
                   <span className="product-serial">{product.serialNumber}</span>
                 </div>
                 <h3 className="product-card-title">{product.name}</h3>
@@ -503,6 +547,7 @@ const Products = () => {
                 <tr>
                   <th>Serial No.</th>
                   <th>Product Name</th>
+                  <th>Product Type</th>
                   <th>Category</th>
                   <th>Price</th>
                   <th>Description</th>
@@ -519,6 +564,27 @@ const Products = () => {
                     </td>
                     <td data-label="Product Name" style={{ fontWeight: 500 }}>
                       {product.name}
+                    </td>
+                    <td data-label="Product Type">
+                      <span
+                        style={{
+                          textTransform: "capitalize",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          backgroundColor:
+                            product.productType === "wholesale"
+                              ? "var(--color-primary-light)"
+                              : "var(--color-success-light)",
+                          color:
+                            product.productType === "wholesale"
+                              ? "var(--color-primary)"
+                              : "var(--color-success)",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {product.productType || "retail"}
+                      </span>
                     </td>
                     <td data-label="Category">{product.category}</td>
                     <td data-label="Price" style={{ fontWeight: 600 }}>

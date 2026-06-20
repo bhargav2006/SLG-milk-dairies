@@ -51,6 +51,7 @@ const Bills = () => {
   // Filters State
   const [search, setSearch] = useState(initialSearch);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [billTypeFilter, setBillTypeFilter] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [page, setPage] = useState(1);
   const limit = 10; // items per page
@@ -91,10 +92,14 @@ const Bills = () => {
     setLoading(true);
     try {
       let data = [];
+      const params = {};
+      if (billTypeFilter) {
+        params.billType = billTypeFilter;
+      }
       if (user.role === "admin") {
-        data = await billService.getBills();
+        data = await billService.getBills(params);
       } else {
-        data = await billService.getBillsByAccountant(user._id);
+        data = await billService.getBillsByAccountant(user._id, params);
       }
       setBills(data || []);
     } catch (err) {
@@ -103,7 +108,7 @@ const Bills = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, showError]);
+  }, [user, billTypeFilter, showError]);
 
   useEffect(() => {
     loadBills();
@@ -270,7 +275,7 @@ const Bills = () => {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [search, paymentMethod, filterDate, selectedAccountantFilter]);
+  }, [search, paymentMethod, filterDate, selectedAccountantFilter, billTypeFilter]);
 
   // Pagination slicing
   const paginatedBills = useMemo(() => {
@@ -285,6 +290,7 @@ const Bills = () => {
     setPaymentMethod("");
     setFilterDate("");
     setSelectedAccountantFilter("");
+    setBillTypeFilter("");
   };
 
   const handleViewBill = (bill) => {
@@ -331,10 +337,16 @@ const Bills = () => {
           </p>
         </div>
 
-        <Link to="/bills/create" className="btn btn-success">
-          <Plus size={18} />
-          Create POS Bill
-        </Link>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <Link to="/billing/retail" className="btn btn-success">
+            <Plus size={18} />
+            Create Retail Bill
+          </Link>
+          <Link to="/billing/wholesale" className="btn btn-primary">
+            <Plus size={18} />
+            Create Wholesale Bill
+          </Link>
+        </div>
       </div>
 
       {/* Admin Insights Panel */}
@@ -965,6 +977,20 @@ const Bills = () => {
             </select>
           </div>
 
+          {/* Bill Type Selector */}
+          <div className="filter-group">
+            <select
+              value={billTypeFilter}
+              onChange={(e) => setBillTypeFilter(e.target.value)}
+              className="form-input"
+              style={{ width: "140px", padding: "6px" }}
+            >
+              <option value="">All Bill Types</option>
+              <option value="retail">Retail</option>
+              <option value="wholesale">Wholesale</option>
+            </select>
+          </div>
+
           {/* Accountant Filter Dropdown (Admin Only) */}
           {user.role === "admin" && (
             <div className="filter-group">
@@ -1004,7 +1030,8 @@ const Bills = () => {
           {(search ||
             paymentMethod ||
             filterDate ||
-            selectedAccountantFilter) && (
+            selectedAccountantFilter ||
+            billTypeFilter) && (
             <button
               onClick={handleClearFilters}
               className="btn btn-secondary btn-sm"
@@ -1039,6 +1066,7 @@ const Bills = () => {
               <thead>
                 <tr>
                   <th>Invoice No.</th>
+                  <th>Bill Type</th>
                   <th>Customer Phone</th>
                   <th>Total Amount</th>
                   <th>Payment Method</th>
@@ -1055,6 +1083,27 @@ const Bills = () => {
                       style={{ fontWeight: 600, color: "var(--color-primary)" }}
                     >
                       {bill.invoiceNumber || "N/A"}
+                    </td>
+                    <td data-label="Bill Type">
+                      <span
+                        style={{
+                          textTransform: "capitalize",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          backgroundColor:
+                            bill.billType === "wholesale"
+                              ? "var(--color-primary-light)"
+                              : "var(--color-success-light)",
+                          color:
+                            bill.billType === "wholesale"
+                              ? "var(--color-primary)"
+                              : "var(--color-success)",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {bill.billType || "retail"}
+                      </span>
                     </td>
                     <td data-label="Customer Phone">
                       {bill.customerNumber || "-"}
@@ -1260,6 +1309,12 @@ const Bills = () => {
                 <p>
                   <strong>Invoice Number:</strong>{" "}
                   {selectedBill.invoiceNumber || "N/A"}
+                </p>
+                <p>
+                  <strong>Bill Type:</strong>{" "}
+                  <span style={{ textTransform: "capitalize", fontWeight: 600 }}>
+                    {selectedBill.billType || "retail"}
+                  </span>
                 </p>
                 <p>
                   <strong>Customer Phone:</strong> {selectedBill.customerNumber}

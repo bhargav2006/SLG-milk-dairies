@@ -69,6 +69,22 @@ const AppRoutes = () => {
             </MainLayout>
           }
         />
+        <Route
+          path="/billing/retail"
+          element={
+            <MainLayout>
+              <CreateBill key="retail" billType="retail" />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/billing/wholesale"
+          element={
+            <MainLayout>
+              <CreateBill key="wholesale" billType="wholesale" />
+            </MainLayout>
+          }
+        />
 
         {/* Admin Only Views */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>

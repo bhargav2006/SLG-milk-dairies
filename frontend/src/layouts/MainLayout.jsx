@@ -45,6 +45,8 @@ const MainLayout = ({ children }) => {
       if (path.includes("create")) return "POS Billing Terminal";
       return "Billing Log History";
     }
+    if (path.startsWith("/billing/retail")) return "Retail Billing Terminal";
+    if (path.startsWith("/billing/wholesale")) return "Wholesale Billing Terminal";
     if (path.startsWith("/users")) return "User Accounts Management";
     if (path.startsWith("/profile")) return "Account Profile";
     return "SLG MILK DAIRYS System";

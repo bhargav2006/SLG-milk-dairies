@@ -7,8 +7,17 @@ const Counter = require("../models/Counter");
 // Create a new bill
 exports.createBill = async (req, res) => {
   try {
-    let { customerNumber, customerMail, products, paymentMethod } = req.body;
+    let { customerNumber, customerMail, products, paymentMethod, billType } =
+      req.body;
     customerMail = customerMail || null; // Set to null if not provided
+    billType = billType || "retail";
+
+    if (billType !== "retail" && billType !== "wholesale") {
+      return res.status(400).json({
+        message: "Invalid bill type. Must be 'retail' or 'wholesale'.",
+      });
+    }
+
     if (
       customerNumber &&
       (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber))
@@ -32,6 +41,12 @@ exports.createBill = async (req, res) => {
           .status(404)
           .json({ message: `Product not found: ${item.product}` });
       }
+      const prodType = product.productType || "retail";
+      if (prodType !== billType) {
+        return res.status(400).json({
+          message: `Product '${product.name}' is of type '${prodType}' and cannot be added to a '${billType}' bill.`,
+        });
+      }
       const lineTotal = product.price * item.quantity;
       totalAmount += lineTotal;
       billItems.push({
@@ -47,15 +62,17 @@ exports.createBill = async (req, res) => {
     const month = today.getMonth() + 1; // 1-indexed
     const yearMonthStr = `${year}${month.toString().padStart(2, "0")}`;
 
-    const counterName = `invoice-${yearMonthStr}`;
+    const prefix = billType === "wholesale" ? "INV-W" : "INV-R";
+
+    const counterName = `${prefix}-${yearMonthStr}`;
     const counter = await Counter.findOneAndUpdate(
       { name: counterName },
       { $inc: { sequence: 1 } },
-      { returnDocument: "after", upsert: true },
+      { new: true, upsert: true },
     );
 
     const sequence = counter.sequence.toString().padStart(4, "0");
-    const invoiceNumber = `INV-${yearMonthStr}-${sequence}`;
+    const invoiceNumber = `${prefix}-${yearMonthStr}-${sequence}`;
 
     const bill = new Bill({
       invoiceNumber,
@@ -65,13 +82,14 @@ exports.createBill = async (req, res) => {
       products,
       totalAmount,
       paymentMethod,
+      billType,
     });
     await bill.save();
 
     // Populate accountant name and product info to return full bill details
     const populatedBill = await Bill.findById(bill._id)
       .populate("accountant", "name")
-      .populate("products.product", "name price");
+      .populate("products.product", "name price productType");
 
     res.status(201).json(populatedBill);
 
@@ -90,13 +108,19 @@ exports.createBill = async (req, res) => {
 
           <table style="width:100%;margin-bottom:20px;border-collapse:collapse;border:0;">
             <tr>
-              <td style="width:50%;padding-right:6px;border:0;vertical-align:top;">
+              <td style="width:33.3%;padding-right:6px;border:0;vertical-align:top;">
                 <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;">
                   <div style="font-size:12px;color:#6B7280;margin-bottom:4px;">Customer Number</div>
-                  <div style="font-size:15px;font-weight:600;color:#1F2937;">${customerNumber}</div>
+                  <div style="font-size:15px;font-weight:600;color:#1F2937;">${customerNumber || "-"}</div>
                 </div>
               </td>
-              <td style="width:50%;padding-left:6px;border:0;vertical-align:top;">
+              <td style="width:33.3%;padding-left:3px;padding-right:3px;border:0;vertical-align:top;">
+                <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;">
+                  <div style="font-size:12px;color:#6B7280;margin-bottom:4px;">Bill Type</div>
+                  <div style="font-size:15px;font-weight:600;color:#1F2937;text-transform:capitalize;">${billType}</div>
+                </div>
+              </td>
+              <td style="width:33.3%;padding-left:6px;border:0;vertical-align:top;">
                 <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;">
                   <div style="font-size:12px;color:#6B7280;margin-bottom:4px;">Payment Method</div>
                   <div style="font-size:15px;font-weight:600;color:#1F2937;">${paymentMethod.toUpperCase()}</div>
@@ -166,9 +190,11 @@ exports.createBill = async (req, res) => {
 // Get all bills
 exports.getBills = async (req, res) => {
   try {
-    const bills = await Bill.find()
+    const filter = {};
+    if (req.query.billType) filter.billType = req.query.billType;
+    const bills = await Bill.find(filter)
       .populate("accountant", "name")
-      .populate("products.product", "name price");
+      .populate("products.product", "name price productType");
     res.json(bills);
   } catch (error) {
     console.error(error);
@@ -181,7 +207,7 @@ exports.getBillById = async (req, res) => {
   try {
     const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber })
       .populate("accountant", "name")
-      .populate("products.product", "name price");
+      .populate("products.product", "name price productType");
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
@@ -202,7 +228,7 @@ exports.getBillByCustomerNumber = async (req, res) => {
     }
     const bills = await Bill.find({ customerNumber: req.params.customerNumber })
       .populate("accountant", "name")
-      .populate("products.product", "name price");
+      .populate("products.product", "name price productType");
     if (bills.length === 0) {
       return res
         .status(404)
@@ -218,9 +244,11 @@ exports.getBillByCustomerNumber = async (req, res) => {
 // Get bills by Accountant ID
 exports.getBillByAccountantId = async (req, res) => {
   try {
-    const bills = await Bill.find({ accountant: req.params.accountantId })
+    const filter = { accountant: req.params.accountantId };
+    if (req.query.billType) filter.billType = req.query.billType;
+    const bills = await Bill.find(filter)
       .populate("accountant", "name")
-      .populate("products.product", "name price");
+      .populate("products.product", "name price productType");
     res.json(bills);
   } catch (error) {
     console.error(error);
