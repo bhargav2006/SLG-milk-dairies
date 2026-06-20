@@ -47,9 +47,26 @@ if (!fs.existsSync("uploads/defaults")) {
   fs.mkdirSync("uploads/defaults", { recursive: true });
 }
 
-//Health check route
+// Health check route
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is healthy" });
+});
+
+// Error handling middleware (catches Multer, upload, validation, and other errors as JSON)
+app.use((err, req, res, next) => {
+  console.error("Error Handler:", err);
+  let statusCode = err.statusCode || err.status || 500;
+  let message = err.message || "An unexpected error occurred";
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    statusCode = 400;
+    message = "File is too large. Maximum size allowed is 10MB.";
+  } else if (err.name === "MulterError") {
+    statusCode = 400;
+    message = `Upload error: ${err.message}`;
+  }
+
+  res.status(statusCode).json({ message });
 });
 
 const PORT = process.env.PORT || 5000;
