@@ -67,7 +67,11 @@ const Login = () => {
               marginBottom: "8px",
             }}
           >
-            <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <img
+              src="/logo.png"
+              alt="SLG MILK DAIRYS Logo"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
           </div>
           <h1
             className="brand-name"
@@ -196,42 +200,6 @@ const Login = () => {
             )}
           </button>
         </form>
-
-        <div
-          style={{
-            marginTop: "20px",
-            textAlign: "center",
-            fontSize: "0.85rem",
-            color: "var(--color-text-secondary)",
-          }}
-        >
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            style={{ fontWeight: 600, color: "var(--color-primary)" }}
-          >
-            Register Here
-          </Link>
-        </div>
-
-        <div
-          style={{
-            marginTop: "24px",
-            textAlign: "center",
-            fontSize: "0.75rem",
-            color: "var(--color-text-secondary)",
-            borderTop: "1px dashed var(--color-border)",
-            paddingTop: "16px",
-          }}
-        >
-          <p>Demo Accounts: admin@dairy.com / admin123</p>
-          <p style={{ marginTop: "4px" }}>
-            accountant1@dairy.com / accountant123
-          </p>
-          <p style={{ marginTop: "4px" }}>
-            accountant2@dairy.com / accountant123
-          </p>
-        </div>
       </div>
     </div>
   );
