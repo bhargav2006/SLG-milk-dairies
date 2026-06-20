@@ -23,7 +23,8 @@ const allowedOrigins = [
 
 // Middleware
 app.use(cors({ origin: allowedOrigins, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
