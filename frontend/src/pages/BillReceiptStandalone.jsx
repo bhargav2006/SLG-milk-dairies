@@ -40,7 +40,9 @@ const BillReceiptStandalone = () => {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: "600px", margin: "60px auto", padding: "0 20px" }}>
+      <div
+        style={{ maxWidth: "600px", margin: "60px auto", padding: "0 20px" }}
+      >
         <TableSkeleton rows={4} cols={4} />
       </div>
     );
@@ -48,12 +50,28 @@ const BillReceiptStandalone = () => {
 
   if (!bill) {
     return (
-      <div style={{ textAlign: "center", margin: "100px auto", maxWidth: "400px", padding: "0 20px" }}>
+      <div
+        style={{
+          textAlign: "center",
+          margin: "100px auto",
+          maxWidth: "400px",
+          padding: "0 20px",
+        }}
+      >
         <h2 style={{ color: "var(--color-danger)" }}>Receipt Not Found</h2>
-        <p style={{ margin: "12px 0 24px 0", color: "var(--color-text-secondary)" }}>
-          The requested billing statement could not be resolved from the records.
+        <p
+          style={{
+            margin: "12px 0 24px 0",
+            color: "var(--color-text-secondary)",
+          }}
+        >
+          The requested billing statement could not be resolved from the
+          records.
         </p>
-        <button onClick={() => navigate(isAuthenticated ? "/" : "/login")} className="btn btn-primary">
+        <button
+          onClick={() => navigate(isAuthenticated ? "/" : "/login")}
+          className="btn btn-primary"
+        >
           {isAuthenticated ? "Back to Dashboard" : "Back to Login"}
         </button>
       </div>
@@ -61,9 +79,24 @@ const BillReceiptStandalone = () => {
   }
 
   return (
-    <div style={{ backgroundColor: "var(--color-bg)", minHeight: "100vh", padding: "40px 20px" }}>
+    <div
+      style={{
+        backgroundColor: "var(--color-bg)",
+        minHeight: "100vh",
+        padding: "40px 20px",
+      }}
+    >
       {/* Standalone Control buttons */}
-      <div className="no-print" style={{ maxWidth: "650px", margin: "0 auto 16px auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        className="no-print"
+        style={{
+          maxWidth: "650px",
+          margin: "0 auto 16px auto",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         {isAuthenticated ? (
           <button
             onClick={() => navigate("/")}
@@ -95,36 +128,112 @@ const BillReceiptStandalone = () => {
           margin: "0 auto",
           padding: "40px",
           boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
-          borderRadius: "var(--radius-lg)"
+          borderRadius: "var(--radius-lg)",
         }}
       >
-        <div className="print-invoice-sheet" style={{ fontFamily: "var(--font-family)", color: "var(--color-text-primary)" }}>
+        <div
+          className="print-invoice-sheet"
+          style={{
+            fontFamily: "var(--font-family)",
+            color: "var(--color-text-primary)",
+          }}
+        >
           {/* Store Receipt Header */}
-          <div style={{ textAlign: "center", borderBottom: "2px solid var(--color-border)", paddingBottom: "20px", marginBottom: "24px" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "8px" }}>
-              <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
+          <div
+            style={{
+              textAlign: "center",
+              borderBottom: "2px solid var(--color-border)",
+              paddingBottom: "20px",
+              marginBottom: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "8px",
+              }}
+            >
+              <img
+                src="/logo.png"
+                alt="SLG MILK DAIRYS Logo"
+                style={{
+                  width: "64px",
+                  height: "64px",
+                  objectFit: "contain",
+                  borderRadius: "50%",
+                }}
+              />
             </div>
-            <h2 style={{ fontSize: "1.6rem", fontWeight: 700, letterSpacing: "-0.5px" }}>SLG MILK DAIRYS</h2>
-            <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)", fontWeight: 600, marginTop: "4px" }}>VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2000❤️</p>
-            <p style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)", marginTop: "4px" }}>Shopping & retail | AC Handle: @manikondaswamy</p>
-            <div style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)", marginTop: "8px", borderTop: "1px dashed var(--color-border)", paddingTop: "8px" }}>
-              <strong>Branches:</strong><br />
-              1) Near SBI, opposite P.Gannavaram 🔥<br />
+            <h2
+              style={{
+                fontSize: "1.6rem",
+                fontWeight: 700,
+                letterSpacing: "-0.5px",
+              }}
+            >
+              SLG MILK DAIRYS
+            </h2>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "var(--color-text-secondary)",
+                fontWeight: 600,
+                marginTop: "4px",
+              }}
+            >
+              VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2000❤️
+            </p>
+            <p
+              style={{
+                fontSize: "0.85rem",
+                color: "var(--color-text-secondary)",
+                marginTop: "4px",
+              }}
+            >
+              Retail & Wholesale
+            </p>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--color-text-secondary)",
+                marginTop: "8px",
+                borderTop: "1px dashed var(--color-border)",
+                paddingTop: "8px",
+              }}
+            >
+              <strong>Branches:</strong>
+              <br />
+              1) Near SBI, opposite P.Gannavaram 🔥
+              <br />
               2) Honda Showroom, opposite Pothavaram 😍
             </div>
           </div>
 
           {/* Bill Meta Details */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px", fontSize: "0.875rem" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "16px",
+              marginBottom: "24px",
+              fontSize: "0.875rem",
+            }}
+          >
             <div>
-              <p style={{ marginBottom: "4px" }}><strong>Invoice Number:</strong> {bill.invoiceNumber || "N/A"}</p>
+              <p style={{ marginBottom: "4px" }}>
+                <strong>Invoice Number:</strong> {bill.invoiceNumber || "N/A"}
+              </p>
               <p style={{ marginBottom: "4px" }}>
                 <strong>Bill Type:</strong>{" "}
                 <span style={{ textTransform: "capitalize", fontWeight: 600 }}>
                   {bill.billType || "retail"}
                 </span>
               </p>
-              <p><strong>Customer Phone:</strong> {bill.customerNumber}</p>
+              <p>
+                <strong>Customer Phone:</strong>{" "}
+                {bill.customerNumber || "Not Available"}
+              </p>
             </div>
             <div style={{ textAlign: "right" }}>
               <p style={{ marginBottom: "4px" }}>
@@ -134,57 +243,129 @@ const BillReceiptStandalone = () => {
                   month: "short",
                   year: "numeric",
                   hour: "2-digit",
-                  minute: "2-digit"
+                  minute: "2-digit",
                 })}
               </p>
-              <p><strong>Accountant:</strong> {bill.accountant?.name || "Deleted Staff"}</p>
+              <p>
+                <strong>Accountant:</strong>{" "}
+                {bill.accountant?.name || "Deleted Staff"}
+              </p>
             </div>
           </div>
 
           {/* Invoice Products list table */}
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem", marginBottom: "24px" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "0.875rem",
+              marginBottom: "24px",
+            }}
+          >
             <thead>
-              <tr style={{ borderBottom: "1.5px solid var(--color-text-primary)", textAlign: "left" }}>
+              <tr
+                style={{
+                  borderBottom: "1.5px solid var(--color-text-primary)",
+                  textAlign: "left",
+                }}
+              >
                 <th style={{ padding: "8px 0" }}>Product Name</th>
                 <th style={{ padding: "8px 0", textAlign: "center" }}>Qty</th>
-                <th style={{ padding: "8px 0", textAlign: "right" }}>Unit Price</th>
+                <th style={{ padding: "8px 0", textAlign: "right" }}>
+                  Unit Price
+                </th>
                 <th style={{ padding: "8px 0", textAlign: "right" }}>Amount</th>
               </tr>
             </thead>
             <tbody>
-              {bill.products && bill.products.map((item, index) => (
-                <tr key={index} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <td style={{ padding: "10px 0" }}>{item.product?.name || "Deleted Product"}</td>
-                  <td style={{ padding: "10px 0", textAlign: "center" }}>{item.quantity}</td>
-                  <td style={{ padding: "10px 0", textAlign: "right" }}>₹{(item.product?.price || 0).toFixed(2)}</td>
-                  <td style={{ padding: "10px 0", textAlign: "right" }}>
-                    ₹{((item.product?.price || 0) * item.quantity).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
+              {bill.products &&
+                bill.products.map((item, index) => (
+                  <tr
+                    key={index}
+                    style={{ borderBottom: "1px solid var(--color-border)" }}
+                  >
+                    <td style={{ padding: "10px 0" }}>
+                      {item.product?.name || "Deleted Product"}
+                    </td>
+                    <td style={{ padding: "10px 0", textAlign: "center" }}>
+                      {item.quantity}
+                    </td>
+                    <td style={{ padding: "10px 0", textAlign: "right" }}>
+                      ₹{(item.product?.price || 0).toFixed(2)}
+                    </td>
+                    <td style={{ padding: "10px 0", textAlign: "right" }}>
+                      ₹{((item.product?.price || 0) * item.quantity).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
 
           {/* Invoice Calculations Subtotal & Grand Total */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", fontSize: "0.9rem", borderTop: "2px solid var(--color-border)", paddingTop: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: "8px",
+              fontSize: "0.9rem",
+              borderTop: "2px solid var(--color-border)",
+              paddingTop: "16px",
+            }}
+          >
             <div>
               <span>Subtotal: </span>
-              <span style={{ width: "100px", display: "inline-block", textAlign: "right", fontWeight: 500 }}>
+              <span
+                style={{
+                  width: "100px",
+                  display: "inline-block",
+                  textAlign: "right",
+                  fontWeight: 500,
+                }}
+              >
                 ₹{bill.totalAmount.toFixed(2)}
               </span>
             </div>
             <div style={{ fontSize: "1.2rem", fontWeight: 700 }}>
               <span>Grand Total: </span>
-              <span style={{ width: "120px", display: "inline-block", textAlign: "right", color: "var(--color-primary)" }}>
+              <span
+                style={{
+                  width: "120px",
+                  display: "inline-block",
+                  textAlign: "right",
+                  color: "var(--color-primary)",
+                }}
+              >
                 ₹{bill.totalAmount.toFixed(2)}
               </span>
             </div>
           </div>
 
           {/* Payment receipt footer details */}
-          <div style={{ marginTop: "32px", borderTop: "1px dashed var(--color-border)", paddingTop: "16px", textAlign: "center", fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
-            <p>Payment Mode: <strong style={{ textTransform: "uppercase", color: "var(--color-text-primary)" }}>{bill.paymentMethod}</strong></p>
-            <p style={{ marginTop: "10px" }}>Thank you for shopping at SLG MILK DAIRYS!</p>
+          <div
+            style={{
+              marginTop: "32px",
+              borderTop: "1px dashed var(--color-border)",
+              paddingTop: "16px",
+              textAlign: "center",
+              fontSize: "0.85rem",
+              color: "var(--color-text-secondary)",
+            }}
+          >
+            <p>
+              Payment Mode:{" "}
+              <strong
+                style={{
+                  textTransform: "uppercase",
+                  color: "var(--color-text-primary)",
+                }}
+              >
+                {bill.paymentMethod}
+              </strong>
+            </p>
+            <p style={{ marginTop: "10px" }}>
+              Thank you for shopping at SLG MILK DAIRYS!
+            </p>
             <p>Please visit us again.</p>
           </div>
         </div>

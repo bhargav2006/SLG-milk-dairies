@@ -57,16 +57,16 @@ const CreateBill = ({ billType = "retail" }) => {
       return `${import.meta.env.VITE_BACKEND_URI}${product.image}`;
     }
     const categoryImageMap = {
-      "Milk": "Milk.jpg",
-      "Cheese": "Cheese.jpg",
-      "Butter": "Butter.jpg",
-      "Yogurt": "Curd.jpg",
-      "Ghee": "Ghee.jpg",
-      "Paneer": "Paneer.jpg",
-      "Cream": "Cream.jpg",
-      "Lassi": "Lassi.jpg",
+      Milk: "Milk.jpg",
+      Cheese: "Cheese.jpg",
+      Butter: "Butter.jpg",
+      Yogurt: "Curd.jpg",
+      Ghee: "Ghee.jpg",
+      Paneer: "Paneer.jpg",
+      Cream: "Cream.jpg",
+      Lassi: "Lassi.jpg",
       "Flavoured Milk": "Flavoured-Milk.jpg",
-      "Ice Cream": "Ice-Cream.jpg"
+      "Ice Cream": "Ice-Cream.jpg",
     };
     const filename = categoryImageMap[product.category] || "Logo.jpg";
     return `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;
@@ -74,16 +74,16 @@ const CreateBill = ({ billType = "retail" }) => {
 
   const handleImageError = (e, category) => {
     const categoryImageMap = {
-      "Milk": "Milk.jpg",
-      "Cheese": "Cheese.jpg",
-      "Butter": "Butter.jpg",
-      "Yogurt": "Curd.jpg",
-      "Ghee": "Ghee.jpg",
-      "Paneer": "Paneer.jpg",
-      "Cream": "Cream.jpg",
-      "Lassi": "Lassi.jpg",
+      Milk: "Milk.jpg",
+      Cheese: "Cheese.jpg",
+      Butter: "Butter.jpg",
+      Yogurt: "Curd.jpg",
+      Ghee: "Ghee.jpg",
+      Paneer: "Paneer.jpg",
+      Cream: "Cream.jpg",
+      Lassi: "Lassi.jpg",
       "Flavoured Milk": "Flavoured-Milk.jpg",
-      "Ice Cream": "Ice-Cream.jpg"
+      "Ice Cream": "Ice-Cream.jpg",
     };
     const filename = categoryImageMap[category] || "Logo.jpg";
     e.target.src = `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;
@@ -163,12 +163,12 @@ const CreateBill = ({ billType = "retail" }) => {
   const handleGenerateBill = async () => {
     // Validation
     if (
-  customerNumber &&
-  (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber))
-) {
-  showWarning("Customer phone number must be exactly 10 digits");
-  return;
-}
+      customerNumber &&
+      (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber))
+    ) {
+      showWarning("Customer phone number must be exactly 10 digits");
+      return;
+    }
     if (cart.length === 0) {
       showWarning("Your cart is empty. Add products to create a bill.");
       return;
@@ -685,7 +685,16 @@ const CreateBill = ({ billType = "retail" }) => {
                   marginBottom: "8px",
                 }}
               >
-                <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
+                <img
+                  src="/logo.png"
+                  alt="SLG MILK DAIRYS Logo"
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    objectFit: "contain",
+                    borderRadius: "50%",
+                  }}
+                />
               </div>
               <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
                 SLG MILK DAIRYS
@@ -707,7 +716,7 @@ const CreateBill = ({ billType = "retail" }) => {
                   lineHeight: "1.4",
                 }}
               >
-                Shopping & retail | AC Handle: @manikondaswamy
+                Retail & Wholesale
               </p>
               <div
                 style={{
@@ -719,8 +728,10 @@ const CreateBill = ({ billType = "retail" }) => {
                   textAlign: "center",
                 }}
               >
-                <strong>Branches:</strong><br />
-                1) Near SBI, opposite P.Gannavaram 🔥<br />
+                <strong>Branches:</strong>
+                <br />
+                1) Near SBI, opposite P.Gannavaram 🔥
+                <br />
                 2) Honda Showroom, opposite Pothavaram 😍
               </div>
             </div>
@@ -742,7 +753,9 @@ const CreateBill = ({ billType = "retail" }) => {
                 </p>
                 <p>
                   <strong>Bill Type:</strong>{" "}
-                  <span style={{ textTransform: "capitalize", fontWeight: 600 }}>
+                  <span
+                    style={{ textTransform: "capitalize", fontWeight: 600 }}
+                  >
                     {createdBill.billType || billType}
                   </span>
                 </p>

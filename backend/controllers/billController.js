@@ -193,6 +193,7 @@ exports.getBills = async (req, res) => {
     const filter = {};
     if (req.query.billType) filter.billType = req.query.billType;
     const bills = await Bill.find(filter)
+      .sort({ createdAt: -1 })
       .populate("accountant", "name")
       .populate("products.product", "name price productType");
     res.json(bills);
@@ -247,6 +248,7 @@ exports.getBillByAccountantId = async (req, res) => {
     const filter = { accountant: req.params.accountantId };
     if (req.query.billType) filter.billType = req.query.billType;
     const bills = await Bill.find(filter)
+      .sort({ createdAt: -1 })
       .populate("accountant", "name")
       .populate("products.product", "name price productType");
     res.json(bills);

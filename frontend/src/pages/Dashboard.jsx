@@ -410,6 +410,7 @@ const Dashboard = () => {
               <thead>
                 <tr>
                   <th>Invoice No.</th>
+                  <th>Bill Type</th>
                   <th>Customer Phone</th>
                   <th>Total Amount</th>
                   <th>Payment Method</th>
@@ -426,6 +427,27 @@ const Dashboard = () => {
                       style={{ fontWeight: 600, color: "var(--color-primary)" }}
                     >
                       {bill.invoiceNumber || "N/A"}
+                    </td>
+                    <td data-label="Bill Type">
+                      <span
+                        style={{
+                          textTransform: "capitalize",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          backgroundColor:
+                            bill.billType === "wholesale"
+                              ? "var(--color-primary-light)"
+                              : "var(--color-success-light)",
+                          color:
+                            bill.billType === "wholesale"
+                              ? "var(--color-primary)"
+                              : "var(--color-success)",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {bill.billType || "retail"}
+                      </span>
                     </td>
                     <td data-label="Customer Phone">
                       {bill.customerNumber || "-"}
