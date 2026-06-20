@@ -10,6 +10,16 @@ const userService = {
     const response = await api.delete(`/api/users/${id}`);
     return response.data;
   },
+
+  createUser: async (userData) => {
+    const response = await api.post("/api/users", userData);
+    return response.data;
+  },
+
+  updateUser: async (id, userData) => {
+    const response = await api.put(`/api/users/${id}`, userData);
+    return response.data;
+  },
 };
 
 export default userService;
