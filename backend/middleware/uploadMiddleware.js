@@ -10,21 +10,33 @@ const storage = multer.diskStorage({
     const serialNumber =
       req.body.serialNumber?.trim().replace(/\s+/g, "-") || Date.now();
 
-    cb(null, `${serialNumber}${path.extname(file.originalname).toLowerCase()}`);
+    let ext = path.extname(file.originalname).toLowerCase();
+    if (!ext) {
+      if (file.mimetype === "image/png") ext = ".png";
+      else if (file.mimetype === "image/webp") ext = ".webp";
+      else ext = ".jpg"; // Default fallback for image/jpeg etc
+    }
+
+    cb(null, `${serialNumber}${ext}`);
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpg|jpeg|png|webp/;
+  const allowedMimeTypes = /image\/(jpeg|jpg|png|webp)/i;
+  const allowedExtensions = /\.(jpg|jpeg|png|webp)$/i;
 
-  const isValid =
-    allowedTypes.test(path.extname(file.originalname).toLowerCase()) &&
-    allowedTypes.test(file.mimetype);
+  const hasValidMime = allowedMimeTypes.test(file.mimetype);
+  const ext = path.extname(file.originalname);
 
-  if (isValid) {
+  // If the file has an extension, verify it. Otherwise, rely on mimetype validation.
+  const hasValidExt = ext ? allowedExtensions.test(ext) : true;
+
+  if (hasValidMime && hasValidExt) {
     cb(null, true);
   } else {
-    cb(new Error("Only image files are allowed"));
+    const err = new Error("Only image files (JPG, JPEG, PNG, WEBP) are allowed");
+    err.statusCode = 400; // Tag as a 400 Bad Request
+    cb(err);
   }
 };
 

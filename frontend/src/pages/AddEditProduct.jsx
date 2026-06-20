@@ -121,11 +121,29 @@ const AddEditProduct = () => {
       }
       navigate("/products");
     } catch (err) {
-      console.error(err);
-      const msg =
-        err.response?.data?.message ||
-        "An error occurred while saving the product";
-      showError(msg);
+      console.error("Product save error details:", err);
+      let errorMsg = "An error occurred while saving the product";
+      
+      if (err.response?.data) {
+        if (typeof err.response.data === "string") {
+          // If the server returned an HTML error page (like from Nginx or default Express errors)
+          if (err.response.data.includes("<pre>")) {
+            const match = err.response.data.match(/<pre>([\s\S]*?)<\/pre>/);
+            errorMsg = match ? match[1] : "Server returned HTML error details";
+          } else {
+            // Trim any HTML tags if present or show the first 120 characters
+            const doc = new DOMParser().parseFromString(err.response.data, "text/html");
+            const bodyText = doc.body?.textContent?.trim() || "";
+            errorMsg = bodyText ? bodyText.substring(0, 120) : "Server HTML response";
+          }
+        } else if (err.response.data.message) {
+          errorMsg = err.response.data.message;
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      
+      showError(errorMsg);
     } finally {
       setSubmitting(false);
     }
