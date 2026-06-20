@@ -5,7 +5,7 @@ node_modules/
 # Build and distribution directories
 # dist/
 # build/
-out/
+# out/
 
 # Environment files and credentials
 # .env
