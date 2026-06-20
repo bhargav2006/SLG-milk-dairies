@@ -68,7 +68,7 @@ exports.createBill = async (req, res) => {
     const counter = await Counter.findOneAndUpdate(
       { name: counterName },
       { $inc: { sequence: 1 } },
-      { new: true, upsert: true },
+      { returnDocument: "after", upsert: true },
     );
 
     const sequence = counter.sequence.toString().padStart(4, "0");
