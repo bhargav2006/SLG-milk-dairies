@@ -50,6 +50,8 @@ const CreateBill = ({ billType = "retail" }) => {
     "Lassi",
     "Flavoured Milk",
     "Ice Cream",
+    "Sweets",
+    "Spices",
   ];
 
   const getProductImageUrl = (product) => {
@@ -67,6 +69,8 @@ const CreateBill = ({ billType = "retail" }) => {
       Lassi: "Lassi.jpg",
       "Flavoured Milk": "Flavoured-Milk.jpg",
       "Ice Cream": "Ice-Cream.jpg",
+      "Sweets": "Sweets.jpg",
+      "Spices": "Spices.jpg",
     };
     const filename = categoryImageMap[product.category] || "Logo.jpg";
     return `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;
@@ -84,6 +88,8 @@ const CreateBill = ({ billType = "retail" }) => {
       Lassi: "Lassi.jpg",
       "Flavoured Milk": "Flavoured-Milk.jpg",
       "Ice Cream": "Ice-Cream.jpg",
+      "Sweets": "Sweets.jpg",
+      "Spices": "Spices.jpg",
     };
     const filename = categoryImageMap[category] || "Logo.jpg";
     e.target.src = `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;

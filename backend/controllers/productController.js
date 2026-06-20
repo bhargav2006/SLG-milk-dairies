@@ -10,6 +10,8 @@ const categoryDefaults = {
   Lassi: "/uploads/defaults/Lassi.jpg",
   "Flavoured Milk": "/uploads/defaults/Flavoured-Milk.jpg",
   "Ice Cream": "/uploads/defaults/Ice-Cream.jpg",
+  Sweets: "/uploads/defaults/Sweets.jpg",
+  Spices: "/uploads/defaults/Spices.jpg",
 };
 
 // @desc    Get all products

@@ -57,7 +57,9 @@ const Products = () => {
       "Cream": "Cream.jpg",
       "Lassi": "Lassi.jpg",
       "Flavoured Milk": "Flavoured-Milk.jpg",
-      "Ice Cream": "Ice-Cream.jpg"
+      "Ice Cream": "Ice-Cream.jpg",
+      "Sweets": "Sweets.jpg",
+      "Spices": "Spices.jpg"
     };
     const filename = categoryImageMap[product.category] || "Logo.jpg";
     return `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;
@@ -74,7 +76,9 @@ const Products = () => {
       "Cream": "Cream.jpg",
       "Lassi": "Lassi.jpg",
       "Flavoured Milk": "Flavoured-Milk.jpg",
-      "Ice Cream": "Ice-Cream.jpg"
+      "Ice Cream": "Ice-Cream.jpg",
+      "Sweets": "Sweets.jpg",
+      "Spices": "Spices.jpg"
     };
     const filename = categoryImageMap[category] || "Logo.jpg";
     e.target.src = `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;
@@ -184,6 +188,8 @@ const Products = () => {
     "Lassi",
     "Flavoured Milk",
     "Ice Cream",
+    "Sweets",
+    "Spices",
   ];
 
   return (

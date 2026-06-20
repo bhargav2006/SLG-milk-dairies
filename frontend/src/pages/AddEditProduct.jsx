@@ -160,6 +160,8 @@ const AddEditProduct = () => {
     "Lassi",
     "Flavoured Milk",
     "Ice Cream",
+    "Sweets",
+    "Spices",
   ];
 
   if (loading) {
@@ -468,7 +470,9 @@ const AddEditProduct = () => {
                         "Cream": "Cream.jpg",
                         "Lassi": "Lassi.jpg",
                         "Flavoured Milk": "Flavoured-Milk.jpg",
-                        "Ice Cream": "Ice-Cream.jpg"
+                        "Ice Cream": "Ice-Cream.jpg",
+                        "Sweets": "Sweets.jpg",
+                        "Spices": "Spices.jpg"
                       };
                       const filename = categoryImageMap[formData.category] || "Logo.jpg";
                       e.target.src = `${import.meta.env.VITE_BACKEND_URI}/uploads/defaults/${filename}`;
