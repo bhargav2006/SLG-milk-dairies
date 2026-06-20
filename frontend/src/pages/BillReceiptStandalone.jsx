@@ -69,7 +69,7 @@ const BillReceiptStandalone = () => {
           records.
         </p>
         <button
-          onClick={() => navigate(isAuthenticated ? "/" : "/login")}
+          onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
           className="btn btn-primary"
         >
           {isAuthenticated ? "Back to Dashboard" : "Back to Login"}
@@ -99,7 +99,7 @@ const BillReceiptStandalone = () => {
       >
         {isAuthenticated ? (
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
             className="btn btn-secondary btn-sm"
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >

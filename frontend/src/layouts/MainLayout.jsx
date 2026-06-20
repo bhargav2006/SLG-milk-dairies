@@ -35,7 +35,7 @@ const MainLayout = ({ children }) => {
 
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === "/") return "Dashboard";
+    if (path === "/dashboard") return "Dashboard";
     if (path.startsWith("/products")) {
       if (path.includes("add")) return "Add Product";
       if (path.includes("edit")) return "Edit Product";
@@ -53,7 +53,7 @@ const MainLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "accountant"] },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["admin", "accountant"] },
     { name: "Products", path: "/products", icon: Milk, roles: ["admin", "accountant"] },
     { name: "Bills", path: "/bills", icon: Receipt, roles: ["admin", "accountant"] },
     { name: "Users", path: "/users", icon: UsersIcon, roles: ["admin"] },

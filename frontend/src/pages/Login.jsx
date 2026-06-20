@@ -34,7 +34,7 @@ const Login = () => {
     try {
       await login(email, password);
       showSuccess("Welcome back to SLG MILK DAIRYS!");
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       const errMsg =

@@ -42,7 +42,7 @@ const Register = () => {
     try {
       await register(name.trim(), email.trim(), password, role);
       showSuccess("Account registered and logged in successfully!");
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       const errMsg = err.response?.data?.message || "Registration failed. Try a different email.";

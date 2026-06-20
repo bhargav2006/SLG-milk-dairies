@@ -14,7 +14,7 @@ import Bills from "../pages/Bills";
 import Users from "../pages/Users";
 import Profile from "../pages/Profile";
 import BillReceiptStandalone from "../pages/BillReceiptStandalone";
-import About from "../pages/About";
+import LandingPage from "../pages/LandingPage";
 
 // Import error pages
 import { NotFoundPage, UnauthorizedPage } from "../pages/Errors";
@@ -27,13 +27,14 @@ const AppRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/bill/:invoiceNumber" element={<BillReceiptStandalone />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/services" element={<About />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<LandingPage />} />
+      <Route path="/services" element={<LandingPage />} />
 
       {/* Protected Routes (Admin + Accountant) */}
       <Route element={<ProtectedRoute allowedRoles={["admin", "accountant"]} />}>
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <MainLayout>
               <Dashboard />

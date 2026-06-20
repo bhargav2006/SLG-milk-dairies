@@ -10,7 +10,7 @@ export const ErrorLayout = ({ code, title, description, icon: Icon }) => {
       <h1 className="error-code">{code}</h1>
       <h2 className="error-title">{title}</h2>
       <p className="error-description">{description}</p>
-      <Link to="/" className="btn btn-primary">
+      <Link to="/dashboard" className="btn btn-primary">
         Return to Dashboard
       </Link>
     </div>
