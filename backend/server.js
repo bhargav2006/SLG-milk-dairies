@@ -18,6 +18,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost",
   "http://20.2.139.220",
+  "https://slgmilkdairys.de",
+  "https://www.slgmilkdairys.de",
   process.env.CORS_ORIGIN,
 ];
 
