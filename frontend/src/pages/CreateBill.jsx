@@ -693,7 +693,7 @@ const CreateBill = ({ billType = "retail" }) => {
               >
                 <img
                   src="/logo.png"
-                  alt="SLG MILK DAIRYS Logo"
+                  alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo"
                   style={{
                     width: "64px",
                     height: "64px",
@@ -703,7 +703,7 @@ const CreateBill = ({ billType = "retail" }) => {
                 />
               </div>
               <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-                SLG MILK DAIRYS
+                SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
               </h2>
               <p
                 style={{
@@ -713,7 +713,7 @@ const CreateBill = ({ billType = "retail" }) => {
                   marginBottom: "4px",
                 }}
               >
-                VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2000❤️
+                VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2005❤️
               </p>
               <p
                 style={{
@@ -898,7 +898,7 @@ const CreateBill = ({ billType = "retail" }) => {
                 </strong>
               </p>
               <p style={{ marginTop: "8px" }}>
-                Thank you for shopping at SLG MILK DAIRYS!
+                Thank you for shopping at SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS!
               </p>
               <p>Please visit us again.</p>
             </div>

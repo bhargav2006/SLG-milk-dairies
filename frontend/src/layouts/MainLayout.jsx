@@ -49,7 +49,7 @@ const MainLayout = ({ children }) => {
     if (path.startsWith("/billing/wholesale")) return "Wholesale Billing Terminal";
     if (path.startsWith("/users")) return "User Accounts Management";
     if (path.startsWith("/profile")) return "Account Profile";
-    return "SLG MILK DAIRYS System";
+    return "SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS System";
   };
 
   const menuItems = [
@@ -102,9 +102,9 @@ const MainLayout = ({ children }) => {
       >
         <div className="sidebar-brand">
           <div className="sidebar-logo">
-            <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "28px", height: "28px", objectFit: "contain", borderRadius: "50%" }} />
+            <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo" style={{ width: "28px", height: "28px", objectFit: "contain", borderRadius: "50%" }} />
           </div>
-          <span className="brand-name">SLG MILK DAIRYS</span>
+          <span className="brand-name" style={{ fontSize: "0.8rem", whiteSpace: "normal", lineHeight: "1.2" }}>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</span>
         </div>
 
         <ul className="sidebar-menu">

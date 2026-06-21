@@ -1255,10 +1255,10 @@ const Bills = () => {
                   marginBottom: "8px",
                 }}
               >
-                <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
+                <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
               </div>
               <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-                SLG MILK DAIRYS
+                SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
               </h2>
               <p
                 style={{
@@ -1268,7 +1268,7 @@ const Bills = () => {
                   marginBottom: "4px",
                 }}
               >
-                VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2000❤️
+                VISAKHA DAIRY 🥛 | WHOLESALE MARKET ✨ | SINCE 2005❤️
               </p>
               <p
                 style={{
@@ -1449,7 +1449,7 @@ const Bills = () => {
                 </strong>
               </p>
               <p style={{ marginTop: "8px" }}>
-                Thank you for shopping at SLG MILK DAIRYS!
+                Thank you for shopping at SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS!
               </p>
               <p>Please visit us again.</p>
             </div>

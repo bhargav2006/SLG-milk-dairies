@@ -73,9 +73,9 @@ const About = () => {
       {/* Header bar */}
       <header className="about-header-nav">
         <div className="about-brand">
-          <img src="/logo.png" alt="SLG Logo" className="about-logo" />
+          <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI Logo" className="about-logo" />
           <div className="about-brand-text">
-            <span className="about-brand-name">SLG MILK DAIRYS</span>
+            <span className="about-brand-name" style={{ fontSize: "0.85rem", whiteSpace: "normal" }}>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</span>
             <span className="about-brand-sub">VISAKHA DAIRY PARTNER</span>
           </div>
         </div>
@@ -92,10 +92,10 @@ const About = () => {
         <section className="about-hero-banner">
           <span className="about-hero-badge">Established 2005</span>
           <h1 className="about-hero-title">
-            SLG (Sri Lakshmi Ganapathi) MILK DAIRYS & Visakha Dairy Distributor
+            SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS & Visakha Dairy Distributor
           </h1>
           <p className="about-hero-desc">
-            SLG (Sri Lakshmi Ganapathi) MILK DAIRYS is a premium distributor of Visakha Dairy, serving
+            SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS is a premium distributor of Visakha Dairy, serving
             wholesale and retail milk and high-quality dairy items across the East
             Godavari district of Andhra Pradesh, India. Under the professional
             guidance of Yarramsetti Manikonda Swamy, we supply pure, fresh, and
@@ -119,7 +119,7 @@ const About = () => {
               <span className="av-label">
                 <Briefcase size={14} /> Legal Business Name
               </span>
-              <span className="av-value">SLG (Sri Lakshmi Ganapathi) MILK DAIRYS</span>
+              <span className="av-value">SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</span>
             </div>
 
             <div className="av-item">
@@ -209,7 +209,7 @@ const About = () => {
             <Info size={20} className="about-service-icon" style={{ marginTop: "2px" }} />
             <span>
               <strong>Reviewer Note:</strong> This page presents the official registry details of
-              SLG (Sri Lakshmi Ganapathi) MILK DAIRYS for Meta Business Manager verification. These credentials
+              SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS for Meta Business Manager verification. These credentials
               fully align with our trade registration certificates (including Udyam Registration UDYAM-AP-03-0012683 under the name SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS), phone bills, and
               association contracts with Visakha Dairy.
             </span>
@@ -247,7 +247,7 @@ const About = () => {
 
       {/* Footer */}
       <footer className="about-footer">
-        <p>&copy; 2026 SLG MILK DAIRYS. All Rights Reserved.</p>
+        <p>&copy; 2026 SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All Rights Reserved.</p>
         <p style={{ fontSize: "0.78rem", marginTop: "4px", color: "var(--color-text-secondary)" }}>
           Official Distributor of Visakha Dairy Co-operative Union.
         </p>

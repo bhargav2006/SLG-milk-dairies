@@ -74,12 +74,12 @@ const Register = () => {
               overflow: "hidden"
             }}
           >
-            <img src="/logo.png" alt="SLG MILK DAIRYS Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           <h1 className="brand-name" style={{ fontSize: "1.75rem", textAlign: "center" }}>
             Create Account
           </h1>
-          <p className="login-subtitle">SLG MILK DAIRYS Billing & Management</p>
+          <p className="login-subtitle">SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Billing & Management</p>
         </div>
 
         {validationError && (

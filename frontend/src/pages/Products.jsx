@@ -221,7 +221,7 @@ const Products = () => {
               color: "var(--color-text-secondary)",
             }}
           >
-            Manage your SLG MILK DAIRYS inventory here.
+            Manage your SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS inventory here.
           </p>
         </div>
 
