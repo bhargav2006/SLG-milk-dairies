@@ -934,6 +934,7 @@ const LandingPage = () => {
             <a href="#services">Services</a>
             <a href="#products">Products</a>
             <a href="#contact">Contact</a>
+            <Link to="/privacy-policy">Privacy Policy</Link>
           </div>
 
           <div className="lp-footer-bottom">

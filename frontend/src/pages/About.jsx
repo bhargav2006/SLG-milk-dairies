@@ -247,7 +247,9 @@ const About = () => {
 
       {/* Footer */}
       <footer className="about-footer">
-        <p>&copy; 2026 SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All Rights Reserved.</p>
+        <p>
+          &copy; 2026 SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All Rights Reserved. | <Link to="/privacy-policy" className="about-footer-link">Privacy Policy</Link>
+        </p>
         <p style={{ fontSize: "0.78rem", marginTop: "4px", color: "var(--color-text-secondary)" }}>
           Official Distributor of Visakha Dairy Co-operative Union.
         </p>
