@@ -16,6 +16,7 @@ import Profile from "../pages/Profile";
 import BillReceiptStandalone from "../pages/BillReceiptStandalone";
 import LandingPage from "../pages/LandingPage";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import TermsOfService from "../pages/TermsOfService";
 
 // Import error pages
 import { NotFoundPage, UnauthorizedPage } from "../pages/Errors";
@@ -29,6 +30,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/bill/:invoiceNumber" element={<BillReceiptStandalone />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<LandingPage />} />
       <Route path="/services" element={<LandingPage />} />
