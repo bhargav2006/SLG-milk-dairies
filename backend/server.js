@@ -4,6 +4,7 @@ dotenv.config();
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const { connectDB } = require("./config/db");
 
@@ -11,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const billRoutes = require("./routes/billRoutes");
+const webhookRoutes = require("./routes/webhookRoutes");
 
 const app = express();
 const server = require("http").createServer(app);
@@ -36,6 +38,10 @@ app.use("/api/bill", billRoutes);
 
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// webhook routes
+app.use(bodyParser.json());
+app.use("/api/webhook", webhookRoutes);
 
 // Ensure uploads directory exists
 if (!fs.existsSync("uploads")) {
