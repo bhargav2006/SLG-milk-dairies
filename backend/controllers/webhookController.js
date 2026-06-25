@@ -22,60 +22,6 @@ exports.verifyWebhook = async (req, res) => {
   }
 };
 
-// exports.webhookEvents = async (req, res) => {
-//   try {
-//     const message = req.body;
-//     console.log("Message received:", message);
-//     if (message.object) {
-//       if (
-//         message.entry &&
-//         message.entry[0].changes &&
-//         message.entry[0].changes[0].value.message &&
-//         message.entry[0].changes[0].value.message[0]
-//       ) {
-//         const phnNumberId =
-//           message.entry[0].changes[0].value.metadata.phone_number_id;
-//         const messageFrom = message.entry[0].changes[0].value.messages[0].from;
-//         const messageText =
-//           message.entry[0].changes[0].value.messages[0].text.body;
-//         const messageId = message.entry[0].changes[0].value.messages[0].id;
-//         const messageTimestamp =
-//           message.entry[0].changes[0].value.messages[0].timestamp;
-//         console.log("Phone Number Id", phnNumberId);
-//         console.log("Message From", messageFrom);
-//         console.log("Message Text", messageText);
-//         console.log("Message Id", messageId);
-//         console.log("Message Timestamp", messageTimestamp);
-
-//         axios({
-//           method: "POST",
-//           url:
-//             "https://graph.facebook.com/v25.0/" +
-//             phnNumberId +
-//             "/messages?access_token=" +
-//             process.env.WHATSAPP_TOKEN,
-//           data: {
-//             messaging_product: "whatsapp",
-//             to: messageFrom,
-//             text: {
-//               body: "Hi.. I'm SLG",
-//             },
-//           },
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//         });
-//         res.sendStatus(200);
-//       } else {
-//         res.status(400).json({ message: "Invalid request" });
-//       }
-//     }
-//   } catch (error) {
-//     console.log("Error while receiving webhook:", error);
-//     res.status(500).json({ message: "Failed to receive webhook" });
-//   }
-// };
-
 exports.webhookEvents = async (req, res) => {
   try {
     const body = req.body;
@@ -106,30 +52,31 @@ exports.webhookEvents = async (req, res) => {
         if (messageObj.type === "text") {
           const messageText = messageObj.text.body;
           console.log("Message Text:", messageText);
-
-          try {
-            // 4. Await the Axios call and use the Authorization header
-            await axios({
-              method: "POST",
-              url: `https://graph.facebook.com/v25.0/${phnNumberId}/messages`,
-              data: {
-                messaging_product: "whatsapp",
-                to: messageFrom,
-                text: {
-                  body: "Hi.. I'm SLG",
+          if (messageText === "Stop" || messageText === "STOP") {
+            try {
+              // 4. Await the Axios call and use the Authorization header
+              await axios({
+                method: "POST",
+                url: `https://graph.facebook.com/v25.0/${phnNumberId}/messages`,
+                data: {
+                  messaging_product: "whatsapp",
+                  to: messageFrom,
+                  text: {
+                    body: "Hi.. I'm SLG",
+                  },
                 },
-              },
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, // Standard auth method
-              },
-            });
-            console.log("Reply sent successfully.");
-          } catch (apiError) {
-            console.log(
-              "Error sending WhatsApp reply:",
-              apiError.response ? apiError.response.data : apiError.message,
-            );
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, // Standard auth method
+                },
+              });
+              console.log("Reply sent successfully.");
+            } catch (apiError) {
+              console.log(
+                "Error sending WhatsApp reply:",
+                apiError.response ? apiError.response.data : apiError.message,
+              );
+            }
           }
         }
       }
