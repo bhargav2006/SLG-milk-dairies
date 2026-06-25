@@ -159,12 +159,19 @@ const createProduct = async (req, res) => {
   try {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
-    const { name, serialNumber, price, description, category, productType } =
-      req.body;
+    const {
+      name,
+      serialNumber,
+      price,
+      description,
+      category,
+      productType,
+      stock,
+    } = req.body;
     const image = req.file ? `/uploads/products/${req.file.filename}` : null;
-    if (!name || !serialNumber || price === undefined || !category) {
+    if (!name || !serialNumber || price === undefined || !category || !stock) {
       return res.status(400).json({
-        message: "Name, serial number, category, and price are required",
+        message: "Name, serial number, category, price and stock are required",
       });
     }
     const existingProduct = await Product.findOne({ serialNumber });
@@ -181,6 +188,7 @@ const createProduct = async (req, res) => {
       category,
       image,
       productType: productType || "retail",
+      stock,
     });
     await product.save();
     res.status(201).json(product);
@@ -194,8 +202,15 @@ const createProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 const updateProduct = async (req, res) => {
   try {
-    const { name, serialNumber, price, description, category, productType } =
-      req.body;
+    const {
+      name,
+      serialNumber,
+      price,
+      description,
+      category,
+      productType,
+      stock,
+    } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -205,6 +220,7 @@ const updateProduct = async (req, res) => {
     if (category !== undefined) product.category = category;
     if (name) product.name = name;
     if (productType !== undefined) product.productType = productType;
+    if (stock !== undefined) product.stock = stock;
     if (serialNumber) {
       const existingProduct = await Product.findOne({
         serialNumber,
