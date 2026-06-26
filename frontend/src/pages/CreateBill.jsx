@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import productService from "../services/productService";
@@ -18,7 +19,9 @@ import {
   UserCheck,
 } from "lucide-react";
 
-const CreateBill = ({ billType = "retail" }) => {
+const CreateBill = ({ billType = "retail", isEditMode = false }) => {
+  const { invoiceNumber } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
 
@@ -38,6 +41,11 @@ const CreateBill = ({ billType = "retail" }) => {
   const [createdBill, setCreatedBill] = useState(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  // Edit mode states
+  const [activeBillType, setActiveBillType] = useState(billType);
+  const [originalBillProducts, setOriginalBillProducts] = useState({});
+  const [loadingBill, setLoadingBill] = useState(isEditMode);
 
   const categoriesList = [
     "Milk",
@@ -102,7 +110,7 @@ const CreateBill = ({ billType = "retail" }) => {
       const data = await productService.getProducts({
         search: search.trim() || undefined,
         category: category || undefined,
-        productType: billType,
+        productType: activeBillType,
         limit: 100, // Load all for POS selection
       });
       setProducts(data.products || []);
@@ -112,15 +120,83 @@ const CreateBill = ({ billType = "retail" }) => {
     } finally {
       setLoadingCatalog(false);
     }
-  }, [search, category, billType, showError]);
+  }, [search, category, activeBillType, showError]);
 
   useEffect(() => {
     loadCatalog();
   }, [loadCatalog]);
 
+  // Sync bill type from prop if not in edit mode
+  useEffect(() => {
+    if (!isEditMode) {
+      setActiveBillType(billType);
+    }
+  }, [billType, isEditMode]);
+
+  // Fetch existing bill if in edit mode
+  useEffect(() => {
+    if (isEditMode && invoiceNumber) {
+      const fetchBill = async () => {
+        setLoadingBill(true);
+        try {
+          const bill = await billService.getBillById(invoiceNumber);
+          setCustomerNumber(bill.customerNumber || "");
+          setCustomerMail(bill.customerMail || "");
+          setPaymentMethod(bill.paymentMethod);
+          setActiveBillType(bill.billType);
+
+          // Build original quantities map
+          const originalMap = {};
+          bill.products.forEach((p) => {
+            if (p.product?._id) {
+              originalMap[p.product._id] = p.quantity;
+            }
+          });
+          setOriginalBillProducts(originalMap);
+
+          // Load latest product details (to get latest stock) for each product in the bill
+          const cartItems = await Promise.all(
+            bill.products.map(async (p) => {
+              try {
+                if (p.product?._id) {
+                  const latestProduct = await productService.getProductById(p.product._id);
+                  return {
+                    product: latestProduct,
+                    quantity: p.quantity,
+                  };
+                }
+              } catch (err) {
+                console.error("Failed to load latest product details", err);
+              }
+              return {
+                product: p.product,
+                quantity: p.quantity,
+              };
+            })
+          );
+          setCart(cartItems.filter(Boolean));
+        } catch (err) {
+          console.error(err);
+          showError("Failed to fetch bill details.");
+          navigate("/bills");
+        } finally {
+          setLoadingBill(false);
+        }
+      };
+      fetchBill();
+    }
+  }, [isEditMode, invoiceNumber, navigate, showError]);
+
+  const getVirtualStock = (product) => {
+    if (!product) return 0;
+    const origQty = originalBillProducts[product._id] || 0;
+    return (product.stock !== undefined ? product.stock : 0) + origQty;
+  };
+
   // Add product to cart
   const addToCart = (product) => {
-    if (product.stock === 0) {
+    const virtualStock = getVirtualStock(product);
+    if (virtualStock === 0) {
       showWarning("This product is currently out of stock.");
       return;
     }
@@ -129,8 +205,8 @@ const CreateBill = ({ billType = "retail" }) => {
         (item) => item.product._id === product._id,
       );
       const currentQty = existing ? existing.quantity : 0;
-      if (product.stock !== undefined && currentQty + 1 > product.stock) {
-        showWarning(`Cannot add more. Only ${product.stock} units available in stock.`);
+      if (currentQty + 1 > virtualStock) {
+        showWarning(`Cannot add more. Only ${virtualStock} units available in stock.`);
         return prevCart;
       }
       if (existing) {
@@ -148,11 +224,13 @@ const CreateBill = ({ billType = "retail" }) => {
   const updateQty = (productId, delta) => {
     setCart((prevCart) => {
       let isExceeded = false;
+      let virtualStock = 0;
       const updated = prevCart
         .map((item) => {
           if (item.product._id === productId) {
             const newQty = item.quantity + delta;
-            if (delta > 0 && item.product.stock !== undefined && newQty > item.product.stock) {
+            virtualStock = getVirtualStock(item.product);
+            if (delta > 0 && newQty > virtualStock) {
               isExceeded = true;
               return item;
             }
@@ -163,8 +241,7 @@ const CreateBill = ({ billType = "retail" }) => {
         .filter((item) => item.quantity > 0);
 
       if (isExceeded) {
-        const item = prevCart.find((i) => i.product._id === productId);
-        showWarning(`Cannot add more. Only ${item.product.stock} units available in stock.`);
+        showWarning(`Cannot add more. Only ${virtualStock} units available in stock.`);
         return prevCart;
       }
       return updated;
@@ -186,6 +263,13 @@ const CreateBill = ({ billType = "retail" }) => {
     0,
   );
   const grandTotal = subtotal;
+
+  const handleCloseModal = () => {
+    setIsInvoiceOpen(false);
+    if (isEditMode) {
+      navigate("/bills");
+    }
+  };
 
   const handleGenerateBill = async () => {
     // Validation
@@ -211,28 +295,35 @@ const CreateBill = ({ billType = "retail" }) => {
         })),
         paymentMethod,
         customerMail,
-        billType,
+        billType: activeBillType,
       };
 
-      const newBill = await billService.createBill(billData);
-      showSuccess("Invoice generated successfully!");
+      if (isEditMode) {
+        const updatedBill = await billService.updateBill(invoiceNumber, billData);
+        showSuccess("Invoice updated successfully!");
+        setCreatedBill(updatedBill);
+        setIsInvoiceOpen(true);
+      } else {
+        const newBill = await billService.createBill(billData);
+        showSuccess("Invoice generated successfully!");
 
-      // Log the standalone receipt link to the console for external email operations
-      console.log(
-        `[INVOICE LINK] URL for billing statement: ${window.location.origin}/bill/${newBill._id}`,
-      );
+        // Log the standalone receipt link to the console for external email operations
+        console.log(
+          `[INVOICE LINK] URL for billing statement: ${window.location.origin}/bill/${newBill._id}`,
+        );
 
-      setCreatedBill(newBill);
-      setIsInvoiceOpen(true);
+        setCreatedBill(newBill);
+        setIsInvoiceOpen(true);
 
-      // Clear Cart & Form on successful checkout
-      setCart([]);
-      setCustomerNumber("");
-      setCustomerMail("");
-      setPaymentMethod("cash");
+        // Clear Cart & Form on successful checkout
+        setCart([]);
+        setCustomerNumber("");
+        setCustomerMail("");
+        setPaymentMethod("cash");
+      }
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.message || "Failed to generate bill.";
+      const msg = err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'generate'} bill.`;
       showError(msg);
     } finally {
       setGenerating(false);
@@ -242,6 +333,16 @@ const CreateBill = ({ billType = "retail" }) => {
   const handlePrint = () => {
     window.print();
   };
+
+  if (loadingBill) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "300px" }}>
+        <div style={{ fontSize: "1.2rem", fontWeight: 600, color: "var(--color-text-secondary)" }}>
+          Loading invoice details...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pos-layout">
@@ -337,137 +438,140 @@ const CreateBill = ({ billType = "retail" }) => {
           />
         ) : (
           <div className="pos-catalog-grid">
-            {products.map((product) => (
-              <div
-                key={product._id}
-                className={`catalog-item-card ${product.stock === 0 ? "disabled" : ""}`}
-                style={{
-                  opacity: product.stock === 0 ? 0.6 : 1,
-                  cursor: product.stock === 0 ? "not-allowed" : "pointer"
-                }}
-                onClick={() => addToCart(product)}
-              >
+            {products.map((product) => {
+              const virtualStock = getVirtualStock(product);
+              return (
                 <div
+                  key={product._id}
+                  className={`catalog-item-card ${virtualStock === 0 ? "disabled" : ""}`}
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    flexGrow: 1,
+                    opacity: virtualStock === 0 ? 0.6 : 1,
+                    cursor: virtualStock === 0 ? "not-allowed" : "pointer"
                   }}
+                  onClick={() => addToCart(product)}
                 >
                   <div
                     style={{
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "6px",
+                      flexDirection: "column",
+                      flexGrow: 1,
                     }}
                   >
-                    <span
+                    <div
                       style={{
-                        fontSize: "0.65rem",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        color: "var(--color-primary)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: "6px",
                       }}
                     >
-                      {product.category}
-                    </span>
-                    <span
+                      <span
+                        style={{
+                          fontSize: "0.65rem",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          color: "var(--color-primary)",
+                        }}
+                      >
+                        {product.category}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.65rem",
+                          color: "var(--color-text-secondary)",
+                        }}
+                      >
+                        {product.serialNumber}
+                      </span>
+                    </div>
+
+                    {/* Responsive image wrapper */}
+                    <div
                       style={{
-                        fontSize: "0.65rem",
-                        color: "var(--color-text-secondary)",
+                        height: "120px",
+                        width: "100%",
+                        overflow: "hidden",
+                        borderRadius: "8px",
+                        marginBottom: "8px",
+                        background: "var(--color-bg)",
+                        position: "relative",
                       }}
                     >
-                      {product.serialNumber}
+                      <img
+                        src={getProductImageUrl(product)}
+                        alt={product.name}
+                        onError={(e) => handleImageError(e, product.category)}
+                        className="catalog-product-image"
+                        style={{
+                          height: "100%",
+                          width: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+
+                    <h4
+                      style={{
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        color: "var(--color-text-primary)",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      {product.name}
+                    </h4>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                        color: virtualStock === 0 ? "var(--color-danger)" : virtualStock < 10 ? "var(--color-warning)" : "var(--color-text-secondary)",
+                        display: "block",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {virtualStock === 0 ? "Out of Stock" : `Stock: ${virtualStock}`}
                     </span>
                   </div>
-
-                  {/* Responsive image wrapper */}
                   <div
                     style={{
-                      height: "120px",
-                      width: "100%",
-                      overflow: "hidden",
-                      borderRadius: "8px",
-                      marginBottom: "8px",
-                      background: "var(--color-bg)",
-                      position: "relative",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginTop: "auto",
+                      paddingTop: "6px",
                     }}
                   >
-                    <img
-                      src={getProductImageUrl(product)}
-                      alt={product.name}
-                      onError={(e) => handleImageError(e, product.category)}
-                      className="catalog-product-image"
+                    <span
                       style={{
-                        height: "100%",
-                        width: "100%",
-                        objectFit: "cover",
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        color: "var(--color-text-primary)",
                       }}
-                    />
+                    >
+                      ₹{product.price.toFixed(2)}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        backgroundColor: virtualStock === 0 ? "var(--color-border)" : "var(--color-primary)",
+                        color: virtualStock === 0 ? "var(--color-text-secondary)" : "#FFFFFF",
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        fontWeight: 600,
+                        boxShadow: virtualStock === 0 ? "none" : "0 2px 4px rgba(74, 144, 226, 0.25)",
+                        transition: "all var(--transition-fast) ease",
+                      }}
+                    >
+                      {virtualStock === 0 ? "Out" : "Add +"}
+                    </span>
                   </div>
-
-                  <h4
-                    style={{
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      color: "var(--color-text-primary)",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {product.name}
-                  </h4>
-                  <span
-                    style={{
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      color: product.stock === 0 ? "var(--color-danger)" : product.stock < 10 ? "var(--color-warning)" : "var(--color-text-secondary)",
-                      display: "block",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {product.stock === 0 ? "Out of Stock" : `Stock: ${product.stock}`}
-                  </span>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: "auto",
-                    paddingTop: "6px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      color: "var(--color-text-primary)",
-                    }}
-                  >
-                    ₹{product.price.toFixed(2)}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.75rem",
-                      backgroundColor: product.stock === 0 ? "var(--color-border)" : "var(--color-primary)",
-                      color: product.stock === 0 ? "var(--color-text-secondary)" : "#FFFFFF",
-                      padding: "4px 10px",
-                      borderRadius: "6px",
-                      fontWeight: 600,
-                      boxShadow: product.stock === 0 ? "none" : "0 2px 4px rgba(74, 144, 226, 0.25)",
-                      transition: "all var(--transition-fast) ease",
-                    }}
-                  >
-                    {product.stock === 0 ? "Out" : "Add +"}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -484,7 +588,7 @@ const CreateBill = ({ billType = "retail" }) => {
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <ShoppingCart size={20} color="var(--color-primary)" />
-            <span>Billing Cart</span>
+            <span>{isEditMode ? `Edit Invoice: ${invoiceNumber}` : "Billing Cart"}</span>
           </div>
           {cart.length > 0 && (
             <button
@@ -669,7 +773,7 @@ const CreateBill = ({ billType = "retail" }) => {
               fontWeight: 600,
             }}
           >
-            {generating ? "Generating Invoice..." : "Generate & Print Invoice"}
+            {generating ? (isEditMode ? "Updating Invoice..." : "Generating Invoice...") : (isEditMode ? "Save Changes" : "Generate & Print Invoice")}
           </button>
         </div>
       </div>
@@ -677,8 +781,8 @@ const CreateBill = ({ billType = "retail" }) => {
       {/* Bill Receipt Preview Modal on success */}
       <Modal
         isOpen={isInvoiceOpen}
-        onClose={() => setIsInvoiceOpen(false)}
-        title="Invoice Generated Successfully"
+        onClose={handleCloseModal}
+        title={isEditMode ? "Invoice Updated Successfully" : "Invoice Generated Successfully"}
         size="large"
         footer={
           <div
@@ -694,10 +798,10 @@ const CreateBill = ({ billType = "retail" }) => {
               Print Invoice Receipt
             </button>
             <button
-              onClick={() => setIsInvoiceOpen(false)}
+              onClick={handleCloseModal}
               className="btn btn-secondary"
             >
-              Close POS Terminal
+              {isEditMode ? "Back to Invoices" : "Close POS Terminal"}
             </button>
           </div>
         }

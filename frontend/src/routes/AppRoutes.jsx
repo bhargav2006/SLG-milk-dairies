@@ -113,6 +113,14 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="/bills/edit/:invoiceNumber"
+            element={
+              <MainLayout>
+                <CreateBill isEditMode={true} />
+              </MainLayout>
+            }
+          />
+          <Route
             path="/users"
             element={
               <MainLayout>

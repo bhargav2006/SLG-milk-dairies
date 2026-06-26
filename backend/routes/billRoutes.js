@@ -8,6 +8,8 @@ const {
   getBillById,
   getBillByCustomerNumber,
   getBillByAccountantId,
+  updateBill,
+  deleteBill,
 } = require("../controllers/billController");
 
 // Create a new bill (admin and accountant)
@@ -24,5 +26,11 @@ router.get("/accountant/:accountantId", protect, getBillByAccountantId);
 
 // Get a single bill by ID (admin and accountant)
 router.get("/:invoiceNumber", getBillById);
+
+// Update a bill (admin only)
+router.put("/:invoiceNumber", protect, admin, updateBill);
+
+// Delete a bill (admin only)
+router.delete("/:invoiceNumber", protect, admin, deleteBill);
 
 module.exports = router;

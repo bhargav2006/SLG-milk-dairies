@@ -270,3 +270,133 @@ exports.getBillByAccountantId = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Update a bill
+exports.updateBill = async (req, res) => {
+  try {
+    const { customerNumber, customerMail, products, paymentMethod, billType } = req.body;
+    
+    // Basic validation
+    if (billType && billType !== "retail" && billType !== "wholesale") {
+      return res.status(400).json({
+        message: "Invalid bill type. Must be 'retail' or 'wholesale'.",
+      });
+    }
+
+    if (
+      customerNumber &&
+      (customerNumber.length !== 10 || !/^\d{10}$/.test(customerNumber))
+    ) {
+      return res.status(400).json({
+        message: "Customer number must be 10 digits",
+      });
+    }
+
+    const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber });
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+
+    const originalProducts = bill.products;
+    const finalBillType = billType || bill.billType;
+
+    // Temporarily restore stock for original products
+    for (const item of originalProducts) {
+      if (item.product) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity },
+        });
+      }
+    }
+
+    const billItems = [];
+    let totalAmount = 0;
+
+    try {
+      const targetProducts = products || originalProducts;
+
+      for (const item of targetProducts) {
+        const product = await Product.findById(item.product);
+        if (!product) {
+          throw new Error(`Product not found: ${item.product}`);
+        }
+        const prodType = product.productType || "retail";
+        if (prodType !== finalBillType) {
+          throw new Error(`Product '${product.name}' is of type '${prodType}' and cannot be added to a '${finalBillType}' bill.`);
+        }
+        // Check stock availability
+        if (product.stock !== undefined && product.stock < item.quantity) {
+          throw new Error(`Insufficient stock for product '${product.name}'. Available: ${product.stock}, Requested: ${item.quantity}`);
+        }
+        const lineTotal = product.price * item.quantity;
+        totalAmount += lineTotal;
+        billItems.push({
+          product: product._id,
+          quantity: item.quantity,
+        });
+      }
+
+      // Deduct the new stock
+      for (const item of billItems) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: -item.quantity },
+        });
+      }
+
+      // Update bill document fields
+      if (customerNumber !== undefined) bill.customerNumber = customerNumber;
+      if (customerMail !== undefined) bill.customerMail = customerMail || null;
+      if (paymentMethod !== undefined) bill.paymentMethod = paymentMethod;
+      bill.billType = finalBillType;
+      bill.products = billItems;
+      bill.totalAmount = totalAmount;
+
+      await bill.save();
+
+      const populatedBill = await Bill.findById(bill._id)
+        .populate("accountant", "name")
+        .populate("products.product", "name price productType");
+
+      res.json(populatedBill);
+    } catch (error) {
+      // Revert stock to original values by re-deducting them
+      for (const item of originalProducts) {
+        if (item.product) {
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { stock: -item.quantity },
+          });
+        }
+      }
+      return res.status(400).json({ message: error.message });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete a bill
+exports.deleteBill = async (req, res) => {
+  try {
+    const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber });
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+
+    // Restore stock for all products in this bill
+    for (const item of bill.products) {
+      if (item.product) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity },
+        });
+      }
+    }
+
+    await Bill.deleteOne({ invoiceNumber: req.params.invoiceNumber });
+    res.json({ message: "Bill deleted successfully and stock restored" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+

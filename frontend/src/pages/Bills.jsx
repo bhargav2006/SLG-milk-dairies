@@ -21,6 +21,8 @@ import {
   User,
   Users,
   History,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 const Bills = () => {
@@ -300,6 +302,20 @@ const Bills = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDeleteBill = async (bill) => {
+    if (window.confirm(`Are you sure you want to delete invoice ${bill.invoiceNumber}? This will restore the stock levels for the items in this bill.`)) {
+      try {
+        await billService.deleteBill(bill.invoiceNumber);
+        showSuccess(`Invoice ${bill.invoiceNumber} deleted successfully.`);
+        loadBills(); // Re-fetch the bills list
+      } catch (err) {
+        console.error(err);
+        const msg = err.response?.data?.message || "Failed to delete invoice.";
+        showError(msg);
+      }
+    }
   };
 
   return (
@@ -1147,13 +1163,35 @@ const Bills = () => {
                       })}
                     </td>
                     <td data-label="Actions" style={{ textAlign: "center" }}>
-                      <button
-                        onClick={() => handleViewBill(bill)}
-                        className="btn btn-ghost btn-sm"
-                        title="View details"
-                      >
-                        <Eye size={16} />
-                      </button>
+                      <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+                        <button
+                          onClick={() => handleViewBill(bill)}
+                          className="btn btn-ghost btn-sm"
+                          title="View details"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        {user.role === "admin" && (
+                          <>
+                            <Link
+                              to={`/bills/edit/${bill.invoiceNumber}`}
+                              className="btn btn-ghost btn-sm"
+                              title="Edit invoice"
+                              style={{ color: "var(--color-primary)" }}
+                            >
+                              <Edit size={16} />
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteBill(bill)}
+                              className="btn btn-ghost btn-sm"
+                              title="Delete invoice"
+                              style={{ color: "var(--color-danger, #ef4444)" }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
