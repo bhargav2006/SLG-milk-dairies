@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const sendEmail = require("../utils/sendEmail");
 const sendWhatsapp = require("../utils/sendWhatsapp");
 const Counter = require("../models/Counter");
+const CustomerRecord = require("../models/CustomerRecord");
 
 // Create a new bill
 exports.createBill = async (req, res) => {
@@ -91,6 +92,56 @@ exports.createBill = async (req, res) => {
       billType,
     });
     await bill.save();
+    let customer = null;
+    if (customerNumber) {
+      customer = await CustomerRecord.findOne({
+        customerPhone: customerNumber,
+      });
+
+      if (!customer) {
+        customer = await CustomerRecord.create({
+          customerPhone: customerNumber,
+          customerEmail: customerMail,
+          customerName: "Anonymous",
+        });
+      }
+
+      // Update customer purchase history and loyalty points
+      customer.productsHistory.push(
+        ...products.map((item) => ({
+          product: item.product,
+          quantity: item.quantity,
+          invoiceNumber,
+        })),
+      );
+      customer.loyaltyPoints += Math.floor(totalAmount / 100);
+      if (customerMail && !customer.customerEmail) {
+        customer.customerEmail = customerMail;
+      }
+      await customer.save();
+    } else if (customerMail) {
+      customer = await CustomerRecord.findOne({
+        customerEmail: customerMail,
+      });
+
+      if (!customer) {
+        customer = await CustomerRecord.create({
+          customerEmail: customerMail,
+          customerName: "Anonymous",
+        });
+      }
+
+      // Update customer purchase history and loyalty points
+      customer.productsHistory.push(
+        ...products.map((item) => ({
+          product: item.product,
+          quantity: item.quantity,
+          invoiceNumber,
+        })),
+      );
+      customer.loyaltyPoints += Math.floor(totalAmount / 100);
+      await customer.save();
+    }
 
     // Deduct stock for each product
     for (const item of products) {
@@ -274,8 +325,9 @@ exports.getBillByAccountantId = async (req, res) => {
 // Update a bill
 exports.updateBill = async (req, res) => {
   try {
-    const { customerNumber, customerMail, products, paymentMethod, billType } = req.body;
-    
+    const { customerNumber, customerMail, products, paymentMethod, billType } =
+      req.body;
+
     // Basic validation
     if (billType && billType !== "retail" && billType !== "wholesale") {
       return res.status(400).json({
@@ -292,7 +344,9 @@ exports.updateBill = async (req, res) => {
       });
     }
 
-    const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber });
+    const bill = await Bill.findOne({
+      invoiceNumber: req.params.invoiceNumber,
+    });
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
@@ -322,11 +376,15 @@ exports.updateBill = async (req, res) => {
         }
         const prodType = product.productType || "retail";
         if (prodType !== finalBillType) {
-          throw new Error(`Product '${product.name}' is of type '${prodType}' and cannot be added to a '${finalBillType}' bill.`);
+          throw new Error(
+            `Product '${product.name}' is of type '${prodType}' and cannot be added to a '${finalBillType}' bill.`,
+          );
         }
         // Check stock availability
         if (product.stock !== undefined && product.stock < item.quantity) {
-          throw new Error(`Insufficient stock for product '${product.name}'. Available: ${product.stock}, Requested: ${item.quantity}`);
+          throw new Error(
+            `Insufficient stock for product '${product.name}'. Available: ${product.stock}, Requested: ${item.quantity}`,
+          );
         }
         const lineTotal = product.price * item.quantity;
         totalAmount += lineTotal;
@@ -343,7 +401,27 @@ exports.updateBill = async (req, res) => {
         });
       }
 
+      // 1. Revert original customer points and history from the original customer record
+      if (bill.customerNumber || bill.customerMail) {
+        const query = bill.customerNumber 
+          ? { customerPhone: bill.customerNumber }
+          : { customerEmail: bill.customerMail };
+          
+        const originalCustomer = await CustomerRecord.findOne(query);
+        if (originalCustomer) {
+          originalCustomer.productsHistory = originalCustomer.productsHistory.filter(
+            (item) => item.invoiceNumber !== bill.invoiceNumber
+          );
+          const pointsToDeduct = Math.floor(bill.totalAmount / 100);
+          originalCustomer.loyaltyPoints = Math.max(0, originalCustomer.loyaltyPoints - pointsToDeduct);
+          await originalCustomer.save();
+        }
+      }
+
       // Update bill document fields
+      const newCustomerNumber = customerNumber !== undefined ? customerNumber : bill.customerNumber;
+      const newCustomerMail = customerMail !== undefined ? customerMail : bill.customerMail;
+
       if (customerNumber !== undefined) bill.customerNumber = customerNumber;
       if (customerMail !== undefined) bill.customerMail = customerMail || null;
       if (paymentMethod !== undefined) bill.paymentMethod = paymentMethod;
@@ -352,6 +430,47 @@ exports.updateBill = async (req, res) => {
       bill.totalAmount = totalAmount;
 
       await bill.save();
+
+      // 2. Add points and history to the new customer record
+      if (newCustomerNumber) {
+        let newCustomer = await CustomerRecord.findOne({ customerPhone: newCustomerNumber });
+        if (!newCustomer) {
+          newCustomer = await CustomerRecord.create({
+            customerPhone: newCustomerNumber,
+            customerEmail: newCustomerMail || null,
+            customerName: "Anonymous",
+          });
+        }
+        newCustomer.productsHistory.push(
+          ...billItems.map((item) => ({
+            product: item.product,
+            quantity: item.quantity,
+            invoiceNumber: bill.invoiceNumber,
+          }))
+        );
+        newCustomer.loyaltyPoints += Math.floor(totalAmount / 100);
+        if (newCustomerMail && !newCustomer.customerEmail) {
+          newCustomer.customerEmail = newCustomerMail;
+        }
+        await newCustomer.save();
+      } else if (newCustomerMail) {
+        let newCustomer = await CustomerRecord.findOne({ customerEmail: newCustomerMail });
+        if (!newCustomer) {
+          newCustomer = await CustomerRecord.create({
+            customerEmail: newCustomerMail,
+            customerName: "Anonymous",
+          });
+        }
+        newCustomer.productsHistory.push(
+          ...billItems.map((item) => ({
+            product: item.product,
+            quantity: item.quantity,
+            invoiceNumber: bill.invoiceNumber,
+          }))
+        );
+        newCustomer.loyaltyPoints += Math.floor(totalAmount / 100);
+        await newCustomer.save();
+      }
 
       const populatedBill = await Bill.findById(bill._id)
         .populate("accountant", "name")
@@ -378,7 +497,9 @@ exports.updateBill = async (req, res) => {
 // Delete a bill
 exports.deleteBill = async (req, res) => {
   try {
-    const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber });
+    const bill = await Bill.findOne({
+      invoiceNumber: req.params.invoiceNumber,
+    });
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
@@ -392,6 +513,23 @@ exports.deleteBill = async (req, res) => {
       }
     }
 
+    // Revert products history and loyalty points from the customer record
+    if (bill.customerNumber || bill.customerMail) {
+      const query = bill.customerNumber 
+        ? { customerPhone: bill.customerNumber }
+        : { customerEmail: bill.customerMail };
+        
+      const customer = await CustomerRecord.findOne(query);
+      if (customer) {
+        customer.productsHistory = customer.productsHistory.filter(
+          (item) => item.invoiceNumber !== bill.invoiceNumber
+        );
+        const pointsToDeduct = Math.floor(bill.totalAmount / 100);
+        customer.loyaltyPoints = Math.max(0, customer.loyaltyPoints - pointsToDeduct);
+        await customer.save();
+      }
+    }
+
     await Bill.deleteOne({ invoiceNumber: req.params.invoiceNumber });
     res.json({ message: "Bill deleted successfully and stock restored" });
   } catch (error) {
@@ -399,4 +537,3 @@ exports.deleteBill = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-

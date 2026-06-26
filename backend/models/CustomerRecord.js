@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const BillSchema = new mongoose.Schema(
+const CustomerRecordSchema = new mongoose.Schema(
   {
     customerName: {
       type: String,
@@ -8,35 +8,46 @@ const BillSchema = new mongoose.Schema(
     },
     customerPhone: {
       type: String,
-      default: "Anonymous",
+      default: null,
+    },
+    customerEmail: {
+      type: String,
+      default: null,
     },
     optOut: {
       type: Boolean,
       default: false,
     },
-    // loyalityPoints: {
-    //   type: Number,
-    //   default: 0,
-    // },
-    // productsHistory: [
-    //   {
-    //     product: {
-    //       type: mongoose.Schema.Types.ObjectId,
-    //       ref: "Product",
-    //       required: true,
-    //     },
-    //     quantity: {
-    //       type: Number,
-    //       required: true,
-    //     },
-    //   },
-    // ],
+    loyaltyPoints: {
+      type: Number,
+      default: 0,
+    },
+    productsHistory: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        quantity: {
+          type: Number,
+        },
+        invoiceNumber: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
   },
 );
 
-const CustomerRecord = mongoose.model("CustomerRecord", BillSchema);
+// Define partial unique index for customerPhone so multiple null/undefined values can coexist.
+CustomerRecordSchema.index(
+  { customerPhone: 1 },
+  { unique: true, partialFilterExpression: { customerPhone: { $type: "string" } } }
+);
+
+const CustomerRecord = mongoose.model("CustomerRecord", CustomerRecordSchema);
 
 module.exports = CustomerRecord;

@@ -21,28 +21,30 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
       return;
     }
 
-    const formattedCustomer = customerNumber.startsWith("91")
-      ? customerNumber
-      : `91${customerNumber}`;
+    const tenDigitPhone = customerNumber.startsWith("91") && customerNumber.length === 12
+      ? customerNumber.substring(2)
+      : customerNumber;
+
+    const formattedCustomer = `91${tenDigitPhone}`;
 
     const customer = await CustomerRecord.findOne({
-      customerPhone: formattedCustomer,
+      customerPhone: tenDigitPhone,
     });
     console.log("Customer OptOut Status:", customer?.optOut);
 
     if (customer?.optOut) {
       console.log(
-        `CustomerNumber:${customerNumber} opted out... not sending message`,
+        `CustomerNumber:${tenDigitPhone} opted out... not sending message`,
       );
       return;
     } else {
       await CustomerRecord.findOneAndUpdate(
-        { customerPhone: formattedCustomer },
+        { customerPhone: tenDigitPhone },
         { optOut: false },
         { upsert: true },
       );
       console.log(
-        `CustomerNumber:${customerNumber} opted in... sending message`,
+        `CustomerNumber:${tenDigitPhone} opted in... sending message`,
       );
     }
 
