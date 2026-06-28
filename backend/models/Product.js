@@ -24,6 +24,9 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    price: {
+      type: Number,
+    },
     productType: {
       type: String,
       enum: ["Retail", "Wholesale", "Both"],
@@ -45,6 +48,17 @@ const ProductSchema = new mongoose.Schema(
     timestamps: true, // adds createdAt and updatedAt automatically
   },
 );
+
+ProductSchema.post("init", function (doc) {
+  if (doc.price && doc.price > 0) {
+    if (!doc.retailPrice || doc.retailPrice === 0) {
+      doc.retailPrice = doc.price;
+    }
+    if (!doc.wholesalePrice || doc.wholesalePrice === 0) {
+      doc.wholesalePrice = doc.price;
+    }
+  }
+});
 
 const Product = mongoose.model("Product", ProductSchema);
 
