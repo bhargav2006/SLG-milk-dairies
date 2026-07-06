@@ -5,7 +5,7 @@ import MainLayout from "../layouts/MainLayout";
 
 // Import pages
 import Login from "../pages/Login";
-import Register from "../pages/Register";
+// import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Products from "../pages/Products";
 import AddEditProduct from "../pages/AddEditProduct";
@@ -26,7 +26,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Pages */}
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* <Route path="/register" element={<Register />} /> */}
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/bill/:invoiceNumber" element={<BillReceiptStandalone />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -36,7 +36,8 @@ const AppRoutes = () => {
       <Route path="/services" element={<LandingPage />} />
 
       {/* Protected Routes (Admin + Accountant) */}
-      <Route element={<ProtectedRoute allowedRoles={["admin", "accountant"]} />}>
+      <Route
+        element={<ProtectedRoute allowedRoles={["admin", "accountant"]} />}>
         <Route
           path="/dashboard"
           element={
