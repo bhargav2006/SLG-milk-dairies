@@ -2392,6 +2392,7 @@
   .landing-page-root .lp-storefront-grid,
   .landing-page-root .lp-storefront-grid-loading {
     grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile screens! */
+    gap: 12px;
   }
 
   .landing-page-root .lp-floating-cart-bar {
@@ -2445,6 +2446,30 @@
 
   .landing-page-root .lp-p-modal-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing-page-root .lp-storefront-grid,
+  .landing-page-root .lp-storefront-grid-loading {
+    gap: 10px;
+  }
+
+  .landing-page-root .lp-p-details {
+    padding: 10px;
+  }
+
+  .landing-page-root .lp-product-card-title {
+    font-size: 0.8rem;
+  }
+
+  .landing-page-root .lp-stock-status,
+  .landing-page-root .lp-product-size,
+  .landing-page-root .lp-product-rating {
+    font-size: 0.7rem;
+  }
+
+  .landing-page-root .lp-btn-store-add,
+  .landing-page-root .lp-quantity-selector {
+    min-height: 36px;
   }
 
   .landing-page-root .lp-p-modal-image-box {
