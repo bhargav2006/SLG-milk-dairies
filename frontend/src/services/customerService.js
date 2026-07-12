@@ -9,13 +9,19 @@ const customerService = {
 
   // Send login OTP to customer mobile number
   sendOtp: async (customerPhone) => {
-    const response = await api.post("/api/customer/send-otp", { customerPhone });
+    const response = await api.post("/api/customer/send-otp", {
+      customerPhone,
+    });
     return response.data;
   },
 
   // Verify OTP and sign in customer
-  verifyOtp: async (customerPhone, otp) => {
-    const response = await api.post("/api/customer/verify-otp", { customerPhone, otp });
+  verifyOtp: async (customerPhone, customerName, otp) => {
+    const response = await api.post("/api/customer/verify-otp", {
+      customerPhone,
+      customerName,
+      otp,
+    });
     return response.data;
   },
 
@@ -39,9 +45,11 @@ const customerService = {
 
   // Cancel an order (if Placed)
   cancelOrder: async (orderNumber, reason) => {
-    const response = await api.put(`/api/orders/${orderNumber}/cancel`, { reason });
+    const response = await api.put(`/api/orders/${orderNumber}/cancel`, {
+      reason,
+    });
     return response.data;
-  }
+  },
 };
 
 export default customerService;

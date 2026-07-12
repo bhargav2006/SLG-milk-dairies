@@ -58,7 +58,7 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   try {
-    let { customerPhone, otp } = req.body;
+    let { customerPhone, customerName, otp } = req.body;
 
     if (!customerPhone || !otp) {
       return res.status(400).json({
@@ -81,7 +81,6 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    // Check Expiry
     if (otpRecord.expiresAt < new Date()) {
       await otpRecord.deleteOne();
 
@@ -90,28 +89,42 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    // Find customer
+    // -----------------------------
+    // Find Existing Customer
+    // -----------------------------
     let customer = await Customer.findOne({
       customerPhone,
     });
 
-    // First Time Login
     if (!customer) {
+      // First Login
       customer = await Customer.create({
         customerPhone,
+        customerName:
+          customerName && customerName.trim()
+            ? customerName.trim()
+            : "Anonymous",
       });
+    } else {
+      // Update name only if customer still has default name
+      if (
+        customerName &&
+        customerName.trim() &&
+        (!customer.customerName || customer.customerName === "Anonymous")
+      ) {
+        customer.customerName = customerName.trim();
+        await customer.save();
+      }
     }
 
-    // Delete OTP
     await otpRecord.deleteOne();
 
-    // Generate JWT
     const token = generateToken({
       id: customer._id,
       role: "customer",
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "OTP verified successfully",
       token,
       customer,
@@ -119,7 +132,7 @@ exports.verifyOtp = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "OTP verification failed",
     });
   }

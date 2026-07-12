@@ -83,7 +83,12 @@ const CheckoutDrawer = ({
         <div className="lp-drawer-header">
           <button
             type="button"
-            onClick={onGoBackToCart}
+            onClick={() => {
+              console.log(
+                "[Checkout Debug] checkout back button clicked -> onGoBackToCart",
+              );
+              onGoBackToCart();
+            }}
             className="checkout-back-btn"
             aria-label="Go back to cart">
             <ArrowLeft size={16} />
@@ -91,7 +96,12 @@ const CheckoutDrawer = ({
           </button>
           <h3>Secure Checkout</h3>
           <button
-            onClick={onClose}
+            onClick={() => {
+              console.log(
+                "[Checkout Debug] checkout close button clicked -> onClose",
+              );
+              onClose();
+            }}
             className="close-drawer-btn"
             aria-label="Close checkout">
             <X size={20} />

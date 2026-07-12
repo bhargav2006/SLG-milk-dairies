@@ -95,6 +95,7 @@ const LandingPage = () => {
 
   // Placed Order Receipt Modal State
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [checkoutSessionKey, setCheckoutSessionKey] = useState(0);
 
   useEffect(() => {
     if (placedOrder && cart.length > 0) {
@@ -180,12 +181,8 @@ const LandingPage = () => {
               const defaultIdx = savedAddrs.findIndex((a) => a.isDefault);
               setSelectedAddressIndex(defaultIdx !== -1 ? defaultIdx : 0);
             }
-            if (
-              data.customer.customerName &&
-              data.customer.customerName !== "Anonymous"
-            ) {
-              setCustomerName(data.customer.customerName);
-            }
+
+            setCustomerName(data.customer.customerName || "");
           }
         } catch (err) {
           console.error("Failed to fetch customer profile:", err);
@@ -294,6 +291,11 @@ const LandingPage = () => {
   // --- Customer Login/OTP Flow ---
   const handleSendOtp = async (e) => {
     e.preventDefault();
+    console.log("[Checkout Debug] handleSendOtp executed", {
+      button: "Verify Mobile via OTP",
+      customerName,
+      customerPhone,
+    });
     if (
       !customerPhone ||
       customerPhone.length !== 10 ||
@@ -318,6 +320,11 @@ const LandingPage = () => {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
+    console.log("[Checkout Debug] handleVerifyOtp executed", {
+      button: "Confirm OTP & Log In",
+      customerPhone,
+      otp,
+    });
     if (!otp || otp.length !== 6 || !/^\d+$/.test(otp)) {
       showError("Please enter the 6-digit OTP");
       return;
@@ -325,7 +332,11 @@ const LandingPage = () => {
 
     try {
       setOtpVerifying(true);
-      const data = await customerService.verifyOtp(customerPhone, otp);
+      const data = await customerService.verifyOtp(
+        customerPhone,
+        customerName,
+        otp,
+      );
       if (data && data.token) {
         localStorage.setItem("customer_token", data.token);
         localStorage.setItem("customer_info", JSON.stringify(data.customer));
@@ -335,12 +346,9 @@ const LandingPage = () => {
         if (data.customer.addresses?.length > 0) {
           setSelectedAddressIndex(0);
         }
-        if (
-          data.customer.customerName &&
-          data.customer.customerName !== "Anonymous"
-        ) {
-          setCustomerName(data.customer.customerName);
-        }
+
+        setCustomerName(data.customer.customerName || "");
+
         showSuccess("Authenticated successfully!");
       }
     } catch (err) {
@@ -361,6 +369,7 @@ const LandingPage = () => {
     setAddresses([]);
     setSelectedAddressIndex(-1);
     setCustomerPhone("");
+    setCustomerName("");
     setOtp("");
     setOtpSent(false);
     showInfo("Logged out of customer session.");
@@ -369,13 +378,26 @@ const LandingPage = () => {
   // --- Place Order Logic ---
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+    console.log("[Checkout Debug] handlePlaceOrder executed", {
+      customerToken,
+      placedOrder,
+      selectedAddressIndex,
+      addresses,
+      newAddress,
+      deliveryNotes,
+      isSubmittingOrder,
+      button: "Confirm COD Order",
+      cartItems: cart.length,
+    });
     if (cart.length === 0) {
       showError("Your cart is empty.");
+      console.log("[Checkout Debug] handlePlaceOrder aborted: cart is empty");
       return;
     }
 
     if (!customerName.trim()) {
       showError("Please enter your name.");
+      console.log("[Checkout Debug] handlePlaceOrder aborted: name missing");
       return;
     }
 
@@ -385,13 +407,19 @@ const LandingPage = () => {
     } else {
       if (!newAddress.street || !newAddress.city || !newAddress.pincode) {
         showError("Please fill in all address details (Street, City, Pincode)");
+        console.log(
+          "[Checkout Debug] handlePlaceOrder aborted: incomplete address",
+        );
         return;
       }
       addressPayload = newAddress;
     }
 
+    console.log("step 1");
     try {
+      console.log("step 2");
       setIsSubmittingOrder(true);
+      console.log("step 3");
       const orderPayload = {
         products: cart.map((item) => ({
           product: item.product._id,
@@ -402,12 +430,18 @@ const LandingPage = () => {
         notes: deliveryNotes || "",
       };
 
+      console.log("step 4", orderPayload);
       const response = await customerService.placeOrder(orderPayload);
+      console.log("step 5", response);
       if (response && response.order) {
+        console.log("step 6", response.order);
         setPlacedOrder(response.order);
+        console.log("step 7");
         setCart([]); // Clear cart
+        console.log("step 8");
         setIsCartOpen(false);
         showSuccess("Order placed successfully!");
+        console.log("step 9");
 
         // Refresh customer profile to sync addresses
         const profileData = await customerService.getProfile();
@@ -418,12 +452,15 @@ const LandingPage = () => {
             JSON.stringify(profileData.customer),
           );
           setAddresses(profileData.customer.addresses || []);
+          setCustomerName(profileData.customer.customerName || "");
         }
       }
+      console.log("step 10");
     } catch (err) {
       console.error("Order error:", err);
       showError(err.response?.data?.message || "Failed to place order.");
     } finally {
+      console.log("step finally");
       setIsSubmittingOrder(false);
     }
   };
@@ -490,6 +527,17 @@ const LandingPage = () => {
   });
 
   const handleProceedToCheckout = () => {
+    console.log("[Checkout Debug] handleProceedToCheckout executed", {
+      isSubmittingOrder,
+      addresses,
+      selectedAddressIndex,
+      cart,
+      button: "Proceed to Checkout",
+      cartSubtotal,
+      cartCount,
+      customerToken: !!customerToken,
+      placedOrder: !!placedOrder,
+    });
     if (cartSubtotal < CONFIG.MIN_ORDER_AMOUNT) {
       showError(
         `Minimum order amount of ₹${CONFIG.MIN_ORDER_AMOUNT} required.`,
@@ -501,7 +549,12 @@ const LandingPage = () => {
       setPlacedOrder(null);
     }
 
+    setOtp("");
+    setOtpSent(false);
     setIsCartOpen(false);
+    setIsCheckoutOpen(false);
+    setCheckoutSessionKey((current) => current + 1);
+
     setIsCheckoutOpen(true);
   };
 
@@ -602,7 +655,12 @@ const LandingPage = () => {
             <div className="lp-drawer-header">
               <h3>Shopping Cart</h3>
               <button
-                onClick={() => setIsCartOpen(false)}
+                onClick={() => {
+                  console.log(
+                    "[Checkout Debug] cart drawer close clicked -> setIsCartOpen(false)",
+                  );
+                  setIsCartOpen(false);
+                }}
                 className="close-drawer-btn">
                 <X size={20} />
               </button>
@@ -718,9 +776,18 @@ const LandingPage = () => {
 
       {/* --- CHECKOUT & IDENTITY DRAWER --- */}
       <CheckoutDrawer
+        key={checkoutSessionKey}
         isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
+        onClose={() => {
+          console.log(
+            "[Checkout Debug] checkout drawer close -> setIsCheckoutOpen(false)",
+          );
+          setIsCheckoutOpen(false);
+        }}
         onGoBackToCart={() => {
+          console.log(
+            "[Checkout Debug] onGoBackToCart executed -> return to cart drawer",
+          );
           setIsCheckoutOpen(false);
           setIsCartOpen(true);
         }}
