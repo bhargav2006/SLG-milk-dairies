@@ -28,6 +28,7 @@ const allowedOrigins = [
   "http://20.2.139.220",
   "https://slgmilkdairys.de",
   "https://www.slgmilkdairys.de",
+  "https://staging.slgmilkdairys.de",
   process.env.CORS_ORIGIN,
 ];
 
