@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, ArrowRight, MapPin, Info, CheckCircle, Check } from "lucide-react";
+import {
+  X,
+  ArrowRight,
+  ArrowLeft,
+  MapPin,
+  Info,
+  CheckCircle,
+  Check,
+} from "lucide-react";
 
 const CheckoutDrawer = ({
   isOpen,
@@ -47,7 +55,10 @@ const CheckoutDrawer = ({
       return 2; // Verification
     }
     // Authenticated, check address selection
-    if (selectedAddressIndex === -1 && (!newAddress.street || !newAddress.pincode)) {
+    if (
+      selectedAddressIndex === -1 &&
+      (!newAddress.street || !newAddress.pincode)
+    ) {
       return 3; // Delivery selection
     }
     return 4; // Confirm
@@ -64,11 +75,25 @@ const CheckoutDrawer = ({
   ];
 
   return (
-    <div className="lp-modal-overlay show" onClick={onClose} style={{ zIndex: 1050 }}>
+    <div
+      className="lp-modal-overlay show"
+      onClick={onClose}
+      style={{ zIndex: 1050 }}>
       <div className="lp-checkout-drawer" onClick={(e) => e.stopPropagation()}>
         <div className="lp-drawer-header">
+          <button
+            type="button"
+            onClick={onGoBackToCart}
+            className="checkout-back-btn"
+            aria-label="Go back to cart">
+            <ArrowLeft size={16} />
+            <span>Back to Cart</span>
+          </button>
           <h3>Secure Checkout</h3>
-          <button onClick={onClose} className="close-drawer-btn" aria-label="Close checkout">
+          <button
+            onClick={onClose}
+            className="close-drawer-btn"
+            aria-label="Close checkout">
             <X size={20} />
           </button>
         </div>
@@ -80,8 +105,7 @@ const CheckoutDrawer = ({
               key={st.index}
               className={`lp-step-node ${activeStep === st.index ? "active" : ""} ${
                 activeStep > st.index ? "completed" : ""
-              }`}
-            >
+              }`}>
               <div className="node-circle">
                 {activeStep > st.index ? <Check size={12} /> : st.index}
               </div>
@@ -99,7 +123,9 @@ const CheckoutDrawer = ({
               <CheckCircle size={56} className="success-icon" />
             </div>
             <h4>Order Placed Successfully!</h4>
-            <p className="success-sub">Estimated Delivery Time: <strong>30–45 Minutes</strong></p>
+            <p className="success-sub">
+              Estimated Delivery Time: <strong>30–45 Minutes</strong>
+            </p>
 
             <div className="success-receipt-details">
               <div className="receipt-row">
@@ -117,8 +143,11 @@ const CheckoutDrawer = ({
               <div className="receipt-address">
                 <h5>Delivering To:</h5>
                 <p>
-                  {placedOrder.address.houseNo ? `${placedOrder.address.houseNo}, ` : ""}
-                  {placedOrder.address.street}, {placedOrder.address.city} - {placedOrder.address.pincode}
+                  {placedOrder.address.houseNo
+                    ? `${placedOrder.address.houseNo}, `
+                    : ""}
+                  {placedOrder.address.street}, {placedOrder.address.city} -{" "}
+                  {placedOrder.address.pincode}
                 </p>
               </div>
             </div>
@@ -130,8 +159,7 @@ const CheckoutDrawer = ({
                   onClose();
                   navigate("/track-orders");
                 }}
-                className="lp-btn lp-btn-primary lp-btn-block"
-              >
+                className="lp-btn lp-btn-primary lp-btn-block">
                 Track Order
               </button>
               <button
@@ -139,8 +167,7 @@ const CheckoutDrawer = ({
                   setPlacedOrder(null);
                   onClose();
                 }}
-                className="lp-btn lp-btn-secondary lp-btn-block"
-              >
+                className="lp-btn lp-btn-secondary lp-btn-block">
                 Continue Shopping
               </button>
             </div>
@@ -150,9 +177,14 @@ const CheckoutDrawer = ({
           <div className="lp-checkout-scroll-content">
             {/* Step 1: Details (Name & Phone inputs) */}
             {!customerToken && !otpSent && (
-              <form onSubmit={handleSendOtp} className="lp-checkout-form-step lp-fade-in">
+              <form
+                onSubmit={handleSendOtp}
+                className="lp-checkout-form-step lp-fade-in">
                 <h4>Customer Details</h4>
-                <p className="checkout-step-desc">Enter your name and phone number to verify and prepare order delivery.</p>
+                <p className="checkout-step-desc">
+                  Enter your name and phone number to verify and prepare order
+                  delivery.
+                </p>
 
                 <div className="lp-form-group">
                   <label htmlFor="checkoutName">Full Name *</label>
@@ -182,16 +214,14 @@ const CheckoutDrawer = ({
                 <button
                   type="submit"
                   disabled={otpVerifying}
-                  className="lp-btn lp-btn-primary lp-btn-block form-action-btn"
-                >
+                  className="lp-btn lp-btn-primary lp-btn-block form-action-btn">
                   {otpVerifying ? "Sending OTP..." : "Verify Mobile via OTP"}
                 </button>
 
                 <button
                   type="button"
                   onClick={onGoBackToCart}
-                  className="lp-btn lp-btn-secondary lp-btn-block form-back-btn"
-                >
+                  className="lp-btn lp-btn-secondary lp-btn-block form-back-btn">
                   Go Back to Cart
                 </button>
               </form>
@@ -199,10 +229,13 @@ const CheckoutDrawer = ({
 
             {/* Step 2: Verification (OTP verification input) */}
             {!customerToken && otpSent && (
-              <form onSubmit={handleVerifyOtp} className="lp-checkout-form-step lp-fade-in">
+              <form
+                onSubmit={handleVerifyOtp}
+                className="lp-checkout-form-step lp-fade-in">
                 <h4>Mobile OTP Verification</h4>
                 <p className="checkout-step-desc">
-                  An OTP has been sent to <strong>+91 {customerPhone}</strong>. Check your console / terminal!
+                  An OTP has been sent to <strong>+91 {customerPhone}</strong>.
+                  Check your console / terminal!
                 </p>
 
                 <div className="lp-form-group">
@@ -221,24 +254,21 @@ const CheckoutDrawer = ({
                 <button
                   type="submit"
                   disabled={otpVerifying}
-                  className="lp-btn lp-btn-primary lp-btn-block form-action-btn"
-                >
+                  className="lp-btn lp-btn-primary lp-btn-block form-action-btn">
                   {otpVerifying ? "Verifying..." : "Confirm OTP & Log In"}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setOtpSent(false)}
-                  className="lp-btn lp-btn-secondary lp-btn-block form-back-btn"
-                >
+                  className="lp-btn lp-btn-secondary lp-btn-block form-back-btn">
                   Go Back to Details
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setOtpSent(false)}
-                  className="lp-btn-link-action"
-                >
+                  className="lp-btn-link-action">
                   Change Phone Number
                 </button>
               </form>
@@ -246,7 +276,9 @@ const CheckoutDrawer = ({
 
             {/* Step 3 & 4: Delivery (Address & Delivery Details) */}
             {customerToken && (
-              <form onSubmit={handlePlaceOrder} className="lp-checkout-form-step lp-fade-in">
+              <form
+                onSubmit={handlePlaceOrder}
+                className="lp-checkout-form-step lp-fade-in">
                 <div className="checkout-section">
                   <h4>Delivery Location Details</h4>
 
@@ -256,8 +288,7 @@ const CheckoutDrawer = ({
                       {addresses.map((addr, idx) => (
                         <label
                           key={idx}
-                          className={`saved-address-card ${selectedAddressIndex === idx ? "selected" : ""}`}
-                        >
+                          className={`saved-address-card ${selectedAddressIndex === idx ? "selected" : ""}`}>
                           <input
                             type="radio"
                             name="selectedAddress"
@@ -270,13 +301,16 @@ const CheckoutDrawer = ({
                               {addr.street}
                             </strong>
                             <span>
-                              {addr.landmark ? `(Landmark: ${addr.landmark}), ` : ""}
+                              {addr.landmark
+                                ? `(Landmark: ${addr.landmark}), `
+                                : ""}
                               {addr.city} - {addr.pincode}
                             </span>
                           </div>
                         </label>
                       ))}
-                      <label className={`saved-address-card ${selectedAddressIndex === -1 ? "selected" : ""}`}>
+                      <label
+                        className={`saved-address-card ${selectedAddressIndex === -1 ? "selected" : ""}`}>
                         <input
                           type="radio"
                           name="selectedAddress"
@@ -298,7 +332,12 @@ const CheckoutDrawer = ({
                           <input
                             type="text"
                             value={newAddress.houseNo}
-                            onChange={(e) => setNewAddress({ ...newAddress, houseNo: e.target.value })}
+                            onChange={(e) =>
+                              setNewAddress({
+                                ...newAddress,
+                                houseNo: e.target.value,
+                              })
+                            }
                             placeholder="e.g. D No. 5-57/3"
                           />
                         </div>
@@ -307,7 +346,12 @@ const CheckoutDrawer = ({
                           <input
                             type="text"
                             value={newAddress.street}
-                            onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                            onChange={(e) =>
+                              setNewAddress({
+                                ...newAddress,
+                                street: e.target.value,
+                              })
+                            }
                             placeholder="e.g. Main Road, Patha Gannavaram"
                             required
                           />
@@ -318,7 +362,12 @@ const CheckoutDrawer = ({
                         <input
                           type="text"
                           value={newAddress.landmark}
-                          onChange={(e) => setNewAddress({ ...newAddress, landmark: e.target.value })}
+                          onChange={(e) =>
+                            setNewAddress({
+                              ...newAddress,
+                              landmark: e.target.value,
+                            })
+                          }
                           placeholder="e.g. Near Ramalayam Temple"
                         />
                       </div>
@@ -328,7 +377,12 @@ const CheckoutDrawer = ({
                           <input
                             type="text"
                             value={newAddress.city}
-                            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                            onChange={(e) =>
+                              setNewAddress({
+                                ...newAddress,
+                                city: e.target.value,
+                              })
+                            }
                             placeholder="P.Gannavaram"
                             required
                           />
@@ -338,7 +392,12 @@ const CheckoutDrawer = ({
                           <input
                             type="text"
                             value={newAddress.pincode}
-                            onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
+                            onChange={(e) =>
+                              setNewAddress({
+                                ...newAddress,
+                                pincode: e.target.value,
+                              })
+                            }
                             placeholder="533240"
                             maxLength="6"
                             required
@@ -365,7 +424,12 @@ const CheckoutDrawer = ({
                   <h4>Payment Mode</h4>
                   <div className="payment-options">
                     <label className="payment-card selected">
-                      <input type="radio" name="paymentMethod" checked readOnly />
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        checked
+                        readOnly
+                      />
                       <div className="payment-details">
                         <strong>Cash on Delivery (COD)</strong>
                         <span>UPI or Cash accepted at delivery.</span>
@@ -392,17 +456,17 @@ const CheckoutDrawer = ({
                 <button
                   type="submit"
                   disabled={isSubmittingOrder}
-                  className="lp-btn lp-btn-primary lp-btn-block checkout-submit-btn"
-                >
-                  {isSubmittingOrder ? "Confirming Order..." : `Confirm COD Order (₹${cartTotal})`}
+                  className="lp-btn lp-btn-primary lp-btn-block checkout-submit-btn">
+                  {isSubmittingOrder
+                    ? "Confirming Order..."
+                    : `Confirm COD Order (₹${cartTotal})`}
                 </button>
 
                 <button
                   type="button"
                   onClick={onGoBackToCart}
                   className="lp-btn lp-btn-secondary lp-btn-block form-back-btn"
-                  style={{ marginTop: "12px" }}
-                >
+                  style={{ marginTop: "12px" }}>
                   Go Back to Cart
                 </button>
               </form>

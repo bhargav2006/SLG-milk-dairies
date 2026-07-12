@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, LogOut, Menu, X, Minus, Plus, Trash2, ArrowRight, Clock, MapPin, CheckCircle } from "lucide-react";
+import {
+  ShoppingCart,
+  LogOut,
+  Menu,
+  X,
+  Minus,
+  Plus,
+  Trash2,
+  ArrowRight,
+  Clock,
+  MapPin,
+  CheckCircle,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import customerService from "../services/customerService";
@@ -36,7 +48,7 @@ const LandingPage = () => {
 
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  
+
   // Storefront & Catalog State
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -84,7 +96,11 @@ const LandingPage = () => {
   // Placed Order Receipt Modal State
   const [placedOrder, setPlacedOrder] = useState(null);
 
-
+  useEffect(() => {
+    if (placedOrder && cart.length > 0) {
+      setPlacedOrder(null);
+    }
+  }, [cart, placedOrder]);
 
   // Lock body scroll when drawers/modals are active
   useEffect(() => {
@@ -128,7 +144,10 @@ const LandingPage = () => {
     const fetchProducts = async () => {
       try {
         setLoadingProducts(true);
-        const data = await customerService.getShopProducts({ productType: "retail", limit: 100 });
+        const data = await customerService.getShopProducts({
+          productType: "retail",
+          limit: 100,
+        });
         setProducts(data.products || []);
       } catch (err) {
         console.error("Failed to load products:", err);
@@ -149,8 +168,11 @@ const LandingPage = () => {
           const data = await customerService.getProfile();
           if (data && data.customer) {
             setCustomerInfo(data.customer);
-            localStorage.setItem("customer_info", JSON.stringify(data.customer));
-            
+            localStorage.setItem(
+              "customer_info",
+              JSON.stringify(data.customer),
+            );
+
             // Populate address list
             const savedAddrs = data.customer.addresses || [];
             setAddresses(savedAddrs);
@@ -158,7 +180,10 @@ const LandingPage = () => {
               const defaultIdx = savedAddrs.findIndex((a) => a.isDefault);
               setSelectedAddressIndex(defaultIdx !== -1 ? defaultIdx : 0);
             }
-            if (data.customer.customerName && data.customer.customerName !== "Anonymous") {
+            if (
+              data.customer.customerName &&
+              data.customer.customerName !== "Anonymous"
+            ) {
               setCustomerName(data.customer.customerName);
             }
           }
@@ -178,59 +203,80 @@ const LandingPage = () => {
   }, [cart]);
 
   // --- Cart Actions ---
-  const addToCart = useCallback((product) => {
-    setCart((prevCart) => {
-      const existing = prevCart.find((item) => item.product._id === product._id);
-      if (existing) {
-        if (product.stock !== undefined && existing.quantity >= product.stock) {
-          showError(`Only ${product.stock} items available in stock.`);
-          return prevCart;
-        }
-        showSuccess(`Increased ${product.name} quantity.`);
-        return prevCart.map((item) =>
-          item.product._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+  const addToCart = useCallback(
+    (product) => {
+      setCart((prevCart) => {
+        const existing = prevCart.find(
+          (item) => item.product._id === product._id,
         );
-      } else {
-        if (product.stock !== undefined && product.stock <= 0) {
-          showError("Out of stock.");
-          return prevCart;
-        }
-        showSuccess(`Added ${product.name} to cart.`);
-        return [...prevCart, { product, quantity: 1 }];
-      }
-    });
-  }, [showError, showSuccess]);
-
-  const updateCartQty = useCallback((productId, amount) => {
-    setCart((prevCart) => {
-      return prevCart
-        .map((item) => {
-          if (item.product._id === productId) {
-            const nextQty = item.quantity + amount;
-            if (nextQty <= 0) return null;
-            if (item.product.stock !== undefined && nextQty > item.product.stock) {
-              showError(`Only ${item.product.stock} items available in stock.`);
-              return item;
-            }
-            return { ...item, quantity: nextQty };
+        if (existing) {
+          if (
+            product.stock !== undefined &&
+            existing.quantity >= product.stock
+          ) {
+            showError(`Only ${product.stock} items available in stock.`);
+            return prevCart;
           }
-          return item;
-        })
-        .filter(Boolean);
-    });
-  }, [showError]);
+          showSuccess(`Increased ${product.name} quantity.`);
+          return prevCart.map((item) =>
+            item.product._id === product._id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          );
+        } else {
+          if (product.stock !== undefined && product.stock <= 0) {
+            showError("Out of stock.");
+            return prevCart;
+          }
+          showSuccess(`Added ${product.name} to cart.`);
+          return [...prevCart, { product, quantity: 1 }];
+        }
+      });
+    },
+    [showError, showSuccess],
+  );
+
+  const updateCartQty = useCallback(
+    (productId, amount) => {
+      setCart((prevCart) => {
+        return prevCart
+          .map((item) => {
+            if (item.product._id === productId) {
+              const nextQty = item.quantity + amount;
+              if (nextQty <= 0) return null;
+              if (
+                item.product.stock !== undefined &&
+                nextQty > item.product.stock
+              ) {
+                showError(
+                  `Only ${item.product.stock} items available in stock.`,
+                );
+                return item;
+              }
+              return { ...item, quantity: nextQty };
+            }
+            return item;
+          })
+          .filter(Boolean);
+      });
+    },
+    [showError],
+  );
 
   const removeFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item.product._id !== productId));
+    setCart((prevCart) =>
+      prevCart.filter((item) => item.product._id !== productId),
+    );
     showInfo("Removed item from cart.");
   };
 
-  const getProductQtyInCart = useCallback((productId) => {
-    const item = cart.find((i) => i.product._id === productId);
-    return item ? item.quantity : 0;
-  }, [cart]);
+  const getProductQtyInCart = useCallback(
+    (productId) => {
+      const item = cart.find((i) => i.product._id === productId);
+      return item ? item.quantity : 0;
+    },
+    [cart],
+  );
 
   // --- Calculation Helpers ---
   const cartSubtotal = cart.reduce((acc, item) => {
@@ -238,14 +284,21 @@ const LandingPage = () => {
     return acc + price * item.quantity;
   }, 0);
 
-  const deliveryFee = cartSubtotal >= CONFIG.FREE_DELIVERY_AMOUNT || cartSubtotal === 0 ? 0 : CONFIG.DELIVERY_CHARGE;
+  const deliveryFee =
+    cartSubtotal >= CONFIG.FREE_DELIVERY_AMOUNT || cartSubtotal === 0
+      ? 0
+      : CONFIG.DELIVERY_CHARGE;
   const cartTotal = cartSubtotal + deliveryFee;
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   // --- Customer Login/OTP Flow ---
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!customerPhone || customerPhone.length !== 10 || !/^\d+$/.test(customerPhone)) {
+    if (
+      !customerPhone ||
+      customerPhone.length !== 10 ||
+      !/^\d+$/.test(customerPhone)
+    ) {
       showError("Please enter a valid 10-digit mobile number");
       return;
     }
@@ -282,14 +335,19 @@ const LandingPage = () => {
         if (data.customer.addresses?.length > 0) {
           setSelectedAddressIndex(0);
         }
-        if (data.customer.customerName && data.customer.customerName !== "Anonymous") {
+        if (
+          data.customer.customerName &&
+          data.customer.customerName !== "Anonymous"
+        ) {
           setCustomerName(data.customer.customerName);
         }
         showSuccess("Authenticated successfully!");
       }
     } catch (err) {
       console.error(err);
-      showError(err.response?.data?.message || "OTP verification failed. Check again.");
+      showError(
+        err.response?.data?.message || "OTP verification failed. Check again.",
+      );
     } finally {
       setOtpVerifying(false);
     }
@@ -350,12 +408,15 @@ const LandingPage = () => {
         setCart([]); // Clear cart
         setIsCartOpen(false);
         showSuccess("Order placed successfully!");
-        
+
         // Refresh customer profile to sync addresses
         const profileData = await customerService.getProfile();
         if (profileData && profileData.customer) {
           setCustomerInfo(profileData.customer);
-          localStorage.setItem("customer_info", JSON.stringify(profileData.customer));
+          localStorage.setItem(
+            "customer_info",
+            JSON.stringify(profileData.customer),
+          );
           setAddresses(profileData.customer.addresses || []);
         }
       }
@@ -394,21 +455,55 @@ const LandingPage = () => {
   };
 
   const filteredProducts = products.filter((prod) => {
-    const matchesSearch = prod.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          prod.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch =
+      prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prod.category.toLowerCase().includes(searchQuery.toLowerCase());
+
     if (activeFilter === "all") return matchesSearch;
     if (activeFilter === "milk") {
-      return matchesSearch && (prod.category.toLowerCase() === "milk" || prod.category.toLowerCase() === "yogurt" || prod.category.toLowerCase() === "curd");
+      return (
+        matchesSearch &&
+        (prod.category.toLowerCase() === "milk" ||
+          prod.category.toLowerCase() === "yogurt" ||
+          prod.category.toLowerCase() === "curd")
+      );
     }
     if (activeFilter === "ghee") {
-      return matchesSearch && (prod.category.toLowerCase() === "ghee" || prod.category.toLowerCase() === "butter" || prod.category.toLowerCase() === "cheese" || prod.category.toLowerCase() === "paneer");
+      return (
+        matchesSearch &&
+        (prod.category.toLowerCase() === "ghee" ||
+          prod.category.toLowerCase() === "butter" ||
+          prod.category.toLowerCase() === "cheese" ||
+          prod.category.toLowerCase() === "paneer")
+      );
     }
     if (activeFilter === "sweets") {
-      return matchesSearch && (prod.category.toLowerCase() === "sweets" || prod.category.toLowerCase() === "lassi" || prod.category.toLowerCase() === "flavoured milk" || prod.category.toLowerCase() === "ice cream");
+      return (
+        matchesSearch &&
+        (prod.category.toLowerCase() === "sweets" ||
+          prod.category.toLowerCase() === "lassi" ||
+          prod.category.toLowerCase() === "flavoured milk" ||
+          prod.category.toLowerCase() === "ice cream")
+      );
     }
     return matchesSearch;
   });
+
+  const handleProceedToCheckout = () => {
+    if (cartSubtotal < CONFIG.MIN_ORDER_AMOUNT) {
+      showError(
+        `Minimum order amount of ₹${CONFIG.MIN_ORDER_AMOUNT} required.`,
+      );
+      return;
+    }
+
+    if (placedOrder) {
+      setPlacedOrder(null);
+    }
+
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
 
   return (
     <div className="landing-page-root">
@@ -424,13 +519,14 @@ const LandingPage = () => {
       {/* 2. Sticky Delivery Location Placeholder Bar */}
       <div className="lp-location-banner-bar">
         <div className="lp-container lp-location-flex">
-          <span className="lp-location-text">
-            📍 Select Delivery Location
-          </span>
+          <span className="lp-location-text">📍 Select Delivery Location</span>
           <button
             className="lp-location-change-btn"
-            onClick={() => showInfo("GPS location tracking will be available in future releases.")}
-          >
+            onClick={() =>
+              showInfo(
+                "GPS location tracking will be available in future releases.",
+              )
+            }>
             Change Location
           </button>
         </div>
@@ -467,7 +563,9 @@ const LandingPage = () => {
           <div className="lp-section-header">
             <span className="lp-section-subtitle">Catalog Store</span>
             <h2 className="lp-section-title">🥛 All Products</h2>
-            <div className="lp-title-underline" style={{ margin: "12px 0 0" }}></div>
+            <div
+              className="lp-title-underline"
+              style={{ margin: "12px 0 0" }}></div>
           </div>
 
           <ProductGrid
@@ -497,11 +595,15 @@ const LandingPage = () => {
 
       {/* --- CART SLIDE-OUT PANEL DRAWER --- */}
       {isCartOpen && (
-        <div className="lp-modal-overlay show" onClick={() => setIsCartOpen(false)}>
+        <div
+          className="lp-modal-overlay show"
+          onClick={() => setIsCartOpen(false)}>
           <div className="lp-cart-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="lp-drawer-header">
               <h3>Shopping Cart</h3>
-              <button onClick={() => setIsCartOpen(false)} className="close-drawer-btn">
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="close-drawer-btn">
                 <X size={20} />
               </button>
             </div>
@@ -510,7 +612,9 @@ const LandingPage = () => {
               <div className="lp-drawer-empty-state">
                 <span className="lp-empty-emoji">🛒</span>
                 <p>Your cart is empty.</p>
-                <button onClick={() => setIsCartOpen(false)} className="lp-btn lp-btn-primary">
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="lp-btn lp-btn-primary">
                   Start Shopping
                 </button>
               </div>
@@ -518,7 +622,8 @@ const LandingPage = () => {
               <>
                 <div className="lp-drawer-items-list">
                   {cart.map((item) => {
-                    const price = item.product.retailPrice || item.product.price || 0;
+                    const price =
+                      item.product.retailPrice || item.product.price || 0;
                     return (
                       <div className="lp-cart-item-row" key={item.product._id}>
                         <div className="item-img-container">
@@ -536,15 +641,24 @@ const LandingPage = () => {
                         </div>
                         <div className="item-actions">
                           <div className="lp-quantity-selector sm">
-                            <button onClick={() => updateCartQty(item.product._id, -1)} className="qty-btn">
+                            <button
+                              onClick={() =>
+                                updateCartQty(item.product._id, -1)
+                              }
+                              className="qty-btn">
                               <Minus size={12} />
                             </button>
                             <span className="qty-val">{item.quantity}</span>
-                            <button onClick={() => updateCartQty(item.product._id, 1)} className="qty-btn">
+                            <button
+                              onClick={() => updateCartQty(item.product._id, 1)}
+                              className="qty-btn">
                               <Plus size={12} />
                             </button>
                           </div>
-                          <button onClick={() => removeFromCart(item.product._id)} className="delete-item-btn" title="Remove Item">
+                          <button
+                            onClick={() => removeFromCart(item.product._id)}
+                            className="delete-item-btn"
+                            title="Remove Item">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -559,7 +673,12 @@ const LandingPage = () => {
                     <span>₹{cartSubtotal}</span>
                   </div>
                   <div className="summary-row">
-                    <span>Delivery Fee {cartSubtotal >= CONFIG.FREE_DELIVERY_AMOUNT && <span className="free-badge">FREE</span>}</span>
+                    <span>
+                      Delivery Fee{" "}
+                      {cartSubtotal >= CONFIG.FREE_DELIVERY_AMOUNT && (
+                        <span className="free-badge">FREE</span>
+                      )}
+                    </span>
                     <span>{deliveryFee === 0 ? "₹0" : `₹${deliveryFee}`}</span>
                   </div>
                   <div className="summary-row total-row">
@@ -568,27 +687,27 @@ const LandingPage = () => {
                   </div>
                   {cartSubtotal < CONFIG.MIN_ORDER_AMOUNT ? (
                     <div className="free-delivery-nudge invalid">
-                      Minimum order to checkout is <strong>₹{CONFIG.MIN_ORDER_AMOUNT}</strong>. Add <strong>₹{CONFIG.MIN_ORDER_AMOUNT - cartSubtotal}</strong> more!
+                      Minimum order to checkout is{" "}
+                      <strong>₹{CONFIG.MIN_ORDER_AMOUNT}</strong>. Add{" "}
+                      <strong>₹{CONFIG.MIN_ORDER_AMOUNT - cartSubtotal}</strong>{" "}
+                      more!
                     </div>
                   ) : cartSubtotal < CONFIG.FREE_DELIVERY_AMOUNT ? (
                     <div className="free-delivery-nudge">
-                      Add <strong>₹{CONFIG.FREE_DELIVERY_AMOUNT - cartSubtotal}</strong> more for <strong>FREE delivery</strong>!
+                      Add{" "}
+                      <strong>
+                        ₹{CONFIG.FREE_DELIVERY_AMOUNT - cartSubtotal}
+                      </strong>{" "}
+                      more for <strong>FREE delivery</strong>!
                     </div>
                   ) : null}
 
                   <button
-                    onClick={() => {
-                      if (cartSubtotal < CONFIG.MIN_ORDER_AMOUNT) {
-                        showError(`Minimum order amount of ₹${CONFIG.MIN_ORDER_AMOUNT} required.`);
-                        return;
-                      }
-                      setIsCartOpen(false);
-                      setIsCheckoutOpen(true);
-                    }}
+                    onClick={handleProceedToCheckout}
                     disabled={cartSubtotal < CONFIG.MIN_ORDER_AMOUNT}
-                    className={`lp-btn lp-btn-primary checkout-action-btn ${cartSubtotal < CONFIG.MIN_ORDER_AMOUNT ? "lp-btn-disabled" : ""}`}
-                  >
-                    Proceed to Checkout <ArrowRight size={16} style={{ marginLeft: "6px" }} />
+                    className={`lp-btn lp-btn-primary checkout-action-btn ${cartSubtotal < CONFIG.MIN_ORDER_AMOUNT ? "lp-btn-disabled" : ""}`}>
+                    Proceed to Checkout{" "}
+                    <ArrowRight size={16} style={{ marginLeft: "6px" }} />
                   </button>
                 </div>
               </>
@@ -645,8 +764,6 @@ const LandingPage = () => {
           onClose={() => setSelectedProduct(null)}
         />
       )}
-
-
     </div>
   );
 };

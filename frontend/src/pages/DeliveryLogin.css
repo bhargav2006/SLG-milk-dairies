@@ -5,7 +5,7 @@
   justify-content: center;
   background-color: #f8fafc;
   padding: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .db-login-card {
@@ -31,7 +31,7 @@
 }
 
 .db-login-header h3 {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 1.35rem;
   font-weight: 800;
   color: #1e3a8a;
@@ -158,4 +158,32 @@
 
 .back-home-link:hover {
   color: #1e40af;
+}
+
+@media (max-width: 640px) {
+  .db-login-root {
+    padding: 12px;
+  }
+
+  .db-login-card {
+    max-width: 100%;
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .db-login-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .db-login-header p {
+    font-size: 0.8rem;
+  }
+
+  .db-logo {
+    height: 48px;
+  }
+
+  .db-login-form {
+    gap: 16px;
+  }
 }

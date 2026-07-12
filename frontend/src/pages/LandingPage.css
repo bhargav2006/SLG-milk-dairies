@@ -1,25 +1,25 @@
 /* Premium Mobile-First Fast-Commerce Stylesheet for Sri Lakshmi Ganapathi Milk and Cool Drinks Storefront */
 
 :root {
-  --lp-primary: #1e40af;       /* Brand Primary Blue */
-  --lp-primary-dark: #1e3a8a;  /* Dark Blue */
+  --lp-primary: #1e40af; /* Brand Primary Blue */
+  --lp-primary-dark: #1e3a8a; /* Dark Blue */
   --lp-primary-light: #eff6ff; /* Soft Blue Tint */
-  --lp-secondary: #d97706;     /* Gold Accent */
+  --lp-secondary: #d97706; /* Gold Accent */
   --lp-secondary-light: #fef3c7;
-  --lp-accent: #2563eb;        /* Vibrant UI Blue */
-  --lp-success: #10b981;       /* Safe Green */
+  --lp-accent: #2563eb; /* Vibrant UI Blue */
+  --lp-success: #10b981; /* Safe Green */
   --lp-success-light: #ecfdf5;
-  --lp-warning: #f59e0b;       /* Warning Gold */
+  --lp-warning: #f59e0b; /* Warning Gold */
   --lp-warning-light: #fffbeb;
-  
+
   /* Neutrals */
-  --lp-text-primary: #0f172a;  /* Slate 900 */
-  --lp-text-secondary: #475569;/* Slate 600 */
-  --lp-text-muted: #94a3b8;    /* Slate 400 */
+  --lp-text-primary: #0f172a; /* Slate 900 */
+  --lp-text-secondary: #475569; /* Slate 600 */
+  --lp-text-muted: #94a3b8; /* Slate 400 */
   --lp-bg-primary: #ffffff;
-  --lp-bg-secondary: #f8fafc;  /* Slate 50 */
-  --lp-border: #e2e8f0;        /* Slate 200 */
-  
+  --lp-bg-secondary: #f8fafc; /* Slate 50 */
+  --lp-border: #e2e8f0; /* Slate 200 */
+
   /* Dimensions & Durations */
   --lp-radius-sm: 8px;
   --lp-radius-md: 12px;
@@ -34,7 +34,7 @@
 .landing-page-root {
   background-color: var(--lp-bg-primary);
   color: var(--lp-text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   line-height: 1.5;
   min-height: 100vh;
   position: relative;
@@ -96,7 +96,7 @@
 .landing-page-root h3,
 .landing-page-root h4,
 .landing-page-root h5 {
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
   font-weight: 700;
   color: var(--lp-text-primary);
   line-height: 1.2;
@@ -170,7 +170,7 @@
 }
 
 .landing-page-root .lp-brand-name {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 1rem;
   font-weight: 800;
   color: var(--lp-primary);
@@ -799,9 +799,15 @@
   gap: 4px;
 }
 
-.landing-page-root .lp-stock-status.in { color: var(--lp-success); }
-.landing-page-root .lp-stock-status.low { color: var(--lp-warning); }
-.landing-page-root .lp-stock-status.out { color: #ef4444; }
+.landing-page-root .lp-stock-status.in {
+  color: var(--lp-success);
+}
+.landing-page-root .lp-stock-status.low {
+  color: var(--lp-warning);
+}
+.landing-page-root .lp-stock-status.out {
+  color: #ef4444;
+}
 
 .landing-page-root .lp-store-price-action {
   display: flex;
@@ -817,7 +823,7 @@
 }
 
 .landing-page-root .price-val {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 1rem;
   font-weight: 800;
   color: var(--lp-text-primary);
@@ -944,8 +950,12 @@
 }
 
 @keyframes loading-pulse {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Empty States */
@@ -1194,6 +1204,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+}
+
+.landing-page-root .lp-drawer-header h3 {
+  flex: 1;
+  min-width: 0;
+}
+
+.landing-page-root .checkout-back-btn {
+  background: none;
+  border: 1px solid var(--lp-border);
+  color: var(--lp-text-secondary);
+  border-radius: var(--lp-radius-sm);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  flex-shrink: 0;
+}
+
+.landing-page-root .checkout-back-btn:hover {
+  background-color: var(--lp-bg-secondary);
+  color: var(--lp-text-primary);
 }
 
 .landing-page-root .close-drawer-btn {
@@ -1364,7 +1401,9 @@
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.3);
   z-index: 99;
   cursor: pointer;
-  transition: transform 180ms ease, opacity 180ms ease;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
 }
 
 .landing-page-root .lp-floating-cart-content {
@@ -2157,8 +2196,12 @@
 }
 
 @keyframes spinner-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Fade, Scale & slide anim configurations with exact durations */
@@ -2167,8 +2210,14 @@
 }
 
 @keyframes modal-fade-in {
-  0% { opacity: 0; transform: scale(0.98); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Responsive Styles overrides */
@@ -2194,7 +2243,124 @@
   .landing-page-root .lp-main-header {
     height: 70px;
   }
-  
+
+  .landing-page-root .lp-brand-name {
+    font-size: 0.9rem;
+  }
+
+  .landing-page-root .lp-brand-sub {
+    display: none;
+  }
+
+  .landing-page-root .lp-header-actions {
+    gap: 8px;
+  }
+
+  .landing-page-root .lp-hero-section-compact {
+    padding: 28px 0 24px;
+  }
+
+  .landing-page-root .lp-hero-compact-title {
+    font-size: 1.55rem;
+  }
+
+  .landing-page-root .lp-hero-compact-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .landing-page-root .lp-hero-compact-perks {
+    gap: 8px;
+  }
+
+  .landing-page-root .lp-hero-compact-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .landing-page-root .lp-btn-hero {
+    width: min(100%, 260px);
+  }
+
+  .landing-page-root .lp-offer-banner-container {
+    padding: 20px 0;
+  }
+
+  .landing-page-root .lp-info-item {
+    align-items: flex-start;
+  }
+
+  .landing-page-root .lp-delivery-info-bar {
+    gap: 10px;
+  }
+
+  .landing-page-root .lp-trust-card {
+    padding: 20px 14px;
+  }
+
+  .landing-page-root .lp-section-padding {
+    padding: 36px 0;
+  }
+
+  .landing-page-root .lp-checkout-drawer,
+  .landing-page-root .lp-cart-drawer {
+    max-width: none;
+    width: 100vw;
+  }
+
+  .landing-page-root .lp-checkout-progress-bar {
+    padding: 12px 14px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .landing-page-root .lp-step-node {
+    min-width: 72px;
+  }
+
+  .landing-page-root .node-label {
+    font-size: 0.58rem;
+  }
+
+  .landing-page-root .lp-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-page-root .lp-success-screen {
+    padding: 32px 16px;
+  }
+
+  .landing-page-root .lp-drawer-header {
+    padding: 14px 16px;
+  }
+
+  .landing-page-root .checkout-back-btn span {
+    display: none;
+  }
+
+  .landing-page-root .lp-drawer-items-list {
+    padding: 14px 16px;
+  }
+
+  .landing-page-root .lp-drawer-summary-checkout {
+    padding: 16px;
+  }
+
+  .landing-page-root .lp-cart-item-row {
+    align-items: flex-start;
+  }
+
+  .landing-page-root .item-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .landing-page-root .checkout-action-btn,
+  .landing-page-root .checkout-submit-btn {
+    height: 46px;
+  }
+
   .landing-page-root .lp-nav-menu {
     position: fixed;
     top: 70px;
@@ -2210,66 +2376,182 @@
     transition: transform 220ms ease;
     overflow-y: auto;
   }
-  
+
   .landing-page-root .lp-nav-menu.open {
     transform: translateX(0);
   }
-  
+
   .landing-page-root .lp-mobile-menu-toggle {
     display: flex;
   }
-  
+
   .landing-page-root .lp-delivery-info-bar {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .landing-page-root .lp-storefront-grid,
   .landing-page-root .lp-storefront-grid-loading {
     grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile screens! */
   }
-  
+
   .landing-page-root .lp-floating-cart-bar {
     display: block; /* Show floating bar on mobile screens */
   }
-  
+
   .landing-page-root .lp-trust-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .landing-page-root .lp-store-price-action {
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .landing-page-root .lp-action-btn-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
   }
 }
 
 @media (max-width: 580px) {
+  .landing-page-root .lp-container {
+    padding: 0 14px;
+  }
+
+  .landing-page-root .lp-location-flex {
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .landing-page-root .lp-info-item {
+    padding: 10px 12px;
+  }
+
+  .landing-page-root .lp-filter-btn {
+    white-space: nowrap;
+  }
+
   .landing-page-root .lp-footer-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .landing-page-root .lp-footer-bottom-flex {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .landing-page-root .lp-p-modal-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .landing-page-root .lp-p-modal-image-box {
     aspect-ratio: 4 / 3;
     border-right: none;
     border-bottom: 1px solid var(--lp-border);
   }
+
+  .landing-page-root .lp-product-card-title {
+    font-size: 0.85rem;
+  }
+
+  .landing-page-root .lp-product-size,
+  .landing-page-root .lp-product-rating {
+    font-size: 0.7rem;
+  }
+
+  .landing-page-root .lp-store-price-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .landing-page-root .lp-action-btn-wrapper {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .landing-page-root .lp-btn-store-add,
+  .landing-page-root .lp-quantity-selector {
+    width: 100%;
+  }
+
+  .landing-page-root .lp-quantity-selector {
+    justify-content: space-between;
+  }
+
+  .landing-page-root .lp-drawer-header h3 {
+    font-size: 1rem;
+  }
+
+  .landing-page-root .success-receipt-details .receipt-row {
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 420px) {
+  .landing-page-root .lp-main-header {
+    height: 64px;
+  }
+
+  .landing-page-root .lp-nav-menu {
+    top: 64px;
+    height: calc(100vh - 64px);
+  }
+
   .landing-page-root .lp-storefront-grid,
   .landing-page-root .lp-storefront-grid-loading {
     grid-template-columns: 1fr; /* 1 column on extremely small mobile screens */
   }
-  
+
   .landing-page-root .lp-delivery-info-bar {
     grid-template-columns: 1fr;
   }
-  
+
   .landing-page-root .lp-trust-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing-page-root .lp-floating-cart-bar {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .landing-page-root .lp-floating-cart-content {
+    padding: 12px 14px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .landing-page-root .floating-cart-summary {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .landing-page-root .view-cart-btn-floating {
+    width: 100%;
+  }
+
+  .landing-page-root .lp-checkout-progress-bar {
+    padding: 10px 12px;
+  }
+
+  .landing-page-root .node-circle {
+    width: 22px;
+    height: 22px;
+    font-size: 0.68rem;
+  }
+
+  .landing-page-root .lp-step-node {
+    min-width: 62px;
+  }
+
+  .landing-page-root .lp-success-screen h4 {
+    font-size: 1.2rem;
   }
 }
