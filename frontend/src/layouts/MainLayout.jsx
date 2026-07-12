@@ -10,7 +10,8 @@ import {
   User as UserIcon,
   LogOut,
   Menu,
-  X
+  X,
+  ShoppingBag
 } from "lucide-react";
 
 const MainLayout = ({ children }) => {
@@ -41,6 +42,7 @@ const MainLayout = ({ children }) => {
       if (path.includes("edit")) return "Edit Product";
       return "Products Catalog";
     }
+    if (path.startsWith("/orders")) return "Customer Orders Management";
     if (path.startsWith("/bills")) {
       if (path.includes("create")) return "POS Billing Terminal";
       return "Billing Log History";
@@ -56,6 +58,7 @@ const MainLayout = ({ children }) => {
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["admin", "accountant"] },
     { name: "Products", path: "/products", icon: Milk, roles: ["admin", "accountant"] },
     { name: "Bills", path: "/bills", icon: Receipt, roles: ["admin", "accountant"] },
+    { name: "Orders", path: "/orders", icon: ShoppingBag, roles: ["admin", "accountant"] },
     { name: "Users", path: "/users", icon: UsersIcon, roles: ["admin"] },
     { name: "Profile", path: "/profile", icon: UserIcon, roles: ["admin", "accountant"] },
   ];

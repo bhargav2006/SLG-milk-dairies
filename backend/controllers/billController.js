@@ -3,7 +3,7 @@ const Product = require("../models/Product");
 const sendEmail = require("../utils/sendEmail");
 const sendWhatsapp = require("../utils/sendWhatsapp");
 const Counter = require("../models/Counter");
-const CustomerRecord = require("../models/CustomerRecord");
+const Customer = require("../models/Customer");
 
 const mapBillProductsPrice = (bill) => {
   if (!bill) return null;
@@ -14,8 +14,12 @@ const mapBillProductsPrice = (bill) => {
         const prodType = item.product.productType || "Retail";
         item.product.price =
           billObj.billType === "wholesale"
-            ? (item.product.wholesalePrice !== undefined ? item.product.wholesalePrice : (item.product.price || 0))
-            : (item.product.retailPrice !== undefined ? item.product.retailPrice : (item.product.price || 0));
+            ? item.product.wholesalePrice !== undefined
+              ? item.product.wholesalePrice
+              : item.product.price || 0
+            : item.product.retailPrice !== undefined
+              ? item.product.retailPrice
+              : item.product.price || 0;
       }
     });
   }
@@ -60,8 +64,8 @@ exports.createBill = async (req, res) => {
           .json({ message: `Product not found: ${item.product}` });
       }
       const prodType = product.productType || "Retail";
-      const isAllowed = 
-        prodType.toLowerCase() === "both" || 
+      const isAllowed =
+        prodType.toLowerCase() === "both" ||
         prodType.toLowerCase() === billType.toLowerCase();
 
       if (!isAllowed) {
@@ -75,7 +79,8 @@ exports.createBill = async (req, res) => {
           message: `Insufficient stock for product '${product.name}'. Available: ${product.stock}, Requested: ${item.quantity}`,
         });
       }
-      const price = billType === "wholesale" ? product.wholesalePrice : product.retailPrice;
+      const price =
+        billType === "wholesale" ? product.wholesalePrice : product.retailPrice;
       const lineTotal = price * item.quantity;
       totalAmount += lineTotal;
       billItems.push({
@@ -116,12 +121,12 @@ exports.createBill = async (req, res) => {
     await bill.save();
     let customer = null;
     if (customerNumber) {
-      customer = await CustomerRecord.findOne({
+      customer = await Customer.findOne({
         customerPhone: customerNumber,
       });
 
       if (!customer) {
-        customer = await CustomerRecord.create({
+        customer = await Customer.create({
           customerPhone: customerNumber,
           customerEmail: customerMail,
           customerName: "Anonymous",
@@ -142,12 +147,12 @@ exports.createBill = async (req, res) => {
       }
       await customer.save();
     } else if (customerMail) {
-      customer = await CustomerRecord.findOne({
+      customer = await Customer.findOne({
         customerEmail: customerMail,
       });
 
       if (!customer) {
-        customer = await CustomerRecord.create({
+        customer = await Customer.create({
           customerEmail: customerMail,
           customerName: "Anonymous",
         });
@@ -175,7 +180,10 @@ exports.createBill = async (req, res) => {
     // Populate accountant name and product info to return full bill details
     const populatedBill = await Bill.findById(bill._id)
       .populate("accountant", "name")
-      .populate("products.product", "name price retailPrice wholesalePrice productType");
+      .populate(
+        "products.product",
+        "name price retailPrice wholesalePrice productType",
+      );
 
     res.status(201).json(mapBillProductsPrice(populatedBill));
 
@@ -281,7 +289,10 @@ exports.getBills = async (req, res) => {
     const bills = await Bill.find(filter)
       .sort({ createdAt: -1 })
       .populate("accountant", "name")
-      .populate("products.product", "name price retailPrice wholesalePrice productType");
+      .populate(
+        "products.product",
+        "name price retailPrice wholesalePrice productType",
+      );
     res.json(bills.map(mapBillProductsPrice));
   } catch (error) {
     console.error(error);
@@ -294,7 +305,10 @@ exports.getBillById = async (req, res) => {
   try {
     const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber })
       .populate("accountant", "name")
-      .populate("products.product", "name price retailPrice wholesalePrice productType");
+      .populate(
+        "products.product",
+        "name price retailPrice wholesalePrice productType",
+      );
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
@@ -315,7 +329,10 @@ exports.getBillByCustomerNumber = async (req, res) => {
     }
     const bills = await Bill.find({ customerNumber: req.params.customerNumber })
       .populate("accountant", "name")
-      .populate("products.product", "name price retailPrice wholesalePrice productType");
+      .populate(
+        "products.product",
+        "name price retailPrice wholesalePrice productType",
+      );
     if (bills.length === 0) {
       return res
         .status(404)
@@ -336,7 +353,10 @@ exports.getBillByAccountantId = async (req, res) => {
     const bills = await Bill.find(filter)
       .sort({ createdAt: -1 })
       .populate("accountant", "name")
-      .populate("products.product", "name price retailPrice wholesalePrice productType");
+      .populate(
+        "products.product",
+        "name price retailPrice wholesalePrice productType",
+      );
     res.json(bills.map(mapBillProductsPrice));
   } catch (error) {
     console.error(error);
@@ -397,8 +417,8 @@ exports.updateBill = async (req, res) => {
           throw new Error(`Product not found: ${item.product}`);
         }
         const prodType = product.productType || "Retail";
-        const isAllowed = 
-          prodType.toLowerCase() === "both" || 
+        const isAllowed =
+          prodType.toLowerCase() === "both" ||
           prodType.toLowerCase() === finalBillType.toLowerCase();
 
         if (!isAllowed) {
@@ -412,7 +432,10 @@ exports.updateBill = async (req, res) => {
             `Insufficient stock for product '${product.name}'. Available: ${product.stock}, Requested: ${item.quantity}`,
           );
         }
-        const price = finalBillType === "wholesale" ? product.wholesalePrice : product.retailPrice;
+        const price =
+          finalBillType === "wholesale"
+            ? product.wholesalePrice
+            : product.retailPrice;
         const lineTotal = price * item.quantity;
         totalAmount += lineTotal;
         billItems.push({
@@ -430,24 +453,30 @@ exports.updateBill = async (req, res) => {
 
       // 1. Revert original customer points and history from the original customer record
       if (bill.customerNumber || bill.customerMail) {
-        const query = bill.customerNumber 
+        const query = bill.customerNumber
           ? { customerPhone: bill.customerNumber }
           : { customerEmail: bill.customerMail };
-          
-        const originalCustomer = await CustomerRecord.findOne(query);
+
+        const originalCustomer = await Customer.findOne(query);
         if (originalCustomer) {
-          originalCustomer.productsHistory = originalCustomer.productsHistory.filter(
-            (item) => item.invoiceNumber !== bill.invoiceNumber
-          );
+          originalCustomer.productsHistory =
+            originalCustomer.productsHistory.filter(
+              (item) => item.invoiceNumber !== bill.invoiceNumber,
+            );
           const pointsToDeduct = Math.floor(bill.totalAmount / 100);
-          originalCustomer.loyaltyPoints = Math.max(0, originalCustomer.loyaltyPoints - pointsToDeduct);
+          originalCustomer.loyaltyPoints = Math.max(
+            0,
+            originalCustomer.loyaltyPoints - pointsToDeduct,
+          );
           await originalCustomer.save();
         }
       }
 
       // Update bill document fields
-      const newCustomerNumber = customerNumber !== undefined ? customerNumber : bill.customerNumber;
-      const newCustomerMail = customerMail !== undefined ? customerMail : bill.customerMail;
+      const newCustomerNumber =
+        customerNumber !== undefined ? customerNumber : bill.customerNumber;
+      const newCustomerMail =
+        customerMail !== undefined ? customerMail : bill.customerMail;
 
       if (customerNumber !== undefined) bill.customerNumber = customerNumber;
       if (customerMail !== undefined) bill.customerMail = customerMail || null;
@@ -460,9 +489,11 @@ exports.updateBill = async (req, res) => {
 
       // 2. Add points and history to the new customer record
       if (newCustomerNumber) {
-        let newCustomer = await CustomerRecord.findOne({ customerPhone: newCustomerNumber });
+        let newCustomer = await Customer.findOne({
+          customerPhone: newCustomerNumber,
+        });
         if (!newCustomer) {
-          newCustomer = await CustomerRecord.create({
+          newCustomer = await Customer.create({
             customerPhone: newCustomerNumber,
             customerEmail: newCustomerMail || null,
             customerName: "Anonymous",
@@ -473,7 +504,7 @@ exports.updateBill = async (req, res) => {
             product: item.product,
             quantity: item.quantity,
             invoiceNumber: bill.invoiceNumber,
-          }))
+          })),
         );
         newCustomer.loyaltyPoints += Math.floor(totalAmount / 100);
         if (newCustomerMail && !newCustomer.customerEmail) {
@@ -481,9 +512,11 @@ exports.updateBill = async (req, res) => {
         }
         await newCustomer.save();
       } else if (newCustomerMail) {
-        let newCustomer = await CustomerRecord.findOne({ customerEmail: newCustomerMail });
+        let newCustomer = await Customer.findOne({
+          customerEmail: newCustomerMail,
+        });
         if (!newCustomer) {
-          newCustomer = await CustomerRecord.create({
+          newCustomer = await Customer.create({
             customerEmail: newCustomerMail,
             customerName: "Anonymous",
           });
@@ -493,7 +526,7 @@ exports.updateBill = async (req, res) => {
             product: item.product,
             quantity: item.quantity,
             invoiceNumber: bill.invoiceNumber,
-          }))
+          })),
         );
         newCustomer.loyaltyPoints += Math.floor(totalAmount / 100);
         await newCustomer.save();
@@ -501,7 +534,10 @@ exports.updateBill = async (req, res) => {
 
       const populatedBill = await Bill.findById(bill._id)
         .populate("accountant", "name")
-        .populate("products.product", "name price retailPrice wholesalePrice productType");
+        .populate(
+          "products.product",
+          "name price retailPrice wholesalePrice productType",
+        );
 
       res.json(mapBillProductsPrice(populatedBill));
     } catch (error) {
@@ -542,17 +578,20 @@ exports.deleteBill = async (req, res) => {
 
     // Revert products history and loyalty points from the customer record
     if (bill.customerNumber || bill.customerMail) {
-      const query = bill.customerNumber 
+      const query = bill.customerNumber
         ? { customerPhone: bill.customerNumber }
         : { customerEmail: bill.customerMail };
-        
-      const customer = await CustomerRecord.findOne(query);
+
+      const customer = await Customer.findOne(query);
       if (customer) {
         customer.productsHistory = customer.productsHistory.filter(
-          (item) => item.invoiceNumber !== bill.invoiceNumber
+          (item) => item.invoiceNumber !== bill.invoiceNumber,
         );
         const pointsToDeduct = Math.floor(bill.totalAmount / 100);
-        customer.loyaltyPoints = Math.max(0, customer.loyaltyPoints - pointsToDeduct);
+        customer.loyaltyPoints = Math.max(
+          0,
+          customer.loyaltyPoints - pointsToDeduct,
+        );
         await customer.save();
       }
     }

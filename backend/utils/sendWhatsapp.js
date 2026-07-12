@@ -1,15 +1,7 @@
 const axios = require("axios");
-const CustomerRecord = require("../models/CustomerRecord");
+const Customer = require("../models/Customer");
 
 const frontendUrl = process.env.CORS_ORIGIN || "http://localhost:5173";
-
-// const TEST_NUMBERS = [
-//   "918074200988", // your number
-//   "919948290585", // test number 2
-//   "918499095377", // test number 3
-// ];
-
-// const FALLBACK_NUMBER = "918074200988"; // your number
 
 const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
   try {
@@ -21,13 +13,14 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
       return;
     }
 
-    const tenDigitPhone = customerNumber.startsWith("91") && customerNumber.length === 12
-      ? customerNumber.substring(2)
-      : customerNumber;
+    const tenDigitPhone =
+      customerNumber.startsWith("91") && customerNumber.length === 12
+        ? customerNumber.substring(2)
+        : customerNumber;
 
     const formattedCustomer = `91${tenDigitPhone}`;
 
-    const customer = await CustomerRecord.findOne({
+    const customer = await Customer.findOne({
       customerPhone: tenDigitPhone,
     });
     console.log("Customer OptOut Status:", customer?.optOut);
@@ -38,7 +31,7 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
       );
       return;
     } else {
-      await CustomerRecord.findOneAndUpdate(
+      await Customer.findOneAndUpdate(
         { customerPhone: tenDigitPhone },
         { optOut: false },
         { upsert: true },
@@ -100,6 +93,12 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
           "Content-Type": "application/json",
         },
       },
+    );
+
+    await Customer.findOneAndUpdate(
+      { customerPhone: tenDigitPhone },
+      { $inc: { msgSent: 1 } },
+      { upsert: true },
     );
 
     console.log("=================================");

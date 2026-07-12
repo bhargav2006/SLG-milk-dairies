@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import MainLayout from "../layouts/MainLayout";
 
@@ -15,11 +15,25 @@ import Users from "../pages/Users";
 import Profile from "../pages/Profile";
 import BillReceiptStandalone from "../pages/BillReceiptStandalone";
 import LandingPage from "../pages/LandingPage";
+import About from "../pages/About";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import TermsOfService from "../pages/TermsOfService";
+import Orders from "../pages/Orders";
+import DeliveryLogin from "../pages/DeliveryLogin";
+import DeliveryDashboard from "../pages/DeliveryDashboard";
+import TrackOrders from "../pages/TrackOrders";
 
 // Import error pages
 import { NotFoundPage, UnauthorizedPage } from "../pages/Errors";
+
+// Delivery Boy Protected Route Wrapper
+const DeliveryProtectedRoute = () => {
+  const token = localStorage.getItem("delivery_token");
+  if (!token) {
+    return <Navigate to="/delivery/login" replace />;
+  }
+  return <Outlet />;
+};
 
 const AppRoutes = () => {
   return (
@@ -32,8 +46,15 @@ const AppRoutes = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/" element={<LandingPage />} />
-      <Route path="/about" element={<LandingPage />} />
-      <Route path="/services" element={<LandingPage />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/services" element={<About />} />
+      <Route path="/track-orders" element={<TrackOrders />} />
+      
+      {/* Delivery Boy Public & Protected Routes */}
+      <Route path="/delivery/login" element={<DeliveryLogin />} />
+      <Route element={<DeliveryProtectedRoute />}>
+        <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+      </Route>
 
       {/* Protected Routes (Admin + Accountant) */}
       <Route
@@ -67,6 +88,14 @@ const AppRoutes = () => {
           element={
             <MainLayout>
               <Bills />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <MainLayout>
+              <Orders />
             </MainLayout>
           }
         />

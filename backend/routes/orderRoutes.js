@@ -1,0 +1,25 @@
+const express = require("express");
+const router = express.Router();
+
+const { customerProtect } = require("../middleware/customerMiddleware");
+
+const {
+  placeOrder,
+  getMyOrders,
+  getOrderById,
+  cancelOrder,
+} = require("../controllers/orderController");
+
+// Place Order
+router.post("/", customerProtect, placeOrder);
+
+// My Orders
+router.get("/", customerProtect, getMyOrders);
+
+// Single Order
+router.get("/:orderNumber", customerProtect, getOrderById);
+
+// Cancel
+router.put("/:orderNumber/cancel", customerProtect, cancelOrder);
+
+module.exports = router;

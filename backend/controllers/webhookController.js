@@ -1,5 +1,5 @@
 const axios = require("axios");
-const CustomerRecord = require("../models/CustomerRecord");
+const Customer = require("../models/Customer");
 
 exports.verifyWebhook = async (req, res) => {
   try {
@@ -54,11 +54,11 @@ exports.verifyWebhook = async (req, res) => {
 //           const messageText = messageObj.text.body.toLowerCase();
 //           console.log("Message Text:", messageText);
 //           if (messageText === "stop") {
-//             const customer = await CustomerRecord.findOne({
+//             const customer = await Customer.findOne({
 //               customerPhone: messageFrom,
 //             });
 //             if (!customer) {
-//               await CustomerRecord.create({
+//               await Customer.create({
 //                 customerPhone: messageFrom,
 //                 optOut: true,
 //               });
@@ -90,11 +90,11 @@ exports.verifyWebhook = async (req, res) => {
 //             }
 //           }
 //           else if (messageText === "start" || messageText === "continue") {
-//             const customer = await CustomerRecord.findOne({
+//             const customer = await Customer.findOne({
 //               customerPhone: messageFrom,
 //             });
 //             if (!customer) {
-//               await CustomerRecord.create({
+//               await Customer.create({
 //                 customerPhone: messageFrom,
 //                 optOut: false,
 //               });
@@ -166,7 +166,7 @@ exports.webhookEvents = async (req, res) => {
           // Handle STOP
           if (messageText === "stop") {
             // Upsert: Updates the user if they exist, creates them if they don't
-            await CustomerRecord.findOneAndUpdate(
+            await Customer.findOneAndUpdate(
               { customerPhone: messageFrom },
               { optOut: true },
               { upsert: true, new: true },
@@ -188,6 +188,11 @@ exports.webhookEvents = async (req, res) => {
                   Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
                 },
               });
+              await Customer.findOneAndUpdate(
+                { customerPhone: messageFrom },
+                { $inc: { msgSent: 1 } },
+                { upsert: true, new: true },
+              );
               console.log("Stop reply sent successfully.");
             } catch (apiError) {
               console.log(
@@ -200,7 +205,7 @@ exports.webhookEvents = async (req, res) => {
           // Handle START / CONTINUE
           else if (messageText === "start" || messageText === "continue") {
             // Upsert: Updates the user if they exist, creates them if they don't
-            await CustomerRecord.findOneAndUpdate(
+            await Customer.findOneAndUpdate(
               { customerPhone: messageFrom },
               { optOut: false },
               { upsert: true, new: true },
@@ -222,6 +227,11 @@ exports.webhookEvents = async (req, res) => {
                   Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
                 },
               });
+              await Customer.findOneAndUpdate(
+                { customerPhone: messageFrom },
+                { $inc: { msgSent: 1 } },
+                { upsert: true, new: true },
+              );
               console.log("Start reply sent successfully.");
             } catch (apiError) {
               console.log(

@@ -12,6 +12,25 @@ const api = axios.create({
 // Request interceptor: add bearer token if it exists
 api.interceptors.request.use(
   (config) => {
+    // If the request targets customer routes, use the customer token
+    if (
+      config.url.startsWith("/api/orders") ||
+      config.url.startsWith("/api/customer/profile")
+    ) {
+      const customerToken = localStorage.getItem("customer_token");
+      if (customerToken) {
+        config.headers.Authorization = `Bearer ${customerToken}`;
+        return config;
+      }
+    }
+    // If the request targets delivery boy routes, use the delivery token
+    if (config.url.startsWith("/api/delivery")) {
+      const deliveryToken = localStorage.getItem("delivery_token");
+      if (deliveryToken) {
+        config.headers.Authorization = `Bearer ${deliveryToken}`;
+        return config;
+      }
+    }
     const token = localStorage.getItem("dairy_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

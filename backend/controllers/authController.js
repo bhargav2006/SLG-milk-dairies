@@ -25,8 +25,12 @@ const registerUser = async (req, res) => {
       role: role || "accountant",
     });
 
+    const payload = {
+      id: user._id,
+      role: user.role,
+    };
     // Generate token
-    const token = generateToken(user);
+    const token = generateToken(payload);
 
     res.status(201).json({
       token,
@@ -58,8 +62,12 @@ const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-
-    const token = generateToken(user);
+    const payload = {
+      id: user._id,
+      role: user.role,
+    };
+    // Generate token
+    const token = generateToken(payload);
 
     res.json({
       token,

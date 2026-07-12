@@ -1,73 +1,143 @@
-const CustomerRecord = require("../models/CustomerRecord");
+const Customer = require("../models/Customer");
+const Otp = require("../models/Otp");
+const crypto = require("crypto");
+const generateToken = require("../utils/generateToken");
+const sendWhatsapp = require("../utils/sendWhatsapp");
 
-exports.getCustomerRecords = async (req, res) => {
+exports.sendOtp = async (req, res) => {
   try {
-    const customerRecords = await CustomerRecord.find();
-    res.status(200).json(customerRecords);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    let { customerPhone } = req.body;
 
-exports.getCustomerRecordByPhone = async (req, res) => {
-  try {
-    const { customerPhone } = req.params;
-    const customerRecord = await CustomerRecord.findOne({ customerPhone });
-    if (!customerRecord) {
-      return res.status(404).json({ message: "Customer record not found" });
+    if (!customerPhone) {
+      return res.status(400).json({
+        message: "Customer phone number is required",
+      });
     }
-    res.status(200).json(customerRecord);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
-exports.updateCustomerRecord = async (req, res) => {
-  try {
-    const { customerPhone } = req.params;
-    const {
-      customerName,
-      customerEmail,
-      optOut,
-      loyaltyPoints,
-      productsHistory,
-    } = req.body;
-    const customerRecord = await CustomerRecord.findOne({ customerPhone });
-    if (!customerRecord) {
-      return res.status(404).json({ message: "Customer record not found" });
-    } else {
-      if (customerName !== undefined)
-        customerRecord.customerName = customerName;
-      if (customerEmail !== undefined)
-        customerRecord.customerEmail = customerEmail;
-      if (optOut !== undefined) customerRecord.optOut = optOut;
-      if (loyaltyPoints !== undefined)
-        customerRecord.loyaltyPoints = loyaltyPoints;
-      if (productsHistory?.length) {
-        customerRecord.productsHistory.push(...productsHistory);
-      }
+    if (customerPhone.length !== 10 || !/^\d+$/.test(customerPhone)) {
+      return res.status(400).json({
+        message: "Invalid phone number format (should be 10 digits)",
+      });
     }
-    await customerRecord.save();
-    res.status(200).json(customerRecord);
+
+    // Format phone number
+    customerPhone = customerPhone.startsWith("91")
+      ? customerPhone
+      : `91${customerPhone}`;
+
+    // Generate 6 digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    // Delete previous OTP if exists
+    await Otp.deleteMany({
+      phone: customerPhone,
+    });
+
+    // Save new OTP
+    await Otp.create({
+      phone: customerPhone,
+      otp,
+    });
+
+    // Send OTP through WhatsApp
+    // We'll create this utility next
+    // await sendWhatsapp(customerPhone, otp);
+    console.log(`OTP for ${customerPhone}: ${otp}`);
+
+    res.status(200).json({
+      message: "OTP sent successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to send OTP",
+    });
   }
 };
 
-exports.deleteCustomerRecord = async (req, res) => {
+exports.verifyOtp = async (req, res) => {
   try {
-    const { customerPhone } = req.params;
-    const customerRecord = await CustomerRecord.findOneAndDelete({
+    let { customerPhone, otp } = req.body;
+
+    if (!customerPhone || !otp) {
+      return res.status(400).json({
+        message: "Phone number and OTP are required",
+      });
+    }
+
+    customerPhone = customerPhone.startsWith("91")
+      ? customerPhone
+      : `91${customerPhone}`;
+
+    const otpRecord = await Otp.findOne({
+      phone: customerPhone,
+      otp,
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // Check Expiry
+    if (otpRecord.expiresAt < new Date()) {
+      await otpRecord.deleteOne();
+
+      return res.status(400).json({
+        message: "OTP has expired",
+      });
+    }
+
+    // Find customer
+    let customer = await Customer.findOne({
       customerPhone,
     });
-    if (!customerRecord) {
-      return res.status(404).json({ message: "Customer record not found" });
+
+    // First Time Login
+    if (!customer) {
+      customer = await Customer.create({
+        customerPhone,
+      });
     }
-    res.json({
-      message: "Customer deleted successfully",
-      customerRecord,
+
+    // Delete OTP
+    await otpRecord.deleteOne();
+
+    // Generate JWT
+    const token = generateToken({
+      id: customer._id,
+      role: "customer",
+    });
+
+    res.status(200).json({
+      message: "OTP verified successfully",
+      token,
+      customer,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+
+    res.status(500).json({
+      message: "OTP verification failed",
+    });
+  }
+};
+
+exports.getProfile = async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.customer.id);
+    if (!customer)
+      return res.status(404).json({ message: "Customer not found" });
+    res.status(200).json({
+      message: "Profile fetched successfully",
+      customer,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to fetch profile",
+    });
   }
 };

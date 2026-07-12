@@ -14,6 +14,12 @@ const productRoutes = require("./routes/productRoutes");
 const billRoutes = require("./routes/billRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
 
+const customerRoutes = require("./routes/customerRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const deliveryRoutes = require("./routes/deliveryRoutes");
+const customerProductRoutes = require("./routes/customerProductRoutes");
+const accountantRoutes = require("./routes/accountantRoutes");
+
 const app = express();
 const server = require("http").createServer(app);
 const allowedOrigins = [
@@ -35,6 +41,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/bill", billRoutes);
+
+app.use("/api/customer", customerRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/delivery", deliveryRoutes);
+app.use("/api/accountant", accountantRoutes);
+// // Public customer products
+app.use("/api/shop/products", customerProductRoutes);
 
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
