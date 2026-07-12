@@ -12,10 +12,18 @@ const {
   updateOrderStatus,
   updateAvailability,
   sendDeliveryOtp,
+  getDeliveryBoys,
+  updateDeliveryBoy,
+  deleteDeliveryBoy,
 } = require("../controllers/deliveryController");
 
 // Admin register Delivery Boy
 router.post("/register", protect, admin, registerDeliveryBoy);
+
+// Admin manage Delivery Boys
+router.get("/", protect, admin, getDeliveryBoys);
+router.put("/:id", protect, admin, updateDeliveryBoy);
+router.delete("/:id", protect, admin, deleteDeliveryBoy);
 
 // Login
 router.post("/login", loginDeliveryBoy);

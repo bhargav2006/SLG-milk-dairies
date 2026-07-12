@@ -234,3 +234,73 @@ exports.sendDeliveryOtp = async (req, res) => {
     res.status(500).json({ message: "Server error sending delivery OTP" });
   }
 };
+
+// @desc    Get all delivery boys
+// @route   GET /api/delivery
+// @access  Private (Admin)
+exports.getDeliveryBoys = async (req, res) => {
+  try {
+    const boys = await DeliveryBoy.find({}).select("-password");
+    res.status(200).json(boys);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error retrieving delivery boys" });
+  }
+};
+
+// @desc    Update delivery boy
+// @route   PUT /api/delivery/:id
+// @access  Private (Admin)
+exports.updateDeliveryBoy = async (req, res) => {
+  try {
+    const { name, phone, password, currentLocation, isAvailable, isActive } = req.body;
+    const boy = await DeliveryBoy.findById(req.params.id);
+
+    if (!boy) {
+      return res.status(404).json({ message: "Delivery boy not found" });
+    }
+
+    // Check if phone number is unique if modified
+    if (phone && phone !== boy.phone) {
+      const existing = await DeliveryBoy.findOne({ phone });
+      if (existing) {
+        return res.status(400).json({ message: "Mobile number is already registered by another delivery partner" });
+      }
+      boy.phone = phone;
+    }
+
+    if (name) boy.name = name;
+    if (currentLocation) {
+      if (currentLocation.street) boy.currentLocation.street = currentLocation.street;
+      if (currentLocation.city) boy.currentLocation.city = currentLocation.city;
+    }
+    if (typeof isAvailable === "boolean") boy.isAvailable = isAvailable;
+    if (typeof isActive === "boolean") boy.isActive = isActive;
+    
+    if (password) {
+      boy.password = password; // pre-save hook will hash it automatically
+    }
+
+    await boy.save();
+    res.status(200).json({ message: "Delivery boy updated successfully", deliveryBoy: boy });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error updating delivery boy" });
+  }
+};
+
+// @desc    Delete delivery boy
+// @route   DELETE /api/delivery/:id
+// @access  Private (Admin)
+exports.deleteDeliveryBoy = async (req, res) => {
+  try {
+    const boy = await DeliveryBoy.findByIdAndDelete(req.params.id);
+    if (!boy) {
+      return res.status(404).json({ message: "Delivery boy not found" });
+    }
+    res.status(200).json({ message: "Delivery boy deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error deleting delivery boy" });
+  }
+};

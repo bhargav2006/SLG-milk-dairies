@@ -34,6 +34,27 @@ const deliveryBoyService = {
     const response = await api.put("/api/delivery/availability", { isAvailable });
     return response.data;
   },
+
+  // Admin CRUD actions for managing Delivery Boys
+  adminGetDeliveryBoys: async () => {
+    const response = await api.get("/api/delivery");
+    return response.data;
+  },
+
+  adminCreateDeliveryBoy: async (boyData) => {
+    const response = await api.post("/api/delivery/register", boyData);
+    return response.data;
+  },
+
+  adminUpdateDeliveryBoy: async (id, boyData) => {
+    const response = await api.put(`/api/delivery/${id}`, boyData);
+    return response.data;
+  },
+
+  adminDeleteDeliveryBoy: async (id) => {
+    const response = await api.delete(`/api/delivery/${id}`);
+    return response.data;
+  },
 };
 
 export default deliveryBoyService;
