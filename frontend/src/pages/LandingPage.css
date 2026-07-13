@@ -2391,7 +2391,7 @@
 
   .landing-page-root .lp-storefront-grid,
   .landing-page-root .lp-storefront-grid-loading {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile screens! */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -2450,7 +2450,18 @@
 
   .landing-page-root .lp-storefront-grid,
   .landing-page-root .lp-storefront-grid-loading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  .landing-page-root .lp-p-details {
+    padding: 8px;
+  }
+
+  .landing-page-root .lp-btn-store-add,
+  .landing-page-root .lp-quantity-selector {
+    min-height: 34px;
+    font-size: 0.75rem;
   }
 
   .landing-page-root .lp-p-details {
@@ -2529,7 +2540,7 @@
 
   .landing-page-root .lp-storefront-grid,
   .landing-page-root .lp-storefront-grid-loading {
-    grid-template-columns: 1fr; /* 1 column on extremely small mobile screens */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .landing-page-root .lp-delivery-info-bar {

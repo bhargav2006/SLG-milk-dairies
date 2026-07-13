@@ -1,7 +1,7 @@
 .to-page-root {
   background-color: #f8fafc;
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #0f172a;
 }
 
@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-weight: 800;
   font-size: 1.05rem;
   color: #1e3a8a;
@@ -94,7 +94,7 @@
 }
 
 .to-auth-header h2 {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 1.35rem;
   font-weight: 800;
   color: #1e3a8a;
@@ -190,7 +190,7 @@
 }
 
 .to-workspace-header h3 {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
   color: #1e3a8a;
@@ -290,12 +290,30 @@
   text-transform: uppercase;
 }
 
-.status-badge.placed { background-color: #eff6ff; color: #1e40af; }
-.status-badge.accepted { background-color: #fef3c7; color: #d97706; }
-.status-badge.assigned { background-color: #ecfdf5; color: #059669; }
-.status-badge.out-for-delivery { background-color: #f0fdf4; color: #16a34a; }
-.status-badge.delivered { background-color: #d1fae5; color: #047857; }
-.status-badge.cancelled { background-color: #fef2f2; color: #dc2626; }
+.status-badge.placed {
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+.status-badge.accepted {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+.status-badge.assigned {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+.status-badge.out-for-delivery {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+.status-badge.delivered {
+  background-color: #d1fae5;
+  color: #047857;
+}
+.status-badge.cancelled {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
 
 .to-card-body {
   padding: 16px;
@@ -449,9 +467,18 @@
   color: #64748b;
 }
 
-.to-empty-state .emoji { font-size: 2.5rem; margin-bottom: 8px; }
-.to-empty-state h4 { color: #1e3a8a; }
-.to-empty-state p { font-size: 0.85rem; max-width: 250px; margin-bottom: 16px; }
+.to-empty-state .emoji {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+.to-empty-state h4 {
+  color: #1e3a8a;
+}
+.to-empty-state p {
+  font-size: 0.85rem;
+  max-width: 250px;
+  margin-bottom: 16px;
+}
 
 .to-shop-cta-btn {
   background-color: #1e40af;
@@ -477,8 +504,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .lp-fade-in {
@@ -486,6 +517,85 @@
 }
 
 @keyframes fade-in {
-  0% { opacity: 0; transform: scale(0.98); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .to-container {
+    padding: 0 12px;
+  }
+
+  .to-header {
+    height: auto;
+    padding: 8px 0;
+  }
+
+  .to-header-flex {
+    gap: 10px;
+    align-items: center;
+  }
+
+  .to-back-shop-btn,
+  .to-logout-btn {
+    min-height: 40px;
+    font-size: 0.78rem;
+  }
+
+  .to-brand-title {
+    width: 100%;
+    justify-content: center;
+    order: -1;
+  }
+
+  .to-main-container {
+    padding: 16px 0 32px;
+  }
+
+  .to-auth-card {
+    padding: 24px 16px;
+  }
+
+  .to-workspace-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .to-refresh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .to-workspace-tabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .to-workspace-tabs .tab-btn {
+    width: 100%;
+  }
+
+  .to-card-header,
+  .to-card-footer,
+  .boy-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .to-cancel-btn,
+  .to-shop-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .to-order-card {
+    border-radius: 10px;
+  }
 }

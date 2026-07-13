@@ -442,7 +442,13 @@
 
 @media (max-width: 640px) {
   .db-dash-header {
-    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .db-header-left {
+    flex: 1 1 100%;
   }
 
   .db-header-left {
@@ -487,6 +493,10 @@
     gap: 8px;
   }
 
+  .db-task-collect-box {
+    align-items: flex-start;
+  }
+
   .customer-row {
     flex-direction: column;
     align-items: flex-start;
@@ -504,6 +514,11 @@
 
   .db-task-actions-row {
     padding: 12px;
+    flex-direction: column;
+  }
+
+  .db-task-actions-row > * {
+    width: 100%;
   }
 
   .db-task-actions-row > div,

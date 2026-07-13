@@ -344,7 +344,9 @@
   border-radius: 8px;
   width: 100%;
   max-width: 600px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   animation: modal-slide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -465,18 +467,33 @@
 }
 
 @keyframes spinner-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes modal-slide {
-  from { transform: translateY(15px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Mobile responsive view for table */
 @media (max-width: 768px) {
-  .orders-table, .orders-table thead, .orders-table tbody, .orders-table th, .orders-table td, .orders-table tr {
+  .orders-table,
+  .orders-table thead,
+  .orders-table tbody,
+  .orders-table th,
+  .orders-table td,
+  .orders-table tr {
     display: block;
   }
   .orders-table thead tr {
@@ -521,5 +538,59 @@
   .modal-section-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  .orders-page-root {
+    padding: 16px;
+  }
+
+  .orders-header-row {
+    align-items: stretch;
+  }
+
+  .refresh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .orders-tabs {
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .table-actions-flex {
+    justify-content: stretch;
+    gap: 8px;
+  }
+
+  .table-actions-flex > * {
+    width: 100%;
+  }
+
+  .assign-action-box {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dboy-select,
+  .btn-action-view,
+  .btn-action-accept,
+  .btn-action-assign,
+  .assigned-boy-tag {
+    width: 100%;
+  }
+
+  .orders-modal-card .modal-header,
+  .orders-modal-card .modal-body {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
