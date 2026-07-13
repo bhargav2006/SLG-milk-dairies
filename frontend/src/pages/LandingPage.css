@@ -302,7 +302,7 @@
   border-bottom: 1px solid rgba(245, 158, 11, 0.15);
   padding: 8px 0;
   font-size: 0.85rem;
-  min-height: 80px;
+  margin-top: 80px;
 }
 
 .landing-page-root .lp-location-flex {
