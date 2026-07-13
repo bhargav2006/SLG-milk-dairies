@@ -135,8 +135,7 @@
   top: 0;
   left: 0;
   right: 0;
-  min-height: 80px;
-  height: auto;
+  height: 80px;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -146,21 +145,17 @@
 }
 
 .landing-page-root .lp-nav-container {
-  min-height: 80px;
-  height: auto;
+  height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
 }
 
 .landing-page-root .lp-brand-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 0;
-  flex: 0 1 auto;
+  height: 100%;
 }
 
 .landing-page-root .lp-logo-img {
@@ -172,7 +167,6 @@
 .landing-page-root .lp-brand-text {
   display: flex;
   flex-direction: column;
-  min-width: 0;
 }
 
 .landing-page-root .lp-brand-name {
@@ -182,7 +176,6 @@
   color: var(--lp-primary);
   line-height: 1.1;
   letter-spacing: -0.01em;
-  white-space: nowrap;
 }
 
 .landing-page-root .lp-brand-sub {
@@ -197,9 +190,6 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  flex: 1 1 auto;
-  justify-content: center;
-  min-width: 0;
 }
 
 .landing-page-root .lp-nav-link {
@@ -251,7 +241,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
 }
 
 .landing-page-root .lp-header-cart-btn {
@@ -313,16 +302,12 @@
   border-bottom: 1px solid rgba(245, 158, 11, 0.15);
   padding: 8px 0;
   font-size: 0.85rem;
-  position: relative;
-  z-index: 2;
 }
 
 .landing-page-root .lp-location-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
 }
 
 .landing-page-root .lp-location-text {
@@ -344,45 +329,6 @@
 
 .landing-page-root .lp-location-change-btn:hover {
   text-decoration: underline;
-}
-
-@media (max-width: 1280px) {
-  .landing-page-root .lp-nav-container {
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .landing-page-root .lp-brand-logo {
-    flex: 1 1 auto;
-  }
-
-  .landing-page-root .lp-nav-menu {
-    order: 3;
-    flex: 1 1 100%;
-    justify-content: center;
-    padding-top: 6px;
-    gap: 14px;
-  }
-
-  .landing-page-root .lp-header-actions {
-    margin-left: auto;
-  }
-
-  .landing-page-root .lp-location-flex {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 1100px) {
-  .landing-page-root .lp-brand-name {
-    white-space: normal;
-    font-size: 0.92rem;
-  }
-
-  .landing-page-root .lp-nav-menu {
-    gap: 12px;
-    justify-content: flex-start;
-  }
 }
 
 /* Compact Hero Section */
