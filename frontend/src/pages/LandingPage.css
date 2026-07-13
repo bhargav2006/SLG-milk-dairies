@@ -135,7 +135,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  min-height: 80px;
+  height: auto;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
