@@ -29,9 +29,9 @@ const PrivacyPolicy = () => {
       {/* Header bar */}
       <header className="privacy-header-nav">
         <div className="privacy-brand">
-          <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI Logo" className="privacy-logo" />
+          <img src="/logo.png" alt="SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY Logo" className="privacy-logo" />
           <div className="privacy-brand-text">
-            <span className="privacy-brand-name">SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</span>
+            <span className="privacy-brand-name">SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY</span>
             <span className="privacy-brand-sub">VISAKHA DAIRY PARTNER</span>
           </div>
         </div>
@@ -50,7 +50,7 @@ const PrivacyPolicy = () => {
           </div>
           <h1 className="privacy-hero-title">Privacy Policy</h1>
           <p className="privacy-hero-desc">
-            We value your trust. This Privacy Policy explains how SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS collects, uses, and safeguards information when you visit our website, use our billing portal, or contact us.
+            We value your trust. This Privacy Policy explains how SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY collects, uses, and safeguards information when you visit our website, use our billing portal, or contact us.
           </p>
           <div className="privacy-updated-badge">
             <Clock size={14} /> Last Updated: {lastUpdated}
@@ -85,7 +85,7 @@ const PrivacyPolicy = () => {
             <section id="introduction" className="privacy-section">
               <h2>1. Introduction & Scope</h2>
               <p>
-                <strong>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</strong> ("we", "us", or "our") operates the website and billing management portal. We are a registered Micro Enterprise (Udyam Registration: <strong>UDYAM-AP-03-0012683</strong>) and an authorized distribution partner of <strong>Visakha Dairy</strong> based in East Godavari, Andhra Pradesh, India.
+                <strong>SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY</strong> ("we", "us", or "our") operates the website and billing management portal. We are a registered Micro Enterprise (Udyam Registration: <strong>UDYAM-AP-03-0012683</strong>) and an authorized distribution partner of <strong>Visakha Dairy</strong> based in East Godavari, Andhra Pradesh, India.
               </p>
               <p>
                 This policy applies to information collected through our public website, contact forms, and billing portals used by our wholesale partners, accountants, and administrators. By interacting with our services, you consent to the data practices described in this policy.
@@ -191,7 +191,7 @@ const PrivacyPolicy = () => {
                   <UserCheck size={18} />
                   <div>
                     <strong>Legal Business Profile:</strong>
-                    <p>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</p>
+                    <p>SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY</p>
                   </div>
                 </div>
 
@@ -232,7 +232,7 @@ const PrivacyPolicy = () => {
 
       {/* Footer */}
       <footer className="privacy-footer">
-        <p>&copy; 2026 SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All Rights Reserved.</p>
+        <p>&copy; 2026 SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY. All Rights Reserved.</p>
         <p className="privacy-footer-sub">Partnered with Visakha Dairy Cooperative Union.</p>
       </footer>
     </div>

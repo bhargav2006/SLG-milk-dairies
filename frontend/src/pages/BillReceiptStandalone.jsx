@@ -156,7 +156,7 @@ const BillReceiptStandalone = () => {
             >
               <img
                 src="/logo.png"
-                alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo"
+                alt="SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY Logo"
                 style={{
                   width: "64px",
                   height: "64px",
@@ -172,7 +172,7 @@ const BillReceiptStandalone = () => {
                 letterSpacing: "-0.5px",
               }}
             >
-              SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
+              SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY
             </h2>
             <p
               style={{
@@ -364,7 +364,7 @@ const BillReceiptStandalone = () => {
               </strong>
             </p>
             <p style={{ marginTop: "10px" }}>
-              Thank you for shopping at SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS!
+              Thank you for shopping at SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY!
             </p>
             <p>Please visit us again.</p>
           </div>

@@ -33,7 +33,7 @@ const Login = () => {
     setLoading(true);
     try {
       await login(email, password);
-      showSuccess("Welcome back to SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS!");
+      showSuccess("Welcome back to SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY!");
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -69,7 +69,7 @@ const Login = () => {
           >
             <img
               src="/logo.png"
-              alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo"
+              alt="SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY Logo"
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
@@ -77,7 +77,7 @@ const Login = () => {
             className="brand-name"
             style={{ fontSize: "1.75rem", textAlign: "center" }}
           >
-            SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
+            SRI LAKSHMI GANAPATI MILKS VISAKHA DAIRY
           </h1>
           <p className="login-subtitle">Billing & Management System</p>
         </div>
