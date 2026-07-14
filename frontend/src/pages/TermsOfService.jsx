@@ -32,7 +32,7 @@ const TermsOfService = () => {
         <div className="terms-brand">
           <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI Logo" className="terms-logo" />
           <div className="terms-brand-text">
-            <span className="terms-brand-name">SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</span>
+            <span className="terms-brand-name">SRI LAKSHMI GANAPATHI MILK DAIRYS</span>
             <span className="terms-brand-sub">VISAKHA DAIRY PARTNER</span>
           </div>
         </div>
@@ -51,7 +51,7 @@ const TermsOfService = () => {
           </div>
           <h1 className="terms-hero-title">Terms of Service</h1>
           <p className="terms-hero-desc">
-            Please read these Terms of Service carefully. These terms govern your access to and use of the SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS website, online billing portal, and wholesale supply services.
+            Please read these Terms of Service carefully. These terms govern your access to and use of the SRI LAKSHMI GANAPATHI MILK DAIRYS website, online billing portal, and wholesale supply services.
           </p>
           <div className="terms-updated-badge">
             <Clock size={14} /> Last Updated: {lastUpdated}
@@ -88,7 +88,7 @@ const TermsOfService = () => {
             <section id="acceptance" className="terms-section">
               <h2>1. Terms & Acceptance</h2>
               <p>
-                <strong>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</strong> ("we", "us", or "our") operates this website and the integrated billing management portal. We are a registered Micro Enterprise (Udyam Registration: <strong>UDYAM-AP-03-0012683</strong>) and an authorized distribution partner of <strong>Visakha Dairy</strong> based in East Godavari, Andhra Pradesh, India.
+                <strong>SRI LAKSHMI GANAPATHI MILK DAIRYS</strong> ("we", "us", or "our") operates this website and the integrated billing management portal. We are a registered Micro Enterprise (Udyam Registration: <strong>UDYAM-AP-03-0012683</strong>) and an authorized distribution partner of <strong>Visakha Dairy</strong> based in East Godavari, Andhra Pradesh, India.
               </p>
               <p>
                 By accessing our website, registering an account on our billing portal, or placing orders through our wholesale channels, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use our website, services, or billing portal.
@@ -164,7 +164,7 @@ const TermsOfService = () => {
             <section id="property" className="terms-section">
               <h2>6. Intellectual Property</h2>
               <p>
-                All proprietary software, billing designs, database schemas, text, and graphics on this portal are the intellectual property of <strong>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</strong>.
+                All proprietary software, billing designs, database schemas, text, and graphics on this portal are the intellectual property of <strong>SRI LAKSHMI GANAPATHI MILK DAIRYS</strong>.
               </p>
               <p>
                 Trademarks, product brands, and logos relating to <strong>Visakha Dairy</strong> (Sri Vijaya Visakha District Milk Producers Mutually Aided Cooperative Union Ltd.) are the exclusive property of the cooperative union and are used herein under partner distribution authorizations.
@@ -199,7 +199,7 @@ const TermsOfService = () => {
                   <UserCheck size={18} />
                   <div>
                     <strong>Legal Business Profile:</strong>
-                    <p>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</p>
+                    <p>SRI LAKSHMI GANAPATHI MILK DAIRYS</p>
                   </div>
                 </div>
 
@@ -240,7 +240,7 @@ const TermsOfService = () => {
 
       {/* Footer */}
       <footer className="terms-footer">
-        <p>&copy; 2026 SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All Rights Reserved.</p>
+        <p>&copy; 2026 SRI LAKSHMI GANAPATHI MILK DAIRYS. All Rights Reserved.</p>
         <p className="terms-footer-sub">Partnered with Visakha Dairy Cooperative Union.</p>
       </footer>
     </div>

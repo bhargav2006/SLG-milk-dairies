@@ -202,7 +202,7 @@ const Dashboard = () => {
         <p
           style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)" }}
         >
-          Here is a quick overview of the SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS state for today.
+          Here is a quick overview of the SRI LAKSHMI GANAPATHI MILK DAIRYS state for today.
         </p>
       </div>
 
@@ -560,10 +560,10 @@ const Dashboard = () => {
                   marginBottom: "8px",
                 }}
               >
-                <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
+                <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK DAIRYS Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "50%" }} />
               </div>
               <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-                SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
+                SRI LAKSHMI GANAPATHI MILK DAIRYS
               </h2>
               <p
                 style={{
@@ -755,7 +755,7 @@ const Dashboard = () => {
                 </strong>
               </p>
               <p style={{ marginTop: "8px" }}>
-                Thank you for shopping at SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS!
+                Thank you for shopping at SRI LAKSHMI GANAPATHI MILK DAIRYS!
               </p>
               <p>Please visit us again.</p>
             </div>

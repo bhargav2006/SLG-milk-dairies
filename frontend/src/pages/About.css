@@ -1,5 +1,7 @@
 /* Landing Page Styles scoped to .landing-page-root */
 
+
+
 .landing-page-root {
     --lp-primary: #1e40af;       /* Deep Trust Blue */
     --lp-primary-dark: #1e3a8a;  /* Dark Blue */
@@ -93,6 +95,12 @@
 .landing-page-root .lp-grid {
     display: grid;
     gap: 32px;
+}
+
+@media (max-width: 768px) {
+    .landing-page-root .lp-grid {
+        gap: 10px;
+    }
 }
 
 .landing-page-root .lp-grid-2 {
@@ -296,9 +304,10 @@
 .landing-page-root .lp-title-underline {
     width: 60px;
     height: 4px;
-    background-color: var(--lp-primary);
+    background: linear-gradient(90deg, #1e40af, #3b82f6);
     margin: 16px auto 0;
     border-radius: 2px;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
 }
 
 /* Hero Section */

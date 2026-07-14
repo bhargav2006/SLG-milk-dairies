@@ -1,13 +1,6 @@
 import React from "react";
 
-const CategoryFilter = ({ activeFilter, setActiveFilter }) => {
-  const filters = [
-    { id: "all", label: "✨ All Products" },
-    { id: "milk", label: "🥛 Milk & Curd" },
-    { id: "ghee", label: "🧈 Ghee & Butter" },
-    { id: "sweets", label: "🍦 Sweets & Dessert" },
-  ];
-
+const CategoryFilter = ({ activeFilter, setActiveFilter, filters = [] }) => {
   return (
     <div className="lp-product-filters-wrapper">
       <div className="lp-product-filters">
@@ -16,7 +9,7 @@ const CategoryFilter = ({ activeFilter, setActiveFilter }) => {
             key={filterObj.id}
             className={`lp-filter-btn ${activeFilter === filterObj.id ? "active" : ""}`}
             onClick={() => setActiveFilter(filterObj.id)}
-          >
+            type="button">
             {filterObj.label}
           </button>
         ))}

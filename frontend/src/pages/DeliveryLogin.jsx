@@ -96,7 +96,7 @@ const DeliveryLogin = () => {
         </form>
 
         <div className="db-login-footer">
-          <p>Sri Lakshmi Ganapathi Milk and Cool Drinks</p>
+          <p>Sri Lakshmi Ganapathi Milk Dairys - Visakha Dairy Partner</p>
           <button onClick={() => navigate("/")} className="back-home-link">
             Back to Public Shop
           </button>

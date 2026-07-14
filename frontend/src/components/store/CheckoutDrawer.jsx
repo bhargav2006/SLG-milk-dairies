@@ -27,6 +27,7 @@ const CheckoutDrawer = ({
   otpVerifying,
   handleSendOtp,
   handleVerifyOtp,
+  tempOtp,
   handlePlaceOrder,
   addresses,
   selectedAddressIndex,
@@ -259,6 +260,12 @@ const CheckoutDrawer = ({
                     maxLength="6"
                     required
                   />
+                  {/* [TESTING ONLY] Temporary OTP placeholder printed directly under the field */}
+                  {tempOtp && (
+                    <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "#d97706", fontWeight: "bold" }}>
+                      [TESTING ONLY] Temporary OTP: {tempOtp}
+                    </div>
+                  )}
                 </div>
 
                 <button

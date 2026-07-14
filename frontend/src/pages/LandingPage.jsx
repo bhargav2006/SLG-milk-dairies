@@ -12,6 +12,7 @@ import {
   Clock,
   MapPin,
   CheckCircle,
+  ArrowUp,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -42,12 +43,35 @@ const CONFIG = {
   DELIVERY_TODAY_CUTOFF: "7:00 PM",
 };
 
+const CATEGORY_FILTERS = [
+  { id: "all", label: "All Products" },
+  { id: "cheese", label: "Cheese" },
+  { id: "cream", label: "Cream" },
+  { id: "flavoured-milk", label: "Flavoured Milk" },
+  { id: "ghee", label: "Ghee" },
+  { id: "ice-cream", label: "Ice Cream" },
+  { id: "lassi", label: "Lassi" },
+  { id: "milk", label: "Milk" },
+  { id: "paneer", label: "Paneer" },
+  { id: "sweets", label: "Sweets" },
+  { id: "yogurt", label: "Yogurt" },
+];
+
+const normalizeCategoryKey = (value = "") =>
+  String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+
 const LandingPage = () => {
   const { user } = useAuth(); // Admin/Accountant user if logged in
   const { showSuccess, showError, showInfo } = useToast();
 
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [showScrollCatalog, setShowScrollCatalog] = useState(false);
+  const [tempOtp, setTempOtp] = useState(""); // [TESTING ONLY] Temporary OTP placeholder state
 
   // Storefront & Catalog State
   const [products, setProducts] = useState([]);
@@ -118,10 +142,19 @@ const LandingPage = () => {
   // Scroll Header Effect & Active section tracking
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      const scrollPositionVal = window.scrollY;
+      setScrolled(scrollPositionVal > 50);
+
+      const productsElement = document.getElementById("products");
+      if (productsElement) {
+        const endOfProducts = productsElement.offsetTop + productsElement.offsetHeight;
+        setShowScrollCatalog(scrollPositionVal > endOfProducts - 250);
+      } else {
+        setShowScrollCatalog(scrollPositionVal > 800);
+      }
 
       const sections = ["home", "products"];
-      const scrollPosition = window.scrollY + 120; // Offset
+      const scrollPosition = scrollPositionVal + 120; // Offset
 
       for (const sectionId of sections) {
         const element = document.getElementById(sectionId);
@@ -202,62 +235,68 @@ const LandingPage = () => {
   // --- Cart Actions ---
   const addToCart = useCallback(
     (product) => {
-      setCart((prevCart) => {
-        const existing = prevCart.find(
-          (item) => item.product._id === product._id,
-        );
-        if (existing) {
-          if (
-            product.stock !== undefined &&
-            existing.quantity >= product.stock
-          ) {
-            showError(`Only ${product.stock} items available in stock.`);
-            return prevCart;
-          }
-          showSuccess(`Increased ${product.name} quantity.`);
-          return prevCart.map((item) =>
+      const existing = cart.find((item) => item.product._id === product._id);
+      if (existing) {
+        if (
+          product.stock !== undefined &&
+          existing.quantity >= product.stock
+        ) {
+          showError(`Only ${product.stock} items available in stock.`);
+          return;
+        }
+        showSuccess(`Increased ${product.name} quantity.`);
+        setCart((prevCart) =>
+          prevCart.map((item) =>
             item.product._id === product._id
               ? { ...item, quantity: item.quantity + 1 }
               : item,
-          );
-        } else {
-          if (product.stock !== undefined && product.stock <= 0) {
-            showError("Out of stock.");
-            return prevCart;
-          }
-          showSuccess(`Added ${product.name} to cart.`);
-          return [...prevCart, { product, quantity: 1 }];
+          ),
+        );
+      } else {
+        if (product.stock !== undefined && product.stock <= 0) {
+          showError("Out of stock.");
+          return;
         }
-      });
+        showSuccess(`Added ${product.name} to cart.`);
+        setCart((prevCart) => [...prevCart, { product, quantity: 1 }]);
+      }
     },
-    [showError, showSuccess],
+    [cart, showError, showSuccess],
   );
 
   const updateCartQty = useCallback(
     (productId, amount) => {
-      setCart((prevCart) => {
-        return prevCart
-          .map((item) => {
-            if (item.product._id === productId) {
-              const nextQty = item.quantity + amount;
-              if (nextQty <= 0) return null;
-              if (
-                item.product.stock !== undefined &&
-                nextQty > item.product.stock
-              ) {
-                showError(
-                  `Only ${item.product.stock} items available in stock.`,
-                );
-                return item;
-              }
-              return { ...item, quantity: nextQty };
-            }
-            return item;
-          })
-          .filter(Boolean);
-      });
+      const existing = cart.find((item) => item.product._id === productId);
+      if (!existing) return;
+
+      const nextQty = existing.quantity + amount;
+      if (nextQty <= 0) {
+        setCart((prevCart) =>
+          prevCart.filter((item) => item.product._id !== productId),
+        );
+        showInfo("Removed item from cart.");
+        return;
+      }
+
+      if (
+        existing.product.stock !== undefined &&
+        nextQty > existing.product.stock
+      ) {
+        showError(
+          `Only ${existing.product.stock} items available in stock.`,
+        );
+        return;
+      }
+
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.product._id === productId
+            ? { ...item, quantity: nextQty }
+            : item,
+        ),
+      );
     },
-    [showError],
+    [cart, showError, showInfo],
   );
 
   const removeFromCart = (productId) => {
@@ -307,9 +346,14 @@ const LandingPage = () => {
 
     try {
       setOtpVerifying(true);
-      await customerService.sendOtp(customerPhone);
+      // [TESTING ONLY] Retrieve response containing the generated OTP
+      const res = await customerService.sendOtp(customerPhone);
       setOtpSent(true);
-      showSuccess("OTP sent successfully. Check your terminal/console!");
+      // [TESTING ONLY] Save generated OTP to display next to the field
+      if (res && res.otp) {
+        setTempOtp(res.otp);
+      }
+      showSuccess("OTP sent successfully. Check your mobile verification step!");
     } catch (err) {
       console.error(err);
       showError(err.response?.data?.message || "Failed to send OTP.");
@@ -492,38 +536,19 @@ const LandingPage = () => {
   };
 
   const filteredProducts = products.filter((prod) => {
+    const productName = prod.name?.toLowerCase?.() || "";
+    const productCategory = prod.category?.toLowerCase?.() || "";
+    const normalizedProductCategory = normalizeCategoryKey(prod.category);
+    const normalizedActiveFilter = normalizeCategoryKey(activeFilter);
+
     const matchesSearch =
-      prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prod.category.toLowerCase().includes(searchQuery.toLowerCase());
+      productName.includes(searchQuery.toLowerCase()) ||
+      productCategory.includes(searchQuery.toLowerCase());
 
     if (activeFilter === "all") return matchesSearch;
-    if (activeFilter === "milk") {
-      return (
-        matchesSearch &&
-        (prod.category.toLowerCase() === "milk" ||
-          prod.category.toLowerCase() === "yogurt" ||
-          prod.category.toLowerCase() === "curd")
-      );
-    }
-    if (activeFilter === "ghee") {
-      return (
-        matchesSearch &&
-        (prod.category.toLowerCase() === "ghee" ||
-          prod.category.toLowerCase() === "butter" ||
-          prod.category.toLowerCase() === "cheese" ||
-          prod.category.toLowerCase() === "paneer")
-      );
-    }
-    if (activeFilter === "sweets") {
-      return (
-        matchesSearch &&
-        (prod.category.toLowerCase() === "sweets" ||
-          prod.category.toLowerCase() === "lassi" ||
-          prod.category.toLowerCase() === "flavoured milk" ||
-          prod.category.toLowerCase() === "ice cream")
-      );
-    }
-    return matchesSearch;
+    return (
+      matchesSearch && normalizedProductCategory === normalizedActiveFilter
+    );
   });
 
   const handleProceedToCheckout = () => {
@@ -557,6 +582,7 @@ const LandingPage = () => {
 
     setIsCheckoutOpen(true);
   };
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="landing-page-root">
@@ -567,10 +593,12 @@ const LandingPage = () => {
         cartCount={cartCount}
         handleCustomerLogout={handleCustomerLogout}
         setIsCartOpen={setIsCartOpen}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
       />
 
       {/* 2. Sticky Delivery Location Placeholder Bar */}
-      <div className="lp-location-banner-bar">
+      {/* <div className="lp-location-banner-bar">
         <div className="lp-container lp-location-flex">
           <span className="lp-location-text">📍 Select Delivery Location</span>
           <button
@@ -583,61 +611,65 @@ const LandingPage = () => {
             Change Location
           </button>
         </div>
-      </div>
+      </div> */}
 
-      {/* 3. Hero Banner (Reduced Height, Concise Text) */}
-      <Hero />
+      <div className={`background-non-click ${menuOpen ? "disabled" : ""}`}>
+        {/* 3. Hero Banner (Reduced Height, Concise Text) */}
+        <Hero />
 
-      {/* 4. Delivery terms & Offers Section */}
-      <OfferBanner
-        minOrderAmount={CONFIG.MIN_ORDER_AMOUNT}
-        freeDeliveryAmount={CONFIG.FREE_DELIVERY_AMOUNT}
-        businessHours={CONFIG.BUSINESS_HOURS}
-        deliveryTodayCutoff={CONFIG.DELIVERY_TODAY_CUTOFF}
-      />
+        {/* 4. Delivery terms & Offers Section */}
+        <OfferBanner
+          minOrderAmount={CONFIG.MIN_ORDER_AMOUNT}
+          freeDeliveryAmount={CONFIG.FREE_DELIVERY_AMOUNT}
+          businessHours={CONFIG.BUSINESS_HOURS}
+          deliveryTodayCutoff={CONFIG.DELIVERY_TODAY_CUTOFF}
+        />
 
-      {/* 5. Sticky Search & Categories Controls Panel */}
-      <div className="lp-sticky-controls-panel">
-        <div className="lp-container">
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-          <CategoryFilter
-            activeFilter={activeFilter}
-            setActiveFilter={setActiveFilter}
-          />
-        </div>
-      </div>
-
-      {/* 6. Dynamic Products Catalog Section */}
-      <section id="products" className="lp-section-padding lp-catalog-section">
-        <div className="lp-container">
-          <div className="lp-section-header">
-            <span className="lp-section-subtitle">Catalog Store</span>
-            <h2 className="lp-section-title">🥛 All Products</h2>
-            <div
-              className="lp-title-underline"
-              style={{ margin: "12px 0 0" }}></div>
+        {/* 5. Sticky Search & Categories Controls Panel */}
+        <div className="lp-sticky-controls-panel">
+          <div className="lp-container">
+            <SearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+            <CategoryFilter
+              activeFilter={activeFilter}
+              setActiveFilter={setActiveFilter}
+              filters={CATEGORY_FILTERS}
+            />
           </div>
-
-          <ProductGrid
-            loadingProducts={loadingProducts}
-            filteredProducts={filteredProducts}
-            getProductQtyInCart={getProductQtyInCart}
-            addToCart={addToCart}
-            updateCartQty={updateCartQty}
-            getProductImage={getProductImage}
-            onProductClick={setSelectedProduct}
-          />
         </div>
-      </section>
 
-      {/* 7. Trust perks banner */}
-      <TrustSection />
+        {/* 6. Dynamic Products Catalog Section */}
+        <section id="products" className="lp-section-padding lp-catalog-section">
+          <div className="lp-container">
+            <div className="lp-section-header">
+              <span className="lp-section-subtitle">Catalog Store</span>
+              <h2 className="lp-section-title">🥛 All Products</h2>
+              <div
+                className="lp-title-underline"
+                style={{ margin: "12px 0 0" }}>
+              </div>
+            </div>
 
-      {/* 8. Modern Accessibility-friendly Footer */}
-      <Footer businessHours={CONFIG.BUSINESS_HOURS} />
+            <ProductGrid
+              loadingProducts={loadingProducts}
+              filteredProducts={filteredProducts}
+              getProductQtyInCart={getProductQtyInCart}
+              addToCart={addToCart}
+              updateCartQty={updateCartQty}
+              getProductImage={getProductImage}
+              onProductClick={setSelectedProduct}
+            />
+          </div>
+        </section>
+
+        {/* 7. Trust perks banner */}
+        <TrustSection />
+
+        {/* 8. Modern Accessibility-friendly Footer */}
+        <Footer businessHours={CONFIG.BUSINESS_HOURS} />
+      </div>
 
       {/* 9. Mobile Floating Bottom Cart Bar */}
       <FloatingCart
@@ -645,6 +677,18 @@ const LandingPage = () => {
         cartTotal={cartTotal}
         setIsCartOpen={setIsCartOpen}
       />
+
+      {showScrollCatalog && (
+        <a
+          href="#products"
+          className="lp-floating-catalog-btn"
+          aria-label="Back to Catalog Store"
+          title="Back to Catalog Store"
+        >
+          <ArrowUp size={20} />
+          <span className="lp-floating-catalog-text">Store Catalog</span>
+        </a>
+      )}
 
       {/* --- CART SLIDE-OUT PANEL DRAWER --- */}
       {isCartOpen && (
@@ -804,6 +848,7 @@ const LandingPage = () => {
         otpVerifying={otpVerifying}
         handleSendOtp={handleSendOtp}
         handleVerifyOtp={handleVerifyOtp}
+        tempOtp={tempOtp}
         handlePlaceOrder={handlePlaceOrder}
         addresses={addresses}
         selectedAddressIndex={selectedAddressIndex}

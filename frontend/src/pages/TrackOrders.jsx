@@ -16,6 +16,7 @@ const TrackOrders = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [tempOtp, setTempOtp] = useState(""); // [TESTING ONLY] Temporary OTP placeholder state
 
   // Orders Log State
   const [orders, setOrders] = useState([]);
@@ -32,9 +33,14 @@ const TrackOrders = () => {
 
     try {
       setOtpVerifying(true);
-      await customerService.sendOtp(customerPhone);
+      // [TESTING ONLY] Retrieve response containing the generated OTP
+      const res = await customerService.sendOtp(customerPhone);
       setOtpSent(true);
-      showSuccess("OTP sent successfully. Check your terminal/console!");
+      // [TESTING ONLY] Save generated OTP value
+      if (res && res.otp) {
+        setTempOtp(res.otp);
+      }
+      showSuccess("OTP sent successfully. Check your mobile verification step!");
     } catch (err) {
       console.error(err);
       showError(err.response?.data?.message || "Failed to send OTP.");
@@ -196,6 +202,12 @@ const TrackOrders = () => {
                       maxLength="6"
                       required
                     />
+                    {/* [TESTING ONLY] Temporary OTP placeholder printed directly under the field */}
+                    {tempOtp && (
+                      <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "#d97706", fontWeight: "bold" }}>
+                        [TESTING ONLY] Temporary OTP: {tempOtp}
+                      </div>
+                    )}
                   </div>
                   <button type="submit" disabled={otpVerifying} className="to-btn-primary">
                     {otpVerifying ? "Verifying..." : "Verify & Track Orders"}
@@ -212,7 +224,7 @@ const TrackOrders = () => {
               <div className="to-workspace-header">
                 <div>
                   <h3>Hello, {customerName || "Customer"}!</h3>
-                  <p>Here are your orders from Sri Lakshmi Ganapathi Dairy.</p>
+                  <p>Here are your orders from Sri Lakshmi Ganapathi Milk Dairys.</p>
                 </div>
                 <button onClick={fetchOrders} className="to-refresh-btn" disabled={loading}>
                   <RefreshCw size={16} className={loading ? "spin" : ""} style={{ marginRight: "6px" }} /> Refresh Status

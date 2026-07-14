@@ -140,7 +140,7 @@ const About = () => {
                   lineHeight: "1.2",
                 }}
               >
-                SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
+                SRI LAKSHMI GANAPATHI MILK DAIRYS
               </span>
               <span className="lp-brand-sub">VISAKHA DAIRY PARTNER</span>
             </div>
@@ -228,7 +228,7 @@ const About = () => {
               Purity You Can Trust, Quality You Can Taste
             </h1>
             <p className="lp-hero-desc">
-              SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS, in proud partnership
+              SRI LAKSHMI GANAPATHI MILK DAIRYS, in proud partnership
               with Visakha Dairy, delivers the finest wholesale milk and premium
               dairy products across East Godavari. Assured freshness from farm
               to table.
@@ -293,7 +293,7 @@ const About = () => {
             <div>
               <h3>Serving Purity to Families and Businesses</h3>
               <p>
-                SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS (Visakha Dairy
+                SRI LAKSHMI GANAPATHI MILK DAIRYS (Visakha Dairy
                 Partner) has been a cornerstone of the dairy supply chain in
                 East Godavari, Andhra Pradesh, since the year 2005. Under the
                 professional management of Manikonda Swamy, we run operations
@@ -377,7 +377,7 @@ const About = () => {
                   Official Business Profile
                 </h3>
                 <p style={{ color: "rgba(255,255,255,0.8)" }}>
-                  SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS — Visakha Dairy
+                  SRI LAKSHMI GANAPATHI MILK DAIRYS — Visakha Dairy
                   Distributor
                 </p>
               </div>
@@ -389,7 +389,7 @@ const About = () => {
                   <Briefcase size={16} /> Legal Business Name
                 </div>
                 <div className="lp-v-value">
-                  SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
+                  SRI LAKSHMI GANAPATHI MILK DAIRYS
                 </div>
               </div>
               <div className="lp-v-item">
@@ -492,7 +492,7 @@ const About = () => {
               <Info size={24} />
               <span>
                 Please use the above details to cross-reference our official business records during
-                Meta Verification. For document uploads, refer to our Udyam Registration Certificate (UDYAM-AP-03-0012683 under the name SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS), Partnership Agreement, Municipal
+                Meta Verification. For document uploads, refer to our Udyam Registration Certificate (UDYAM-AP-03-0012683 under the name SRI LAKSHMI GANAPATHI MILK DAIRYS), Partnership Agreement, Municipal
                 Trade License, or GST filings showing the matching name, phone number, and address.
               </span>
             </div>*/}
@@ -662,7 +662,7 @@ const About = () => {
               },
               {
                 q: "How can we verify the business identity for SLG MILK DAIRYS?",
-                a: "Our official legal business entity name is SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. You can verify this using our official Udyam certificate (UDYAM-AP-03-0012683), partnership documentation, GST registration records, or municipal trade licenses. Our verified contact numbers are +91 85000 05377, +91 99666 75377, and +91 85009 35377, and our official email is yerramsettidurgarao435@gmail.com.",
+                a: "Our official legal business entity name is SRI LAKSHMI GANAPATHI MILK DAIRYS. You can verify this using our official Udyam certificate (UDYAM-AP-03-0012683), partnership documentation, GST registration records, or municipal trade licenses. Our verified contact numbers are +91 85000 05377, +91 99666 75377, and +91 85009 35377, and our official email is yerramsettidurgarao435@gmail.com.",
               },
               {
                 q: "What geographic areas do you cover?",
@@ -699,7 +699,7 @@ const About = () => {
           <div className="lp-section-header lp-text-center">
             <span className="lp-section-subtitle">Get In Touch</span>
             <h2 className="lp-section-title" style={{ color: "#ffffff" }}>
-              Connect with SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS
+              Connect with SRI LAKSHMI GANAPATHI MILK DAIRYS
             </h2>
             <p className="lp-section-header-desc lp-text-muted">
               Have inquiries regarding wholesale milk supply, sweet catering, or
@@ -931,7 +931,7 @@ const About = () => {
               alt="SLG Logo"
               className="lp-footer-logo-img"
             />
-            <h3>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</h3>
+            <h3>SRI LAKSHMI GANAPATHI MILK DAIRYS</h3>
             <p>Wholesale Milk & Premium Dairy Products since 2005</p>
           </div>
 
@@ -948,7 +948,7 @@ const About = () => {
 
           <div className="lp-footer-bottom">
             <p>
-              &copy; 2026 SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All rights
+              &copy; 2026 SRI LAKSHMI GANAPATHI MILK DAIRYS. All rights
               reserved.
             </p>
             <p className="lp-coop-disclaimer">

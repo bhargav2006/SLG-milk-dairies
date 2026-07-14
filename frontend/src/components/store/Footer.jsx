@@ -10,7 +10,10 @@ const Footer = ({ businessHours }) => {
         <div className="lp-footer-brand-col">
           <div className="lp-footer-logo-row">
             <img src="/logo.png" alt="SLG Logo" className="lp-footer-logo-img" />
-            <h4>SRI LAKSHMI GANAPATHI</h4>
+            <div className="lp-footer-brand-text">
+              <h4>SRI LAKSHMI GANAPATHI</h4>
+              <span className="lp-footer-brand-sub" style={{ fontSize: "0.68rem", color: "var(--lp-secondary)", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", display: "block" }}>Visakha Dairy Partner</span>
+            </div>
           </div>
           <p className="lp-brand-tagline">
             Authorized Visakha Dairy Partner since 2005. Sourcing, cooling, and supplying premium fresh dairy across Narasapuram.
@@ -101,7 +104,7 @@ const Footer = ({ businessHours }) => {
       {/* Footer Bottom copyright bar */}
       <div className="lp-footer-bottom">
         <div className="lp-container lp-footer-bottom-flex">
-          <p>&copy; {new Date().getFullYear()} SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SRI LAKSHMI GANAPATHI MILK DAIRYS. All rights reserved.</p>
           <p className="coop-declaration">
             Partnered with Sri Vijaya Visakha District Milk Producers Co-op Union Ltd.
           </p>

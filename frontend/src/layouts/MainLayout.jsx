@@ -51,7 +51,7 @@ const MainLayout = ({ children }) => {
     if (path.startsWith("/billing/wholesale")) return "Wholesale Billing Terminal";
     if (path.startsWith("/users")) return "User Accounts Management";
     if (path.startsWith("/profile")) return "Account Profile";
-    return "SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS System";
+    return "SRI LAKSHMI GANAPATHI MILK DAIRYS System";
   };
 
   const menuItems = [
@@ -105,9 +105,12 @@ const MainLayout = ({ children }) => {
       >
         <div className="sidebar-brand">
           <div className="sidebar-logo">
-            <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS Logo" style={{ width: "28px", height: "28px", objectFit: "contain", borderRadius: "50%" }} />
+            <img src="/logo.png" alt="SRI LAKSHMI GANAPATHI MILK DAIRYS Logo" style={{ width: "28px", height: "28px", objectFit: "contain", borderRadius: "50%" }} />
           </div>
-          <span className="brand-name" style={{ fontSize: "0.8rem", whiteSpace: "normal", lineHeight: "1.2" }}>SRI LAKSHMI GANAPATHI MILK AND COOL DRINKS</span>
+          <span className="brand-name" style={{ fontSize: "0.78rem", whiteSpace: "normal", lineHeight: "1.2", display: "flex", flexDirection: "column" }}>
+            <span>SRI LAKSHMI GANAPATHI MILK DAIRYS</span>
+            <span style={{ fontSize: "0.62rem", color: "var(--color-warning)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.02em", marginTop: "1px" }}>Visakha Dairy Partner</span>
+          </span>
         </div>
 
         <ul className="sidebar-menu">
