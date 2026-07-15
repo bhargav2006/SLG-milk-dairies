@@ -11,7 +11,7 @@ const {
   addAddress,
   updateAddress,
   deleteAddress,
-} = require("../controllers/customerController");
+} = require("../controllers/CustomerController");
 
 // OTP
 router.post("/send-otp", sendOtp);
