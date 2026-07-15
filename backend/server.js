@@ -32,8 +32,39 @@ const allowedOrigins = [
   process.env.CORS_ORIGIN,
 ];
 
+// Dynamic CORS configurations to support testing on physical mobile devices in local networks
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    try {
+      const url = new URL(origin);
+      const host = url.hostname;
+      const isLocalIp =
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host.startsWith("192.168.") ||
+        host.startsWith("10.") ||
+        host.startsWith("172.");
+        
+      if (isLocalIp) {
+        return callback(null, true);
+      }
+    } catch (err) {
+      // invalid URL
+    }
+    
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true
+};
+
 // Middleware
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 

@@ -1,6 +1,18 @@
 import axios from "axios";
 
-const base = import.meta.env.VITE_BACKEND_URI;
+let base = import.meta.env.VITE_BACKEND_URI;
+
+if (
+  base &&
+  base.includes("localhost") &&
+  typeof window !== "undefined" &&
+  window.location &&
+  window.location.hostname &&
+  window.location.hostname !== "localhost" &&
+  window.location.hostname !== "127.0.0.1"
+) {
+  base = base.replace("localhost", window.location.hostname);
+}
 
 const api = axios.create({
   baseURL: base,

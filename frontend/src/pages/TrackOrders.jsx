@@ -16,6 +16,7 @@ const TrackOrders = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [isRegistered, setIsRegistered] = useState(true);
   const [tempOtp, setTempOtp] = useState(""); // [TESTING ONLY] Temporary OTP placeholder state
 
   // Orders Log State
@@ -36,6 +37,14 @@ const TrackOrders = () => {
       // [TESTING ONLY] Retrieve response containing the generated OTP
       const res = await customerService.sendOtp(customerPhone);
       setOtpSent(true);
+
+      // Update registration status
+      if (res && res.hasOwnProperty("isRegistered")) {
+        setIsRegistered(res.isRegistered);
+      } else {
+        setIsRegistered(true);
+      }
+
       // [TESTING ONLY] Save generated OTP value
       if (res && res.otp) {
         setTempOtp(res.otp);
@@ -57,9 +66,14 @@ const TrackOrders = () => {
       return;
     }
 
+    if (!isRegistered && !customerName.trim()) {
+      showError("Please enter your name");
+      return;
+    }
+
     try {
       setOtpVerifying(true);
-      const data = await customerService.verifyOtp(customerPhone, otp);
+      const data = await customerService.verifyOtp(customerPhone, customerName, otp);
       if (data && data.token) {
         localStorage.setItem("customer_token", data.token);
         localStorage.setItem("customer_info", JSON.stringify(data.customer));
@@ -114,8 +128,10 @@ const TrackOrders = () => {
     localStorage.removeItem("customer_info");
     setCustomerToken(null);
     setCustomerPhone("");
+    setCustomerName("");
     setOtp("");
     setOtpSent(false);
+    setIsRegistered(true);
     setOrders([]);
     showInfo("Logged out of session.");
   };
@@ -191,6 +207,21 @@ const TrackOrders = () => {
               ) : (
                 <form onSubmit={handleVerifyOtp} className="to-auth-form">
                   <p className="otp-sent-banner">OTP sent to <strong>+91 {customerPhone}</strong></p>
+                  
+                  {!isRegistered && (
+                    <div className="to-form-group" style={{ marginBottom: "16px" }}>
+                      <label htmlFor="trackName">Your Name</label>
+                      <input
+                        type="text"
+                        id="trackName"
+                        placeholder="Enter your name"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  )}
+
                   <div className="to-form-group">
                     <label htmlFor="trackOtp">6-Digit Verification Code</label>
                     <input

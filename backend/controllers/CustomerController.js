@@ -25,6 +25,10 @@ exports.sendOtp = async (req, res) => {
       ? customerPhone
       : `91${customerPhone}`;
 
+    // Check if customer is already registered (exists and has a non-anonymous name)
+    const customer = await Customer.findOne({ customerPhone });
+    const isRegistered = !!customer && customer.customerName && customer.customerName !== "Anonymous";
+
     // Generate 6 digit OTP
     const otp = crypto.randomInt(100000, 999999).toString();
 
@@ -48,6 +52,7 @@ exports.sendOtp = async (req, res) => {
     res.status(200).json({
       message: "OTP sent successfully",
       otp, // [TESTING ONLY] Return generated OTP value
+      isRegistered,
     });
   } catch (error) {
     console.error(error);
