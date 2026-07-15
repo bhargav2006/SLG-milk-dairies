@@ -144,6 +144,14 @@ const CheckoutDrawer = ({
                 <strong>{placedOrder.OrderNumber}</strong>
               </div>
               <div className="receipt-row">
+                <span>Subtotal:</span>
+                <strong>₹{placedOrder.subtotal}</strong>
+              </div>
+              <div className="receipt-row">
+                <span>Delivery Fee:</span>
+                <strong>₹{placedOrder.deliveryFee}</strong>
+              </div>
+              <div className="receipt-row">
                 <span>Grand Total:</span>
                 <strong>₹{placedOrder.totalAmount}</strong>
               </div>

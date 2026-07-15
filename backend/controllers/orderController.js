@@ -53,8 +53,8 @@ exports.placeOrder = async (req, res) => {
       });
     }
 
-    // Calculate delivery fee: free if subtotal >= 200, else 20
-    const deliveryFee = subtotal >= 200 ? 0 : 20;
+    // Calculate delivery fee: free if subtotal >= 500, else 20
+    const deliveryFee = subtotal >= 500 ? 0 : 20;
     const totalAmount = subtotal + deliveryFee;
 
     // Generate Order Number: ORD-YYYYMM-XXXX

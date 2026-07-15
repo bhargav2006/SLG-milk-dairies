@@ -322,6 +322,11 @@ const TrackOrders = () => {
                       {/* Footer billing actions */}
                       <div className="to-card-footer">
                         <div className="collect-totals">
+                          {ord.deliveryFee !== undefined && (
+                            <span className="lbl" style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "4px" }}>
+                              Subtotal: ₹{ord.subtotal !== undefined ? ord.subtotal : (ord.totalAmount - (ord.deliveryFee || 0))} | Delivery Fee: {ord.deliveryFee === 0 ? "Free" : `₹${ord.deliveryFee}`}
+                            </span>
+                          )}
                           <span className="lbl">Total Paid (COD):</span>
                           <span className="val">₹{ord.totalAmount}</span>
                         </div>
