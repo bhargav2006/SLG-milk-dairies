@@ -10,6 +10,7 @@ const {
   acceptOrder,
   assignDeliveryBoy,
   getAllDeliveryBoys,
+  updateOrderStatus,
 } = require("../controllers/accountantController");
 
 // Pending Orders
@@ -26,6 +27,9 @@ router.put("/orders/:orderNumber/accept", protect, acceptOrder);
 
 // Assign
 router.put("/orders/:orderNumber/assign", protect, assignDeliveryBoy);
+
+// Update Status directly
+router.put("/orders/:orderNumber/status", protect, updateOrderStatus);
 
 // Delivery Boys
 router.get("/delivery-boys", protect, getAllDeliveryBoys);

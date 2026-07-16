@@ -64,6 +64,28 @@ const Footer = ({ businessHours }) => {
           </ul>
         </div>
 
+        {/* Our Promise Column */}
+        <div className="lp-footer-col">
+          <h5>Our Promise</h5>
+          <ul className="lp-footer-links-list" style={{ color: "var(--lp-text-muted)", fontSize: "0.82rem", gap: "10px" }}>
+            <li style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--lp-success)" }}>✓</span> 100% Pure Milk
+            </li>
+            <li style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--lp-success)" }}>✓</span> Chilled Delivery
+            </li>
+            <li style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--lp-success)" }}>✓</span> No Preservatives
+            </li>
+            <li style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--lp-success)" }}>✓</span> Hygienic Sourcing
+            </li>
+            <li style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--lp-success)" }}>✓</span> Visakha Partner
+            </li>
+          </ul>
+        </div>
+
         {/* Contacts Column */}
         <div className="lp-footer-col">
           <h5>Contact Us</h5>

@@ -74,6 +74,14 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "DeliveryBoy",
     },
+    isTempDelivery: {
+      type: Boolean,
+      default: false,
+    },
+    tempDeliveryBoy: {
+      name: { type: String, default: null },
+      phone: { type: String, default: null },
+    },
     placedAt: {
       type: Date,
       default: Date.now,

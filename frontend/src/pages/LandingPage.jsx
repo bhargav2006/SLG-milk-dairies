@@ -32,6 +32,8 @@ import TrustSection from "../components/store/TrustSection";
 import Footer from "../components/store/Footer";
 
 import "./LandingPage.css";
+import durgaRaoImg from "../assets/DURGA_RAO_YARRAMSETTI.jpeg";
+import maniKondaImg from "../assets/MANI_KONDA_SWAMY_YARRAMSETTI.PNG";
 
 // Configuration Constants
 const CONFIG = {
@@ -96,6 +98,8 @@ const LandingPage = () => {
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [deliveryNotes, setDeliveryNotes] = useState("");
+  const [isRegistered, setIsRegistered] = useState(true);
+  const [activeFaq, setActiveFaq] = useState(null);
 
   // Customer Auth Session
   const [customerInfo, setCustomerInfo] = useState(() => {
@@ -349,6 +353,14 @@ const LandingPage = () => {
       // [TESTING ONLY] Retrieve response containing the generated OTP
       const res = await customerService.sendOtp(customerPhone);
       setOtpSent(true);
+
+      // Check registration status from backend response
+      if (res && res.hasOwnProperty("isRegistered")) {
+        setIsRegistered(res.isRegistered);
+      } else {
+        setIsRegistered(true);
+      }
+
       // [TESTING ONLY] Save generated OTP to display next to the field
       if (res && res.otp) {
         setTempOtp(res.otp);
@@ -371,6 +383,11 @@ const LandingPage = () => {
     });
     if (!otp || otp.length !== 6 || !/^\d+$/.test(otp)) {
       showError("Please enter the 6-digit OTP");
+      return;
+    }
+
+    if (!isRegistered && !customerName.trim()) {
+      showError("Please enter your name");
       return;
     }
 
@@ -416,6 +433,7 @@ const LandingPage = () => {
     setCustomerName("");
     setOtp("");
     setOtpSent(false);
+    setIsRegistered(true);
     showInfo("Logged out of customer session.");
   };
 
@@ -664,10 +682,303 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* 7. Trust perks banner */}
+        {/* 7. Why Choose SLG Milk Dairys? & Our Andhra Heritage Section */}
+        <section id="why-choose" className="lp-why-choose-section">
+          <div className="lp-container">
+            <div className="lp-section-header lp-text-center">
+              <span className="lp-section-subtitle">Why SLG?</span>
+              <h2 className="lp-section-title">🥛 Why Choose SLG Milk Dairys?</h2>
+              <div className="lp-title-underline"></div>
+            </div>
+
+            <div className="lp-why-choose-grid">
+              <div className="lp-why-choose-card">
+                <div className="lp-why-choose-icon-wrapper">
+                  <span style={{ fontSize: "1.5rem" }}>🌿</span>
+                </div>
+                <h4>Traditional Purity</h4>
+                <p>Sourced from local dairy farms, preserving the genuine taste of fresh cow and buffalo milk.</p>
+              </div>
+
+              <div className="lp-why-choose-card">
+                <div className="lp-why-choose-icon-wrapper">
+                  <span style={{ fontSize: "1.5rem" }}>🔬</span>
+                </div>
+                <h4>Hygienic Processing</h4>
+                <p>Pasteurized and chilled in state-of-the-art facilities under strict sanitization standards.</p>
+              </div>
+
+              <div className="lp-why-choose-card">
+                <div className="lp-why-choose-icon-wrapper">
+                  <span style={{ fontSize: "1.5rem" }}>❄️</span>
+                </div>
+                <h4>Secure Cold-Chain</h4>
+                <p>Maintained under optimal low temperatures from farm to delivery to prevent spoilage.</p>
+              </div>
+
+              <div className="lp-why-choose-card">
+                <div className="lp-why-choose-icon-wrapper">
+                  <span style={{ fontSize: "1.5rem" }}>🚀</span>
+                </div>
+                <h4>Reliable Local Delivery</h4>
+                <p>Quick doorstep delivery within 30-45 minutes by our dedicated coordinators.</p>
+              </div>
+            </div>
+
+            {/* Our Andhra Heritage */}
+            <div className="lp-heritage-grid">
+              <div className="lp-heritage-text-col">
+                <h3>Our Andhra Heritage</h3>
+                <p>
+                  At Sri Lakshmi Ganapathi Milk Dairys, we carry forward a heritage of dairy perfection. Rooted in the heart of East Godavari, Andhra Pradesh, we cherish the traditional methods of milk distribution.
+                </p>
+                <p className="quote">
+                  "Every packet is a promise of health, freshness, and authentic rich taste that connects Telugu families and food lovers."
+                </p>
+                <p>
+                  Partnered proudly with Visakha Dairy, we ensure that every household receives cold-chain milk and dairy sweets prepared under strict hygienic controls using select local processes.
+                </p>
+              </div>
+              <div className="lp-heritage-img-col">
+                <img 
+                  src="/heritage_dairy.png" 
+                  alt="Our Andhra Heritage" 
+                  className="lp-heritage-img"
+                  onError={(e) => {
+                    e.target.src = "/hero_bg.png"; // Fallback
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Our Leadership Team Section */}
+        <section id="leadership" className="lp-leadership-section">
+          <div className="lp-container">
+            <div className="lp-section-header lp-text-center">
+              <span className="lp-section-subtitle">Our Leadership</span>
+              <h2 className="lp-section-title">Pillars of SLG Milk Dairys</h2>
+              <div className="lp-title-underline"></div>
+            </div>
+
+            <div className="lp-leadership-grid">
+              
+              {/* Card 1: Durga Rao Yarramsetti */}
+              <div className="lp-leader-card">
+                <div className="lp-leader-img-wrapper">
+                  <img 
+                    src={durgaRaoImg} 
+                    alt="DURGA RAO YARRAMSETTI" 
+                    className="lp-leader-img"
+                  />
+                </div>
+                <div className="lp-leader-info">
+                  <h3>DURGA RAO YARRAMSETTI</h3>
+                  <span className="lp-leader-role">FOUNDER OF SLG MILK DAIRYS</span>
+                  <p className="lp-leader-quote">
+                    "Serving the community with purity and absolute commitment to quality since 2005."
+                  </p>
+                  <p className="lp-leader-desc">
+                    Durga Rao Yarramsetti established Sri Lakshmi Ganapathi Milk Dairys with a steadfast vision to deliver fresh, pure, and wholesome milk directly to households. His initial steps laid the firm foundations of quality and trust that define our brand values today.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 2: Mani Konda Swamy Yarramsetti */}
+              <div className="lp-leader-card">
+                <div className="lp-leader-img-wrapper">
+                  <img 
+                    src={maniKondaImg} 
+                    alt="MANI KONDA SWAMY YARRAMSETTI" 
+                    className="lp-leader-img"
+                  />
+                </div>
+                <div className="lp-leader-info">
+                  <h3>MANI KONDA SWAMY YARRAMSETTI</h3>
+                  <span className="lp-leader-role">MANAGING DIRECTOR FOR SLG MILK DAIRYS</span>
+                  <p className="lp-leader-quote">
+                    "Integrating cold-chain logistics and modern supply links to serve every customer reliably."
+                  </p>
+                  <p className="lp-leader-desc">
+                    Mani Konda Swamy Yarramsetti drives the operations, network expansion, and business relationships for SLG Milk Dairys. Under his active management, we have modernized our cold storage and distribution logistics, ensuring fresh dairy products arrive on time, every time.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* 8. How to Order Section */}
+        <section id="how-to-order" className="lp-order-flow-section">
+          <div className="lp-container">
+            <div className="lp-section-header lp-text-center">
+              <span className="lp-section-subtitle">Easy Steps</span>
+              <h2 className="lp-section-title">📦 How to Order</h2>
+              <div className="lp-title-underline"></div>
+            </div>
+
+            <div className="lp-order-flow-stepper">
+              <div className="lp-order-step">
+                <div className="lp-step-number-dot">1</div>
+                <div className="lp-step-content">
+                  <h4>Choose Dairy Items</h4>
+                  <p>Browse our rich catalog of pasteurized milk, fresh curd, ghee, paneer, and sweets.</p>
+                </div>
+              </div>
+
+              <div className="lp-order-step">
+                <div className="lp-step-number-dot">2</div>
+                <div className="lp-step-content">
+                  <h4>Add to Cart</h4>
+                  <p>Add products to your cart. Note: The minimum order amount for delivery is just ₹100.</p>
+                </div>
+              </div>
+
+              <div className="lp-order-step">
+                <div className="lp-step-number-dot">3</div>
+                <div className="lp-step-content">
+                  <h4>Enter Address & Mobile</h4>
+                  <p>Fill in your delivery details and verify your mobile number with a quick OTP.</p>
+                </div>
+              </div>
+
+              <div className="lp-order-step">
+                <div className="lp-step-number-dot">4</div>
+                <div className="lp-step-content">
+                  <h4>Confirm Order (COD)</h4>
+                  <p>Review details, choose Cash on Delivery (COD) as payment, and place your order.</p>
+                </div>
+              </div>
+
+              <div className="lp-order-step">
+                <div className="lp-step-number-dot">5</div>
+                <div className="lp-step-content">
+                  <h4>Receive Chilled Delivery</h4>
+                  <p>Our delivery boy will arrive at your door with fresh, cold-chain dairy within 30-45 minutes!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 9. What Our Customers Say Section */}
+        <section id="testimonials" className="lp-testimonials-section">
+          <div className="lp-container">
+            <div className="lp-section-header lp-text-center">
+              <span className="lp-section-subtitle">Reviews</span>
+              <h2 className="lp-section-title">💬 What Our Customers Say</h2>
+              <div className="lp-title-underline"></div>
+            </div>
+
+            <div className="lp-testimonials-grid">
+              <div className="lp-testimonial-card">
+                <div className="lp-stars">★★★★★</div>
+                <p className="lp-testimonial-quote">
+                  "The Visakha Premium Gold Milk is extremely thick and perfect for making tea and coffee. The delivery is always on time, right at 6 AM!"
+                </p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-reviewer-avatar">S</div>
+                  <div className="lp-reviewer-info">
+                    <span className="lp-reviewer-name">Srinivas Rao</span>
+                    <span className="lp-reviewer-location">Tea Stall Owner, Ravulapalem</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lp-testimonial-card">
+                <div className="lp-stars">★★★★★</div>
+                <p className="lp-testimonial-quote">
+                  "Ordered fresh curd packets and paneer for a family gathering in P.Gannavaram. The curd was thick and paneer was melt-in-mouth soft. Excellent service!"
+                </p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-reviewer-avatar">K</div>
+                  <div className="lp-reviewer-info">
+                    <span className="lp-reviewer-name">Kalyani P.</span>
+                    <span className="lp-reviewer-location">Home Maker, P.Gannavaram</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lp-testimonial-card">
+                <div className="lp-stars">★★★★★</div>
+                <p className="lp-testimonial-quote">
+                  "Clean packaging, hygienic storage, and super fast doorstep delivery. My kids love their flavoured milk and sweets. Highly recommended for daily needs!"
+                </p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-reviewer-avatar">R</div>
+                  <div className="lp-reviewer-info">
+                    <span className="lp-reviewer-name">Rajesh Kumar</span>
+                    <span className="lp-reviewer-location">Customer, Amalapuram</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 10. Frequently Asked Questions Section */}
+        <section id="faqs" className="lp-faq-section">
+          <div className="lp-container">
+            <div className="lp-section-header lp-text-center">
+              <span className="lp-section-subtitle">Got Questions?</span>
+              <h2 className="lp-section-title">❓ Frequently Asked Questions</h2>
+              <div className="lp-title-underline"></div>
+            </div>
+
+            <div className="lp-faq-list">
+              {[
+                {
+                  q: "What is the minimum order quantity for delivery?",
+                  a: "The minimum order amount to qualify for home delivery is just ₹100. There is no minimum quantity requirement as long as the subtotal is at or above ₹100."
+                },
+                {
+                  q: "What areas do you deliver to?",
+                  a: "We currently deliver to residential homes, hotels, and retail shops across Patha Gannavaram, P.Gannavaram, and surrounding local neighborhoods in East Godavari."
+                },
+                {
+                  q: "Are the dairy products preservative-free?",
+                  a: "Yes! All milk, curd, ghee, and sweets are sourced directly from Visakha Dairy, processed using high quality pasteurization standards without any harmful added preservatives or synthetic colors."
+                },
+                {
+                  q: "How do I place bulk orders for functions?",
+                  a: "For bulk bookings (such as marriages, ceremonies, or large restaurant orders), you can contact our coordinator Swamy directly at +91 99666 75377 or click the WhatsApp button to chat."
+                },
+                {
+                  q: "What payment methods do you accept?",
+                  a: "We accept Cash on Delivery (COD) as our primary payment method. Our delivery coordinators also accept direct UPI payments (PhonePe, Google Pay, Paytm) upon arrival."
+                },
+                {
+                  q: "How long does the delivery take?",
+                  a: "Deliveries are dispatched quickly from our P.Gannavaram hub and typically take between 30 to 45 minutes to reach your location under full cold-chain protection."
+                }
+              ].map((faq, idx) => (
+                <div 
+                  key={idx} 
+                  className={`lp-faq-item ${activeFaq === idx ? "active" : ""}`}
+                >
+                  <button 
+                    type="button"
+                    className="lp-faq-question-btn"
+                    onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                  >
+                    <h4>{faq.q}</h4>
+                    <span className="lp-faq-icon">▼</span>
+                  </button>
+                  <div className="lp-faq-answer">
+                    <p>{faq.a}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 11. Trust perks banner */}
         <TrustSection />
 
-        {/* 8. Modern Accessibility-friendly Footer */}
+        {/* 12. Modern Accessibility-friendly Footer */}
         <Footer businessHours={CONFIG.BUSINESS_HOURS} />
       </div>
 
@@ -845,6 +1156,7 @@ const LandingPage = () => {
         setOtp={setOtp}
         otpSent={otpSent}
         setOtpSent={setOtpSent}
+        isRegistered={isRegistered}
         otpVerifying={otpVerifying}
         handleSendOtp={handleSendOtp}
         handleVerifyOtp={handleVerifyOtp}

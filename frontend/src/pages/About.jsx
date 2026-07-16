@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import "./About.css";
+import durgaRaoImg from "../assets/DURGA_RAO_YARRAMSETTI.jpeg";
+import maniKondaImg from "../assets/MANI_KONDA_SWAMY_YARRAMSETTI.PNG";
 
 const About = () => {
   const { user } = useAuth();
@@ -51,6 +53,7 @@ const About = () => {
       const sections = [
         "home",
         "about",
+        "leadership",
         "verification",
         "services",
         "products",
@@ -347,6 +350,63 @@ const About = () => {
                 <span className="lp-stat-label">Purity Guaranteed</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Leadership Team Section */}
+      <section id="leadership" className="lp-leadership-section lp-section-padding">
+        <div className="lp-container">
+          <div className="lp-section-header lp-text-center">
+            <span className="lp-section-subtitle">Our Leadership</span>
+            <h2 className="lp-section-title">Pillars of SLG Milk Dairys</h2>
+            <div className="lp-title-underline"></div>
+          </div>
+
+          <div className="lp-leadership-grid">
+            
+            {/* Card 1: Durga Rao Yarramsetti */}
+            <div className="lp-leader-card">
+              <div className="lp-leader-img-wrapper">
+                <img 
+                  src={durgaRaoImg} 
+                  alt="DURGA RAO YARRAMSETTI" 
+                  className="lp-leader-img"
+                />
+              </div>
+              <div className="lp-leader-info">
+                <h3>DURGA RAO YARRAMSETTI</h3>
+                <span className="lp-leader-role">FOUNDER OF SLG MILK DAIRYS</span>
+                <p className="lp-leader-quote">
+                  "Serving the community with purity and absolute commitment to quality since 2005."
+                </p>
+                <p className="lp-leader-desc">
+                  Durga Rao Yarramsetti established Sri Lakshmi Ganapathi Milk Dairys with a steadfast vision to deliver fresh, pure, and wholesome milk directly to households. His initial steps laid the firm foundations of quality and trust that define our brand values today.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 2: Mani Konda Swamy Yarramsetti */}
+            <div className="lp-leader-card">
+              <div className="lp-leader-img-wrapper">
+                <img 
+                  src={maniKondaImg} 
+                  alt="MANI KONDA SWAMY YARRAMSETTI" 
+                  className="lp-leader-img"
+                />
+              </div>
+              <div className="lp-leader-info">
+                <h3>MANI KONDA SWAMY YARRAMSETTI</h3>
+                <span className="lp-leader-role">MANAGING DIRECTOR FOR SLG MILK DAIRYS</span>
+                <p className="lp-leader-quote">
+                  "Integrating cold-chain logistics and modern supply links to serve every customer reliably."
+                </p>
+                <p className="lp-leader-desc">
+                  Mani Konda Swamy Yarramsetti drives the operations, network expansion, and business relationships for SLG Milk Dairys. Under his active management, we have modernized our cold storage and distribution logistics, ensuring fresh dairy products arrive on time, every time.
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

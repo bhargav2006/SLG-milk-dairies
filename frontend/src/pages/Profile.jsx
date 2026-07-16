@@ -48,6 +48,11 @@ const Profile = () => {
           </div>
 
           <div className="profile-detail-item">
+            <span className="profile-detail-label">Mobile Number</span>
+            <span className="profile-detail-value">{user?.phone || "Not Configured"}</span>
+          </div>
+
+          <div className="profile-detail-item">
             <span className="profile-detail-label">Access Level</span>
             <span className="profile-detail-value" style={{ textTransform: "uppercase", fontSize: "0.9rem", color: "var(--color-primary)" }}>
               {user?.role}

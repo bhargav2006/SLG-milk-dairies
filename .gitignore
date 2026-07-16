@@ -21,6 +21,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+pre_deployment_checklist.md
 
 # OS metadata and temporary files
 .DS_Store

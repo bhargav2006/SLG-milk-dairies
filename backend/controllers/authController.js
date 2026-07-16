@@ -5,7 +5,7 @@ const generateToken = require("../utils/generateToken");
 // @route   POST /api/auth/register
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phone } = req.body;
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "Please provide all fields" });
@@ -23,6 +23,7 @@ const registerUser = async (req, res) => {
       email,
       password,
       role: role || "accountant",
+      phone: phone || "",
     });
 
     const payload = {
@@ -39,6 +40,7 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone || "",
       },
     });
   } catch (error) {
@@ -76,6 +78,7 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone || "",
       },
     });
   } catch (error) {

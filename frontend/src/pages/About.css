@@ -1220,3 +1220,116 @@
         max-width: 200px;
     }
 }
+
+/* Leadership Team section styles */
+.landing-page-root .lp-leadership-section {
+    background-color: var(--lp-bg-secondary);
+}
+
+.landing-page-root .lp-leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+    margin-top: 48px;
+    justify-content: center;
+}
+
+@media (min-width: 1024px) {
+    .landing-page-root .lp-leadership-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 1080px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.landing-page-root .lp-leader-card {
+    background: var(--lp-bg-primary);
+    border-radius: var(--lp-radius-md);
+    padding: 32px;
+    box-shadow: var(--lp-shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    border: 1px solid var(--lp-border);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+@media (min-width: 640px) {
+    .landing-page-root .lp-leader-card {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
+
+.landing-page-root .lp-leader-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--lp-shadow-lg);
+}
+
+.landing-page-root .lp-leader-img-wrapper {
+    flex-shrink: 0;
+    width: 150px;
+    height: 190px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid var(--lp-secondary);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    align-self: center;
+}
+
+@media (min-width: 640px) {
+    .landing-page-root .lp-leader-img-wrapper {
+        align-self: flex-start;
+    }
+}
+
+.landing-page-root .lp-leader-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.landing-page-root .lp-leader-card:hover .lp-leader-img {
+    transform: scale(1.05);
+}
+
+.landing-page-root .lp-leader-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.landing-page-root .lp-leader-info h3 {
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 700;
+    color: var(--lp-text-primary);
+}
+
+.landing-page-root .lp-leader-role {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--lp-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.landing-page-root .lp-leader-quote {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-style: italic;
+    color: #991b1b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 8px 0;
+    position: relative;
+}
+
+.landing-page-root .lp-leader-desc {
+    font-size: 0.875rem;
+    color: var(--lp-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}

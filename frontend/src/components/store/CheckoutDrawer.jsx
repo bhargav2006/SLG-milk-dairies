@@ -24,6 +24,7 @@ const CheckoutDrawer = ({
   setOtp,
   otpSent,
   setOtpSent,
+  isRegistered,
   otpVerifying,
   handleSendOtp,
   handleVerifyOtp,
@@ -206,18 +207,6 @@ const CheckoutDrawer = ({
                 </p>
 
                 <div className="lp-form-group">
-                  <label htmlFor="checkoutName">Full Name *</label>
-                  <input
-                    type="text"
-                    id="checkoutName"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
-
-                <div className="lp-form-group">
                   <label htmlFor="checkoutPhone">Mobile Number *</label>
                   <input
                     type="tel"
@@ -256,6 +245,20 @@ const CheckoutDrawer = ({
                   An OTP has been sent to <strong>+91 {customerPhone}</strong>.
                   Check your console / terminal!
                 </p>
+
+                {!isRegistered && (
+                  <div className="lp-form-group">
+                    <label htmlFor="checkoutName">Full Name *</label>
+                    <input
+                      type="text"
+                      id="checkoutName"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Enter your name"
+                      required
+                    />
+                  </div>
+                )}
 
                 <div className="lp-form-group">
                   <label htmlFor="checkoutOtp">Enter 6-Digit OTP *</label>

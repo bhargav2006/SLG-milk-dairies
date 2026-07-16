@@ -46,7 +46,7 @@ const deleteUser = async (req, res) => {
 // @route   POST /api/users/
 const createUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phone } = req.body;
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -54,7 +54,7 @@ const createUser = async (req, res) => {
     if (userExists) {
       return res.status(400).json({ message: "User already exists with this email" });
     }
-    const user = new User({ name, email, password, role });
+    const user = new User({ name, email, password, role, phone: phone || "" });
     await user.save();
     
     // Return user without password
@@ -71,7 +71,7 @@ const createUser = async (req, res) => {
 // @route   PUT /api/users/:id
 const updateUser = async (req, res) => {
   try {
-    const { name, email, role, password } = req.body;
+    const { name, email, role, password, phone } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -88,6 +88,7 @@ const updateUser = async (req, res) => {
     if (name) user.name = name;
     if (role) user.role = role;
     if (password) user.password = password;
+    if (phone !== undefined) user.phone = phone;
 
     await user.save();
 

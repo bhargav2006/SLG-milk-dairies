@@ -21,8 +21,26 @@ const accountantService = {
     return response.data;
   },
 
-  assignDeliveryBoy: async (orderNumber, deliveryBoyId) => {
-    const response = await api.put(`/api/accountant/orders/${orderNumber}/assign`, { deliveryBoyId });
+  assignDeliveryBoy: async (orderNumber, deliveryBoyId, isTemp = false, tempName = "", tempPhone = "") => {
+    const response = await api.put(`/api/accountant/orders/${orderNumber}/assign`, {
+      deliveryBoyId,
+      isTemp,
+      tempDeliveryBoyName: tempName,
+      tempDeliveryBoyPhone: tempPhone
+    });
+    return response.data;
+  },
+
+  updateOrderStatus: async (orderNumber, status, cancelReason = "") => {
+    const response = await api.put(`/api/accountant/orders/${orderNumber}/status`, {
+      status,
+      cancelReason
+    });
+    return response.data;
+  },
+
+  getPublicDeliveryDetails: async (orderNumber) => {
+    const response = await api.get(`/api/orders/delivery-details/${orderNumber}`);
     return response.data;
   },
 

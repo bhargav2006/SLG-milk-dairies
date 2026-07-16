@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "accountant"],
       default: "accountant",
     },
+    phone: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true, // adds createdAt and updatedAt automatically

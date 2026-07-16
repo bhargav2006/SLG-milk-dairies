@@ -1,5 +1,7 @@
 const Order = require("../models/Order");
 const DeliveryBoy = require("../models/DeliveryBoy");
+const Product = require("../models/Product");
+const Customer = require("../models/Customer");
 
 // @desc    Get pending orders (status: Placed)
 // @route   GET /api/accountant/orders/pending
@@ -44,6 +46,7 @@ exports.getAssignedOrders = async (req, res) => {
       .populate("customerId", "customerName customerPhone")
       .populate("products.product", "name price retailPrice category")
       .populate("deliveryBoy", "name phone")
+      .populate("accountantId", "name email phone")
       .sort({ updatedAt: -1 });
     res.status(200).json({ orders });
   } catch (error) {
@@ -81,7 +84,31 @@ exports.acceptOrder = async (req, res) => {
 // @access  Private (Accountant/Admin)
 exports.assignDeliveryBoy = async (req, res) => {
   try {
-    const { deliveryBoyId } = req.body;
+    const { deliveryBoyId, isTemp, tempDeliveryBoyName, tempDeliveryBoyPhone } = req.body;
+
+    const order = await Order.findOne({ OrderNumber: req.params.orderNumber });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (isTemp) {
+      if (!tempDeliveryBoyName || !tempDeliveryBoyPhone) {
+        return res.status(400).json({ message: "Temporary delivery boy name and phone are required" });
+      }
+      order.orderStatus = "Assigned";
+      order.isTempDelivery = true;
+      order.tempDeliveryBoy = {
+        name: tempDeliveryBoyName,
+        phone: tempDeliveryBoyPhone,
+      };
+      order.deliveryBoy = undefined;
+      order.assignedAt = new Date();
+      order.accountantId = req.user._id;
+      await order.save();
+
+      return res.status(200).json({ message: "Temporary delivery boy assigned successfully", order });
+    }
+
     if (!deliveryBoyId) {
       return res.status(400).json({ message: "Delivery boy ID is required" });
     }
@@ -91,14 +118,12 @@ exports.assignDeliveryBoy = async (req, res) => {
       return res.status(404).json({ message: "Delivery boy not found" });
     }
 
-    const order = await Order.findOne({ OrderNumber: req.params.orderNumber });
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
     order.orderStatus = "Assigned";
+    order.isTempDelivery = false;
+    order.tempDeliveryBoy = { name: null, phone: null };
     order.deliveryBoy = dboy._id;
     order.assignedAt = new Date();
+    order.accountantId = req.user._id;
     await order.save();
 
     // Add to delivery boy's order history if not present
@@ -124,5 +149,61 @@ exports.getAllDeliveryBoys = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error fetching delivery boys" });
+  }
+};
+
+// @desc    Update order status directly by Accountant (verifying manually)
+// @route   PUT /api/accountant/orders/:orderNumber/status
+// @access  Private (Accountant/Admin)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status, cancelReason } = req.body;
+    const validStatuses = ["Assigned", "Out for Delivery", "Delivered", "Cancelled"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid order status value" });
+    }
+
+    const order = await Order.findOne({ OrderNumber: req.params.orderNumber });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (["Delivered", "Cancelled"].includes(order.orderStatus)) {
+      return res.status(400).json({ message: `Order is already finalized as: ${order.orderStatus}` });
+    }
+
+    order.orderStatus = status;
+
+    if (status === "Delivered") {
+      order.deliveryOtp = null; // Clear OTP since verified manually
+      order.paymentStatus = "completed";
+      order.deliveredAt = new Date();
+    } else if (status === "Cancelled") {
+      order.cancelledBy = req.user?.role || "accountant";
+      order.canceledAt = new Date();
+      order.cancelReason = cancelReason || "Accountant manually verified and cancelled";
+
+      // Restore stock for all products
+      for (const item of order.products) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity }
+        });
+      }
+
+      // Restore customer spend details
+      if (order.customerId) {
+        const customer = await Customer.findById(order.customerId);
+        if (customer) {
+          customer.totalSpent = Math.max(0, (customer.totalSpent || 0) - order.totalAmount);
+          await customer.save();
+        }
+      }
+    }
+
+    await order.save();
+    res.status(200).json({ message: `Order status updated to ${status} successfully`, order });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error updating order status" });
   }
 };

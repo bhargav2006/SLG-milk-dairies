@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useToast } from "../context/ToastContext";
 import accountantService from "../services/accountantService";
-import { Check, Truck, Clock, AlertCircle, RefreshCw, Eye, X } from "lucide-react";
+import { Check, Truck, Clock, AlertCircle, RefreshCw, Eye, X, Copy, CheckCircle2 } from "lucide-react";
+import Modal from "../components/common/Modal";
 import "./Orders.css";
 
 const Orders = () => {
@@ -11,9 +12,20 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [deliveryBoys, setDeliveryBoys] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [assigningMap, setAssigningMap] = useState({}); // orderNumber -> deliveryBoyId selection
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+
+  // Assignment Modal States
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [orderToAssign, setOrderToAssign] = useState(null);
+  const [isTemp, setIsTemp] = useState(false);
+  const [selectedDboyId, setSelectedDboyId] = useState("");
+  const [tempDboyName, setTempDboyName] = useState("");
+  const [tempDboyPhone, setTempDboyPhone] = useState("");
+
+  // Standalone Link States
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState("");
 
   // Fetch orders based on active tab
   const fetchOrders = async () => {
@@ -67,22 +79,52 @@ const Orders = () => {
     }
   };
 
-  const handleAssignDeliveryBoy = async (orderNumber) => {
-    const dboyId = assigningMap[orderNumber];
-    if (!dboyId) {
-      showInfo("Please select a delivery boy first.");
-      return;
+  const openAssignModal = (ord) => {
+    setOrderToAssign(ord);
+    setIsTemp(false);
+    setSelectedDboyId("");
+    setTempDboyName("");
+    setTempDboyPhone("");
+    setAssignModalOpen(true);
+  };
+
+  const handleAssignDeliveryBoySubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!orderToAssign) return;
+
+    if (isTemp) {
+      if (!tempDboyName.trim() || !tempDboyPhone.trim()) {
+        showError("Please enter temporary delivery boy name and mobile number.");
+        return;
+      }
+      if (tempDboyPhone.trim().length !== 10 || !/^\d+$/.test(tempDboyPhone.trim())) {
+        showError("Please enter a valid 10-digit mobile number.");
+        return;
+      }
+    } else {
+      if (!selectedDboyId) {
+        showError("Please select a delivery boy.");
+        return;
+      }
     }
+
     try {
       setActionLoading(true);
-      await accountantService.assignDeliveryBoy(orderNumber, dboyId);
-      showSuccess(`Assigned delivery boy to order ${orderNumber}!`);
-      // clear map selection
-      setAssigningMap(prev => {
-        const next = { ...prev };
-        delete next[orderNumber];
-        return next;
-      });
+      await accountantService.assignDeliveryBoy(
+        orderToAssign.OrderNumber,
+        isTemp ? null : selectedDboyId,
+        isTemp,
+        isTemp ? tempDboyName.trim() : "",
+        isTemp ? tempDboyPhone.trim() : ""
+      );
+
+      showSuccess(`Delivery boy assigned successfully for order ${orderToAssign.OrderNumber}!`);
+      
+      const link = `${window.location.origin}/delivery-order/${orderToAssign.OrderNumber}`;
+      setGeneratedLink(link);
+      setAssignModalOpen(false);
+      setLinkModalOpen(true);
+
       fetchOrders();
     } catch (err) {
       console.error(err);
@@ -92,11 +134,34 @@ const Orders = () => {
     }
   };
 
-  const handleSelectDboyChange = (orderNumber, val) => {
-    setAssigningMap(prev => ({
-      ...prev,
-      [orderNumber]: val
-    }));
+  const handleUpdateStatus = async (orderNumber, status) => {
+    let cancelReason = "";
+    if (status === "Cancelled") {
+      const confirmCancel = window.confirm(`Are you sure you want to cancel order ${orderNumber}?`);
+      if (!confirmCancel) return;
+      cancelReason = prompt("Enter reason for cancellation (optional):") || "";
+    } else {
+      const confirmDeliver = window.confirm(`Confirm that order ${orderNumber} is delivered successfully (verified with customer)?`);
+      if (!confirmDeliver) return;
+    }
+
+    try {
+      setActionLoading(true);
+      await accountantService.updateOrderStatus(orderNumber, status, cancelReason);
+      showSuccess(`Order ${orderNumber} status updated to ${status}!`);
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+      showError(err.response?.data?.message || "Failed to update order status.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCopyLink = (orderNumber) => {
+    const link = `${window.location.origin}/delivery-order/${orderNumber}`;
+    navigator.clipboard.writeText(link);
+    showSuccess("Delivery tracking link copied to clipboard!");
   };
 
   return (
@@ -208,33 +273,63 @@ const Orders = () => {
                       )}
 
                       {activeTab === "accepted" && (
-                        <div className="assign-action-box">
-                          <select
-                            value={assigningMap[ord.OrderNumber] || ""}
-                            onChange={(e) => handleSelectDboyChange(ord.OrderNumber, e.target.value)}
-                            className="dboy-select"
-                          >
-                            <option value="">-- Select Delivery Boy --</option>
-                            {deliveryBoys.map((db) => (
-                              <option key={db._id} value={db._id}>
-                                {db.name} ({db.isAvailable ? "Available" : "Busy"})
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            className="btn-action-assign"
-                            onClick={() => handleAssignDeliveryBoy(ord.OrderNumber)}
-                            disabled={actionLoading || !assigningMap[ord.OrderNumber]}
-                          >
-                            <Truck size={14} /> Assign
-                          </button>
-                        </div>
+                        <button
+                          className="btn-action-assign"
+                          onClick={() => openAssignModal(ord)}
+                          disabled={actionLoading}
+                          style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                        >
+                          <Truck size={14} /> Assign Delivery
+                        </button>
                       )}
 
-                      {activeTab === "assigned" && ord.deliveryBoy && (
-                        <div className="assigned-boy-tag">
-                          <span>👤 {ord.deliveryBoy.name}</span>
-                          <span className="phone">{ord.deliveryBoy.phone}</span>
+                      {activeTab === "assigned" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                          <div className="assigned-boy-tag">
+                            {ord.isTempDelivery ? (
+                              <>
+                                <span>👤 {ord.tempDeliveryBoy?.name} <small style={{color: "var(--color-primary)", fontWeight: 700}}>(Temp)</small></span>
+                                <span className="phone">{ord.tempDeliveryBoy?.phone}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>👤 {ord.deliveryBoy?.name || "Staff"}</span>
+                                <span className="phone">{ord.deliveryBoy?.phone || "N/A"}</span>
+                              </>
+                            )}
+                          </div>
+                          
+                          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+                            <button
+                              onClick={() => handleCopyLink(ord.OrderNumber)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px", fontSize: "0.75rem" }}
+                              title="Copy Standalone Delivery Link"
+                            >
+                              <Copy size={12} /> Link
+                            </button>
+                            
+                            {["Assigned", "Out for Delivery"].includes(ord.orderStatus) && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateStatus(ord.OrderNumber, "Delivered")}
+                                  className="btn btn-primary btn-sm"
+                                  style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px", backgroundColor: "#38a169", borderColor: "#38a169", fontSize: "0.75rem" }}
+                                  title="Mark order as Delivered"
+                                >
+                                  <Check size={12} /> Deliver
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateStatus(ord.OrderNumber, "Cancelled")}
+                                  className="btn btn-danger btn-sm"
+                                  style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px", fontSize: "0.75rem" }}
+                                  title="Cancel Order"
+                                >
+                                  <X size={12} /> Cancel
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -306,7 +401,7 @@ const Orders = () => {
                 </div>
               </div>
 
-              {selectedOrderDetails.notes && (
+               {selectedOrderDetails.notes && (
                 <div className="modal-section">
                   <h5>Special Instructions</h5>
                   <p className="delivery-notes">"{selectedOrderDetails.notes}"</p>
@@ -316,6 +411,163 @@ const Orders = () => {
           </div>
         </div>
       )}
+
+      {/* Assign Delivery Boy Modal */}
+      <Modal
+        isOpen={assignModalOpen}
+        onClose={() => !actionLoading && setAssignModalOpen(false)}
+        title="Assign Delivery Boy"
+        footer={
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={() => setAssignModalOpen(false)}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={handleAssignDeliveryBoySubmit}
+              className="btn btn-primary"
+            >
+              {actionLoading ? "Assigning..." : "Assign Boy"}
+            </button>
+          </div>
+        }
+      >
+        {orderToAssign && (
+          <form onSubmit={handleAssignDeliveryBoySubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <p style={{ margin: 0, fontSize: "0.9rem" }}>
+                Assigning delivery partner for Order: <strong>{orderToAssign.OrderNumber}</strong>
+              </p>
+              <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
+                Customer Name: {orderToAssign.customerId?.customerName || "Anonymous"}
+              </p>
+            </div>
+
+            {/* Toggle Switch */}
+            <div style={{ display: "flex", background: "#f0f4f8", padding: "4px", borderRadius: "8px", gap: "4px" }}>
+              <button
+                type="button"
+                className={`tab-btn ${!isTemp ? "active" : ""}`}
+                style={{ flex: 1, padding: "8px", border: "none", borderRadius: "6px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", background: !isTemp ? "white" : "transparent", boxShadow: !isTemp ? "0 2px 4px rgba(0,0,0,0.05)" : "none" }}
+                onClick={() => setIsTemp(false)}
+              >
+                Permanent Staff
+              </button>
+              <button
+                type="button"
+                className={`tab-btn ${isTemp ? "active" : ""}`}
+                style={{ flex: 1, padding: "8px", border: "none", borderRadius: "6px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", background: isTemp ? "white" : "transparent", boxShadow: isTemp ? "0 2px 4px rgba(0,0,0,0.05)" : "none" }}
+                onClick={() => setIsTemp(true)}
+              >
+                Temporary / Friend
+              </button>
+            </div>
+
+            {!isTemp ? (
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" htmlFor="dboy-id">Select Registered Delivery Partner *</label>
+                <select
+                  id="dboy-id"
+                  className="form-input"
+                  value={selectedDboyId}
+                  onChange={(e) => setSelectedDboyId(e.target.value)}
+                  disabled={actionLoading}
+                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--color-border)" }}
+                >
+                  <option value="">-- Choose Partner --</option>
+                  {deliveryBoys.map((db) => (
+                    <option key={db._id} value={db._id}>
+                      {db.name} ({db.phone}) - {db.isAvailable ? "Available" : "Busy"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" htmlFor="temp-name">Delivery Person Name *</label>
+                  <input
+                    id="temp-name"
+                    type="text"
+                    className="form-input"
+                    placeholder="Enter Name"
+                    value={tempDboyName}
+                    onChange={(e) => setTempDboyName(e.target.value)}
+                    disabled={actionLoading}
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--color-border)" }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" htmlFor="temp-phone">Mobile Number *</label>
+                  <input
+                    id="temp-phone"
+                    type="text"
+                    className="form-input"
+                    placeholder="10-digit mobile number"
+                    value={tempDboyPhone}
+                    onChange={(e) => setTempDboyPhone(e.target.value)}
+                    disabled={actionLoading}
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--color-border)" }}
+                  />
+                </div>
+              </div>
+            )}
+          </form>
+        )}
+      </Modal>
+
+      {/* Generated Link Copy Popup Modal */}
+      <Modal
+        isOpen={linkModalOpen}
+        onClose={() => setLinkModalOpen(false)}
+        title="Delivery Assignment Complete!"
+        footer={
+          <button
+            type="button"
+            onClick={() => setLinkModalOpen(false)}
+            className="btn btn-primary"
+            style={{ width: "100%" }}
+          >
+            Close Dialog
+          </button>
+        }
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "center", padding: "10px 0" }}>
+          <div style={{ display: "inline-flex", alignSelf: "center", justifyContent: "center", alignItems: "center", width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#e6fffa", color: "#319795" }}>
+            <CheckCircle2 size={24} />
+          </div>
+          <h4 style={{ margin: 0, fontSize: "1.1rem" }}>Standalone Link Generated</h4>
+          <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--color-text-secondary)", lineHeight: 1.4 }}>
+            Send this link to the delivery person. They can open it on their mobile phone to view order and customer details.
+          </p>
+          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+            <input
+              type="text"
+              readOnly
+              className="form-input"
+              value={generatedLink}
+              style={{ flex: 1, background: "#f7fafc", border: "1px solid var(--color-border)", borderRadius: "8px", padding: "8px 12px", fontSize: "0.85rem", color: "var(--color-text-primary)" }}
+              onClick={(e) => e.target.select()}
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(generatedLink);
+                showSuccess("Delivery link copied to clipboard!");
+              }}
+              className="btn btn-secondary"
+              style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}
+            >
+              <Copy size={14} /> Copy Link
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

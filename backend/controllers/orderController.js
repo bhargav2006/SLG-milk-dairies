@@ -260,3 +260,28 @@ exports.cancelOrder = async (req, res) => {
     res.status(500).json({ message: "Server error cancelling order" });
   }
 };
+
+// @desc    Get order details publicly for standalone delivery boys
+// @route   GET /api/orders/delivery-details/:orderNumber
+// @access  Public
+exports.getDeliveryDetailsPublic = async (req, res) => {
+  try {
+    const order = await Order.findOne({ OrderNumber: req.params.orderNumber })
+      .populate("customerId", "customerName customerPhone")
+      .populate("products.product", "name price retailPrice category image")
+      .populate("deliveryBoy", "name phone")
+      .populate("accountantId", "name email phone");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json({
+      message: "Delivery details fetched successfully",
+      order
+    });
+  } catch (error) {
+    console.error("Get Delivery Details Public Error:", error);
+    res.status(500).json({ message: "Server error fetching delivery details" });
+  }
+};

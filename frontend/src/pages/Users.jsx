@@ -30,6 +30,7 @@ const Users = () => {
     email: "",
     password: "",
     role: "accountant",
+    phone: "",
   });
   const [userErrors, setUserErrors] = useState({});
   const [submittingUser, setSubmittingUser] = useState(false);
@@ -94,6 +95,7 @@ const Users = () => {
       email: "",
       password: "",
       role: "accountant",
+      phone: "",
     });
     setUserErrors({});
     setUserModalOpen(true);
@@ -106,6 +108,7 @@ const Users = () => {
       email: usr.email || "",
       password: "",
       role: usr.role || "accountant",
+      phone: usr.phone || "",
     });
     setUserErrors({});
     setUserModalOpen(true);
@@ -149,6 +152,7 @@ const Users = () => {
         name: userData.name.trim(),
         email: userData.email.trim(),
         role: userData.role,
+        phone: userData.phone.trim(),
       };
       if (userData.password) {
         payload.password = userData.password;
@@ -385,6 +389,7 @@ const Users = () => {
                   <tr>
                     <th>Name</th>
                     <th>Email Address</th>
+                    <th>Mobile Number</th>
                     <th>Role Permissions</th>
                     <th style={{ textAlign: "center" }}>Actions</th>
                   </tr>
@@ -394,6 +399,7 @@ const Users = () => {
                     <tr key={usr._id}>
                       <td data-label="Name" style={{ fontWeight: 600 }}>{usr.name}</td>
                       <td data-label="Email Address">{usr.email}</td>
+                      <td data-label="Mobile Number">{usr.phone || "N/A"}</td>
                       <td data-label="Role Permissions">
                         <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                           {usr.role === "admin" ? (
@@ -605,6 +611,20 @@ const Users = () => {
               disabled={submittingUser}
             />
             {userErrors.email && <span className="form-error-msg">{userErrors.email}</span>}
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" htmlFor="user-phone">Mobile Number</label>
+            <input
+              id="user-phone"
+              name="phone"
+              type="text"
+              className="form-input"
+              placeholder="e.g. 9876543210"
+              value={userData.phone || ""}
+              onChange={handleUserChange}
+              disabled={submittingUser}
+            />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>

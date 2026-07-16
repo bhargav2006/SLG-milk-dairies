@@ -14,6 +14,7 @@ import Bills from "../pages/Bills";
 import Users from "../pages/Users";
 import Profile from "../pages/Profile";
 import BillReceiptStandalone from "../pages/BillReceiptStandalone";
+import DeliveryOrderStandalone from "../pages/DeliveryOrderStandalone";
 import LandingPage from "../pages/LandingPage";
 import About from "../pages/About";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -42,7 +43,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       {/* <Route path="/register" element={<Register />} /> */}
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      <Route path="/bill/:invoiceNumber" element={<BillReceiptStandalone />} />
+       <Route path="/bill/:invoiceNumber" element={<BillReceiptStandalone />} />
+      <Route path="/delivery-order/:orderNumber" element={<DeliveryOrderStandalone />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/" element={<LandingPage />} />
