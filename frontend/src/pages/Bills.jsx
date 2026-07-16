@@ -1109,11 +1109,15 @@ const Bills = () => {
                           backgroundColor:
                             bill.billType === "wholesale"
                               ? "var(--color-primary-light)"
-                              : "var(--color-success-light)",
+                              : bill.billType === "delivery"
+                                ? "rgba(124, 58, 237, 0.12)"
+                                : "var(--color-success-light)",
                           color:
                             bill.billType === "wholesale"
                               ? "var(--color-primary)"
-                              : "var(--color-success)",
+                              : bill.billType === "delivery"
+                                ? "rgb(124, 58, 237)"
+                                : "var(--color-success)",
                           padding: "2px 6px",
                           borderRadius: "4px",
                         }}
@@ -1446,9 +1450,23 @@ const Bills = () => {
                     textAlign: "right",
                   }}
                 >
-                  ₹{selectedBill.totalAmount.toFixed(2)}
+                  ₹{(selectedBill.totalAmount - (selectedBill.deliveryFee || 0)).toFixed(2)}
                 </span>
               </div>
+              {selectedBill.billType === "delivery" && (
+                <div>
+                  <span>Delivery Fee: </span>
+                  <span
+                    style={{
+                      width: "100px",
+                      display: "inline-block",
+                      textAlign: "right",
+                    }}
+                  >
+                    {selectedBill.deliveryFee === 0 ? "Free" : `₹${(selectedBill.deliveryFee || 0).toFixed(2)}`}
+                  </span>
+                </div>
+              )}
               <div style={{ fontSize: "1.125rem", fontWeight: 700 }}>
                 <span>Grand Total: </span>
                 <span
@@ -1475,17 +1493,30 @@ const Bills = () => {
                 color: "var(--color-text-secondary)",
               }}
             >
-              <p>
-                Payment Mode:{" "}
-                <strong
-                  style={{
-                    textTransform: "uppercase",
-                    color: "var(--color-text-primary)",
-                  }}
-                >
-                  {selectedBill.paymentMethod}
-                </strong>
-              </p>
+              {selectedBill.billType === "delivery" ? (
+                <p>
+                  Order System:{" "}
+                  <strong style={{ textTransform: "uppercase", color: "var(--color-text-primary)", marginRight: "12px" }}>
+                    Online Delivery
+                  </strong>
+                  | Payment Mode:{" "}
+                  <strong style={{ textTransform: "uppercase", color: "var(--color-text-primary)" }}>
+                    {selectedBill.paymentMethod}
+                  </strong>
+                </p>
+              ) : (
+                <p>
+                  Payment Mode:{" "}
+                  <strong
+                    style={{
+                      textTransform: "uppercase",
+                      color: "var(--color-text-primary)",
+                    }}
+                  >
+                    {selectedBill.paymentMethod}
+                  </strong>
+                </p>
+              )}
               <p style={{ marginTop: "8px" }}>
                 Thank you for shopping at SRI LAKSHMI GANAPATHI MILK DAIRYS!
               </p>

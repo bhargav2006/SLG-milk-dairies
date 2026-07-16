@@ -35,7 +35,7 @@ const BillSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "online"],
+      enum: ["cash", "card", "online", "COD"],
       required: true,
     },
     accountant: {
@@ -44,8 +44,12 @@ const BillSchema = new mongoose.Schema(
     },
     billType: {
       type: String,
-      enum: ["retail", "wholesale"],
+      enum: ["retail", "wholesale", "delivery"],
       default: "retail",
+    },
+    deliveryFee: {
+      type: Number,
+      default: 0,
     },
   },
   {

@@ -323,9 +323,24 @@ const BillReceiptStandalone = () => {
                   fontWeight: 500,
                 }}
               >
-                ₹{bill.totalAmount.toFixed(2)}
+                ₹{(bill.totalAmount - (bill.deliveryFee || 0)).toFixed(2)}
               </span>
             </div>
+            {bill.billType === "delivery" && (
+              <div>
+                <span>Delivery Fee: </span>
+                <span
+                  style={{
+                    width: "100px",
+                    display: "inline-block",
+                    textAlign: "right",
+                    fontWeight: 500,
+                  }}
+                >
+                  {bill.deliveryFee === 0 ? "Free" : `₹${(bill.deliveryFee || 0).toFixed(2)}`}
+                </span>
+              </div>
+            )}
             <div style={{ fontSize: "1.2rem", fontWeight: 700 }}>
               <span>Grand Total: </span>
               <span
@@ -352,17 +367,30 @@ const BillReceiptStandalone = () => {
               color: "var(--color-text-secondary)",
             }}
           >
-            <p>
-              Payment Mode:{" "}
-              <strong
-                style={{
-                  textTransform: "uppercase",
-                  color: "var(--color-text-primary)",
-                }}
-              >
-                {bill.paymentMethod}
-              </strong>
-            </p>
+            {bill.billType === "delivery" ? (
+              <p>
+                Order System:{" "}
+                <strong style={{ textTransform: "uppercase", color: "var(--color-text-primary)", marginRight: "12px" }}>
+                  Online Delivery
+                </strong>
+                | Payment Mode:{" "}
+                <strong style={{ textTransform: "uppercase", color: "var(--color-text-primary)" }}>
+                  {bill.paymentMethod}
+                </strong>
+              </p>
+            ) : (
+              <p>
+                Payment Mode:{" "}
+                <strong
+                  style={{
+                    textTransform: "uppercase",
+                    color: "var(--color-text-primary)",
+                  }}
+                >
+                  {bill.paymentMethod}
+                </strong>
+              </p>
+            )}
             <p style={{ marginTop: "10px" }}>
               Thank you for shopping at SRI LAKSHMI GANAPATHI MILK DAIRYS!
             </p>

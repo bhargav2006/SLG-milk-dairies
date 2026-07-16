@@ -115,6 +115,10 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    invoiceNumber: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

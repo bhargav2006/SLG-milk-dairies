@@ -139,7 +139,19 @@ const Orders = () => {
     if (status === "Cancelled") {
       const confirmCancel = window.confirm(`Are you sure you want to cancel order ${orderNumber}?`);
       if (!confirmCancel) return;
-      cancelReason = prompt("Enter reason for cancellation (optional):") || "";
+      
+      while (true) {
+        cancelReason = prompt("Please enter the reason for cancellation (Required):");
+        if (cancelReason === null) {
+          // User clicked Cancel on prompt
+          return;
+        }
+        cancelReason = cancelReason.trim();
+        if (cancelReason !== "") {
+          break;
+        }
+        alert("A cancellation reason is required to cancel this order.");
+      }
     } else {
       const confirmDeliver = window.confirm(`Confirm that order ${orderNumber} is delivered successfully (verified with customer)?`);
       if (!confirmDeliver) return;
@@ -263,24 +275,46 @@ const Orders = () => {
                       </button>
 
                       {activeTab === "pending" && (
-                        <button
-                          className="btn-action-accept"
-                          onClick={() => handleAcceptOrder(ord.OrderNumber)}
-                          disabled={actionLoading}
-                        >
-                          <Check size={14} /> Accept Order
-                        </button>
+                        <>
+                          <button
+                            className="btn-action-accept"
+                            onClick={() => handleAcceptOrder(ord.OrderNumber)}
+                            disabled={actionLoading}
+                          >
+                            <Check size={14} /> Accept Order
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(ord.OrderNumber, "Cancelled")}
+                            className="btn btn-danger btn-sm"
+                            style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "6px 12px", fontSize: "0.8rem", borderRadius: "4px" }}
+                            title="Cancel Order"
+                            disabled={actionLoading}
+                          >
+                            <X size={12} /> Cancel
+                          </button>
+                        </>
                       )}
 
                       {activeTab === "accepted" && (
-                        <button
-                          className="btn-action-assign"
-                          onClick={() => openAssignModal(ord)}
-                          disabled={actionLoading}
-                          style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                        >
-                          <Truck size={14} /> Assign Delivery
-                        </button>
+                        <>
+                          <button
+                            className="btn-action-assign"
+                            onClick={() => openAssignModal(ord)}
+                            disabled={actionLoading}
+                            style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                          >
+                            <Truck size={14} /> Assign Delivery
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(ord.OrderNumber, "Cancelled")}
+                            className="btn btn-danger btn-sm"
+                            style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "6px 12px", fontSize: "0.8rem", borderRadius: "4px" }}
+                            title="Cancel Order"
+                            disabled={actionLoading}
+                          >
+                            <X size={12} /> Cancel
+                          </button>
+                        </>
                       )}
 
                       {activeTab === "assigned" && (

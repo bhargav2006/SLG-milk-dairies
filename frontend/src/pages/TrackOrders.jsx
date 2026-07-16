@@ -297,7 +297,14 @@ const TrackOrders = () => {
                       {/* Header details */}
                       <div className="to-card-header">
                         <div className="number-date">
-                          <h4>{ord.OrderNumber}</h4>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "4px" }}>
+                            <h4 style={{ margin: 0 }}>{ord.OrderNumber}</h4>
+                            {ord.invoiceNumber && (
+                              <span style={{ fontSize: "0.82rem", backgroundColor: "rgba(124, 58, 237, 0.12)", color: "rgb(124, 58, 237)", padding: "2px 8px", borderRadius: "4px", fontWeight: "600" }}>
+                                Invoice: <Link to={`/bill/${ord.invoiceNumber}`} style={{ color: "rgb(124, 58, 237)", textDecoration: "underline" }}>{ord.invoiceNumber}</Link>
+                              </span>
+                            )}
+                          </div>
                           <span className="date">
                             <Clock size={12} style={{ marginRight: "4px" }} />
                             {new Date(ord.placedAt).toLocaleDateString("en-IN", {

@@ -3,6 +3,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const generateToken = require("../utils/generateToken");
+const { createInvoiceFromOrder } = require("../utils/invoiceHelper");
 
 // @desc    Register a new delivery boy
 // @route   POST /api/delivery/register
@@ -173,6 +174,10 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
+
+    if (status === "Delivered") {
+      await createInvoiceFromOrder(order);
+    }
 
     res.status(200).json({ message: `Order status updated to ${status}`, order });
   } catch (error) {

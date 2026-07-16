@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const DeliveryBoy = require("../models/DeliveryBoy");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
+const { createInvoiceFromOrder } = require("../utils/invoiceHelper");
 
 // @desc    Get pending orders (status: Placed)
 // @route   GET /api/accountant/orders/pending
@@ -172,6 +173,10 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: `Order is already finalized as: ${order.orderStatus}` });
     }
 
+    if (status === "Cancelled" && (!cancelReason || !cancelReason.trim())) {
+      return res.status(400).json({ message: "Cancellation reason is required" });
+    }
+
     order.orderStatus = status;
 
     if (status === "Delivered") {
@@ -181,7 +186,7 @@ exports.updateOrderStatus = async (req, res) => {
     } else if (status === "Cancelled") {
       order.cancelledBy = req.user?.role || "accountant";
       order.canceledAt = new Date();
-      order.cancelReason = cancelReason || "Accountant manually verified and cancelled";
+      order.cancelReason = cancelReason.trim();
 
       // Restore stock for all products
       for (const item of order.products) {
@@ -201,6 +206,11 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
+
+    if (status === "Delivered") {
+      await createInvoiceFromOrder(order);
+    }
+
     res.status(200).json({ message: `Order status updated to ${status} successfully`, order });
   } catch (error) {
     console.error(error);
