@@ -42,7 +42,7 @@ const CONFIG = {
   FREE_DELIVERY_AMOUNT: 500,
   DELIVERY_CHARGE: 20,
   DELIVERY_LOCATION_DEFAULT: null, // "Select Delivery Location"
-  BUSINESS_HOURS: "10:00 AM - 8:00 PM",
+  BUSINESS_HOURS: "8:00 AM - 7:00 PM",
   DELIVERY_TODAY_CUTOFF: "7:00 PM",
 };
 
@@ -647,6 +647,24 @@ const LandingPage = () => {
           deliveryTodayCutoff={CONFIG.DELIVERY_TODAY_CUTOFF}
         />
 
+        {/* Eligible Delivery Locations Bar */}
+        <div className="lp-delivery-locations-banner animate-fade-in no-print">
+          <div className="lp-container">
+            <div className="lp-locations-inner-wrapper">
+              <span className="lp-locations-title-badge">📍 DELIVERY AREAS</span>
+              <p className="lp-locations-desc">
+                We deliver fresh Visakha dairy products daily across:{" "}
+                <strong>
+                  P.GANNAVARAM, NARENDRAPURAM, RAJULAPALEM, POTHAVARAM, MUNJAVARAM, MUNGANDA, 
+                  MACHAVARAM, YENUGAPALLI, KATARLANKA, UDIMUDI, BELLAMPUDI, Y.V.PALEM, 
+                  B.V.PALEM, T.V.PALEM, L.GANNAVARAM, PUCHALANKA, NADIGADI, MONDEPULANKA, 
+                  JONNALANKA
+                </strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* 5. Sticky Search & Categories Controls Panel */}
         <div className="lp-sticky-controls-panel">
           <div className="lp-container">
@@ -935,11 +953,11 @@ const LandingPage = () => {
               {[
                 {
                   q: "What is the minimum order quantity for delivery?",
-                  a: "The minimum order amount to qualify for home delivery is just ₹100. There is no minimum quantity requirement as long as the subtotal is at or above ₹100."
+                  a: "The minimum order amount to qualify for home delivery is just ₹200. There is no minimum quantity requirement as long as the subtotal is at or above ₹200."
                 },
                 {
                   q: "What areas do you deliver to?",
-                  a: "We currently deliver to residential homes, hotels, and retail shops across Patha Gannavaram, P.Gannavaram, and surrounding local neighborhoods in East Godavari."
+                  a: "We deliver fresh dairy products daily across P.GANNAVARAM, NARENDRAPURAM, RAJULAPALEM, POTHAVARAM, MUNJAVARAM, MUNGANDA, MACHAVARAM, YENUGAPALLI, KATARLANKA, UDIMUDI, BELLAMPUDI, Y.V.PALEM, B.V.PALEM, T.V.PALEM, L.GANNAVARAM, PUCHALANKA, NADIGADI, MONDEPULANKA, and JONNALANKA."
                 },
                 {
                   q: "Are the dairy products preservative-free?",

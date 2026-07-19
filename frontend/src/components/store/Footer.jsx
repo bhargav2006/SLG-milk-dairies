@@ -16,12 +16,12 @@ const Footer = ({ businessHours }) => {
             </div>
           </div>
           <p className="lp-brand-tagline">
-            Authorized Visakha Dairy Partner since 2005. Sourcing, cooling, and supplying premium fresh dairy across Narasapuram.
+            Authorized Visakha Dairy Partner since 2005. Sourcing, cooling, and supplying premium fresh dairy across P. Gannavaram.
           </p>
           <div className="lp-business-hours-box">
             <Clock size={16} />
             <span>
-              <strong>Hours:</strong> {businessHours || "10:00 AM - 8:00 PM"} Daily
+              <strong>Hours:</strong> {businessHours || "8:00 AM - 7:00 PM"} Daily
             </span>
           </div>
         </div>

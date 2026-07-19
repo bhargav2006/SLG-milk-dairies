@@ -35,7 +35,7 @@ const OfferBanner = ({ minOrderAmount, freeDeliveryAmount, businessHours, delive
             <span className="lp-info-icon">🕒</span>
             <div className="lp-info-texts">
               <span className="lp-info-title">Delivery Hours</span>
-              <span className="lp-info-desc">{businessHours || "10:00 AM - 8:00 PM"}</span>
+              <span className="lp-info-desc">{businessHours || "8:00 AM - 7:00 PM"}</span>
             </div>
           </div>
         </div>
@@ -51,7 +51,7 @@ const OfferBanner = ({ minOrderAmount, freeDeliveryAmount, businessHours, delive
             <span className="lp-confetti-emoji">🎉</span>
             <div className="lp-placeholder-texts">
               <h4>Exclusive Offers Coming Soon</h4>
-              <p>We are preparing special discounts and subscription benefits for Narasapuram residents.</p>
+              <p>We are preparing special discounts and subscription benefits for P. Gannavaram residents.</p>
             </div>
           </div>
         </div>

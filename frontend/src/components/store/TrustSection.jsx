@@ -27,7 +27,7 @@ const TrustSection = () => {
           <div className="lp-trust-card">
             <span className="lp-trust-icon">🏆</span>
             <h4>Trusted Since 2005</h4>
-            <p>Over 20 years serving purity across Narasapuram & East Godavari.</p>
+            <p>Over 20 years serving purity across P. Gannavaram & East Godavari.</p>
           </div>
         </div>
       </div>
