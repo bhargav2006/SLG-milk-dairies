@@ -3,6 +3,7 @@ const DeliveryBoy = require("../models/DeliveryBoy");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const { createInvoiceFromOrder } = require("../utils/invoiceHelper");
+const { sendNotification } = require("../utils/notificationHelper");
 
 // @desc    Get pending orders (status: Placed)
 // @route   GET /api/accountant/orders/pending
@@ -72,6 +73,17 @@ exports.acceptOrder = async (req, res) => {
     order.acceptedAt = new Date();
     order.accountantId = req.user._id;
     await order.save();
+
+    // Send notification to customer
+    await sendNotification({
+      recipientId: order.customerId,
+      recipientType: "customer",
+      title: "Order Accepted",
+      message: `Your order ${order.OrderNumber} has been accepted and is being processed.`,
+      type: "success",
+      referenceId: order._id,
+      from: "accountant"
+    });
     
     res.status(200).json({ message: "Order accepted successfully", order });
   } catch (error) {
@@ -107,6 +119,17 @@ exports.assignDeliveryBoy = async (req, res) => {
       order.accountantId = req.user._id;
       await order.save();
 
+      // Send notification to customer
+      await sendNotification({
+        recipientId: order.customerId,
+        recipientType: "customer",
+        title: "Delivery Agent Assigned 🚚",
+        message: `Your order ${order.OrderNumber} has been assigned to temporary delivery agent ${tempDeliveryBoyName}.`,
+        type: "info",
+        referenceId: order._id,
+        from: "accountant"
+      });
+
       return res.status(200).json({ message: "Temporary delivery boy assigned successfully", order });
     }
 
@@ -132,6 +155,17 @@ exports.assignDeliveryBoy = async (req, res) => {
       dboy.orderHistory.push(order._id);
       await dboy.save();
     }
+
+    // Send notification to customer
+    await sendNotification({
+      recipientId: order.customerId,
+      recipientType: "customer",
+      title: "Delivery Agent Assigned 🚚",
+      message: `Your order ${order.OrderNumber} has been assigned to delivery agent ${dboy.name}.`,
+      type: "info",
+      referenceId: order._id,
+      from: "accountant"
+    });
 
     res.status(200).json({ message: "Delivery boy assigned successfully", order });
   } catch (error) {
@@ -210,6 +244,35 @@ exports.updateOrderStatus = async (req, res) => {
     if (status === "Delivered") {
       await createInvoiceFromOrder(order);
     }
+
+    // Send status change notification to customer
+    let notifyTitle = "Order Update";
+    let notifyMessage = `Your order ${order.OrderNumber} status has been updated to ${status}.`;
+    let notifyType = "info";
+
+    if (status === "Delivered") {
+      notifyTitle = "Order Delivered 🎉";
+      notifyMessage = `Your order ${order.OrderNumber} has been delivered successfully. Thank you for shopping with us!`;
+      notifyType = "success";
+    } else if (status === "Cancelled") {
+      notifyTitle = "Order Cancelled ❌";
+      notifyMessage = `Your order ${order.OrderNumber} was cancelled by the store. Reason: ${cancelReason || "Not specified"}.`;
+      notifyType = "error";
+    } else if (status === "Out for Delivery") {
+      notifyTitle = "Order Out for Delivery 🚚";
+      notifyMessage = `Your order ${order.OrderNumber} is now out for delivery and will reach you shortly.`;
+      notifyType = "success";
+    }
+
+    await sendNotification({
+      recipientId: order.customerId,
+      recipientType: "customer",
+      title: notifyTitle,
+      message: notifyMessage,
+      type: notifyType,
+      referenceId: order._id,
+      from: "accountant"
+    });
 
     res.status(200).json({ message: `Order status updated to ${status} successfully`, order });
   } catch (error) {

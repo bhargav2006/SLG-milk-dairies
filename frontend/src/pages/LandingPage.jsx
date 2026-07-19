@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import customerService from "../services/customerService";
+import { useNotifications } from "../context/NotificationContext";
 
 // Import Refactored Subcomponents
 import Header from "../components/store/Header";
@@ -69,6 +70,7 @@ const normalizeCategoryKey = (value = "") =>
 const LandingPage = () => {
   const { user } = useAuth(); // Admin/Accountant user if logged in
   const { showSuccess, showError, showInfo } = useToast();
+  const { setCustomerToken: setSocketCustomerToken } = useNotifications();
 
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -402,6 +404,7 @@ const LandingPage = () => {
         localStorage.setItem("customer_token", data.token);
         localStorage.setItem("customer_info", JSON.stringify(data.customer));
         setCustomerToken(data.token);
+        setSocketCustomerToken(data.token);
         setCustomerInfo(data.customer);
         setAddresses(data.customer.addresses || []);
         if (data.customer.addresses?.length > 0) {
@@ -426,6 +429,7 @@ const LandingPage = () => {
     localStorage.removeItem("customer_token");
     localStorage.removeItem("customer_info");
     setCustomerToken(null);
+    setSocketCustomerToken(null);
     setCustomerInfo(null);
     setAddresses([]);
     setSelectedAddressIndex(-1);

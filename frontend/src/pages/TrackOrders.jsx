@@ -3,10 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, MapPin, Phone, Trash2, LogOut, CheckCircle, RefreshCw } from "lucide-react";
 import { useToast } from "../context/ToastContext";
 import customerService from "../services/customerService";
+import { useNotifications } from "../context/NotificationContext";
+import NotificationBell from "../components/NotificationBell";
 import "./TrackOrders.css";
 
 const TrackOrders = () => {
   const { showSuccess, showError, showInfo } = useToast();
+  const { setCustomerToken: setSocketCustomerToken } = useNotifications();
   const navigate = useNavigate();
 
   // Authentication State
@@ -78,6 +81,7 @@ const TrackOrders = () => {
         localStorage.setItem("customer_token", data.token);
         localStorage.setItem("customer_info", JSON.stringify(data.customer));
         setCustomerToken(data.token);
+        setSocketCustomerToken(data.token);
         if (data.customer.customerName && data.customer.customerName !== "Anonymous") {
           setCustomerName(data.customer.customerName);
         }
@@ -127,6 +131,7 @@ const TrackOrders = () => {
     localStorage.removeItem("customer_token");
     localStorage.removeItem("customer_info");
     setCustomerToken(null);
+    setSocketCustomerToken(null);
     setCustomerPhone("");
     setCustomerName("");
     setOtp("");
@@ -167,9 +172,12 @@ const TrackOrders = () => {
             <span>Track Orders</span>
           </div>
           {customerToken ? (
-            <button onClick={handleLogout} className="to-logout-btn" title="Logout">
-              <LogOut size={18} style={{ marginRight: "6px" }} /> Logout
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <NotificationBell />
+              <button onClick={handleLogout} className="to-logout-btn" title="Logout">
+                <LogOut size={18} style={{ marginRight: "6px" }} /> Logout
+              </button>
+            </div>
           ) : (
             <div style={{ width: "100px" }} />
           )}

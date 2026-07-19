@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, LogOut, Menu, X } from "lucide-react";
+import NotificationBell from "../NotificationBell";
 
 const Header = ({
   user,
@@ -115,7 +116,8 @@ const Header = ({
               )}
             </nav>
 
-          <div className="lp-header-actions">
+          <div className="lp-header-actions" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {customerToken && <NotificationBell />}
             <button
               onClick={() => setIsCartOpen(true)}
               className="lp-header-cart-btn"

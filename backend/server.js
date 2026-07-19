@@ -19,9 +19,12 @@ const orderRoutes = require("./routes/orderRoutes");
 const deliveryRoutes = require("./routes/deliveryRoutes");
 const customerProductRoutes = require("./routes/customerProductRoutes");
 const accountantRoutes = require("./routes/accountantRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const { initSocket } = require("./utils/socket");
 
 const app = express();
 const server = require("http").createServer(app);
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost",
@@ -63,6 +66,9 @@ const corsOptions = {
   credentials: true
 };
 
+// Initialize Sockets
+initSocket(server, corsOptions);
+
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "20mb" }));
@@ -78,6 +84,7 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/accountant", accountantRoutes);
+app.use("/api/notifications", notificationRoutes);
 // // Public customer products
 app.use("/api/shop/products", customerProductRoutes);
 

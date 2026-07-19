@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import NotificationBell from "../components/NotificationBell";
 import {
   LayoutDashboard,
   Milk,
@@ -139,7 +140,8 @@ const MainLayout = ({ children }) => {
             <h2 className="page-title">{getPageTitle()}</h2>
           </div>
 
-          <div className="header-right">
+          <div className="header-right" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <NotificationBell />
             <div className="user-profile-badge">
               <div className="user-avatar">{userInitials}</div>
               <div className="user-info">

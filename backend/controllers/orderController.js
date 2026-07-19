@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const Counter = require("../models/Counter");
+const { sendNotification } = require("../utils/notificationHelper");
 
 // @desc    Place a new customer order
 // @route   POST /api/orders
@@ -149,6 +150,16 @@ exports.placeOrder = async (req, res) => {
     const populatedOrder = await Order.findById(order._id)
       .populate("products.product", "name price retailPrice category image");
 
+    // Send live notification to accountants/admins
+    await sendNotification({
+      recipientType: "accountant",
+      title: "New Order Placed",
+      message: `New order ${orderNumber} placed by ${customer?.customerName || "Customer"} for ₹${totalAmount}`,
+      type: "success",
+      referenceId: order._id,
+      from: "customer"
+    });
+
     res.status(201).json({
       message: "Order placed successfully",
       order: populatedOrder
@@ -250,6 +261,16 @@ exports.cancelOrder = async (req, res) => {
 
     const populatedOrder = await Order.findById(order._id)
       .populate("products.product", "name price retailPrice category image");
+
+    // Send live notification to accountants/admins
+    await sendNotification({
+      recipientType: "accountant",
+      title: "Order Cancelled",
+      message: `Order ${order.OrderNumber} has been cancelled by the customer.`,
+      type: "warning",
+      referenceId: order._id,
+      from: "customer"
+    });
 
     res.status(200).json({
       message: "Order cancelled successfully",
