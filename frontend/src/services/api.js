@@ -12,6 +12,12 @@ if (
   window.location.hostname !== "127.0.0.1"
 ) {
   base = base.replace("localhost", window.location.hostname);
+  if (window.location.protocol === "https:") {
+    base = base.replace("http://", "https://");
+    if (base.includes(":5000")) {
+      base = base.replace(":5000", "");
+    }
+  }
 }
 
 const api = axios.create({
