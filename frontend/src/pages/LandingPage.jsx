@@ -647,20 +647,26 @@ const LandingPage = () => {
           deliveryTodayCutoff={CONFIG.DELIVERY_TODAY_CUTOFF}
         />
 
-        {/* Eligible Delivery Locations Bar */}
+        {/* Eligible Delivery Locations Grid */}
         <div className="lp-delivery-locations-banner animate-fade-in no-print">
           <div className="lp-container">
-            <div className="lp-locations-inner-wrapper">
-              <span className="lp-locations-title-badge">📍 DELIVERY AREAS</span>
-              <p className="lp-locations-desc">
-                We deliver fresh Visakha dairy products daily across:{" "}
-                <strong>
-                  P.GANNAVARAM, NARENDRAPURAM, RAJULAPALEM, POTHAVARAM, MUNJAVARAM, MUNGANDA, 
-                  MACHAVARAM, YENUGAPALLI, KATARLANKA, UDIMUDI, BELLAMPUDI, Y.V.PALEM, 
-                  B.V.PALEM, T.V.PALEM, L.GANNAVARAM, PUCHALANKA, NADIGADI, MONDEPULANKA, 
-                  JONNALANKA
-                </strong>
-              </p>
+            <div className="lp-locations-header">
+              <span className="lp-locations-title-badge">📍 ELIGIBLE DELIVERY AREAS</span>
+              <span className="lp-locations-subtitle">Fresh Cold-Chain Delivery Direct to Your Doorstep</span>
+            </div>
+            <div className="lp-locations-grid">
+              {[
+                "P.GANNAVARAM", "NARENDRAPURAM", "RAJULAPALEM", "POTHAVARAM", 
+                "MUNJAVARAM", "MUNGANDA", "MACHAVARAM", "YENUGAPALLI", 
+                "KATARLANKA", "UDIMUDI", "BELLAMPUDI", "Y.V.PALEM", 
+                "B.V.PALEM", "T.V.PALEM", "L.GANNAVARAM", "PUCHALANKA", 
+                "NADIGADI", "MONDEPULANKA", "JONNALANKA"
+              ].map((loc) => (
+                <div key={loc} className="lp-location-badge" title={`${loc} Active Delivery Location`}>
+                  <span className="lp-location-dot"></span>
+                  <span className="lp-location-name">{loc}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
