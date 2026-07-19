@@ -28,7 +28,7 @@ const initSocket = (server, corsOptions) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`[Socket Connected] Socket ID: ${socket.id} (User ID: ${socket.userId}, Role: ${socket.role})`);
+    // console.log(`[Socket Connected] Socket ID: ${socket.id} (User ID: ${socket.userId}, Role: ${socket.role})`);
 
     // Join room specific to this user ID
     socket.join(socket.userId);
@@ -36,14 +36,14 @@ const initSocket = (server, corsOptions) => {
     // Join role-specific rooms
     if (socket.role === "accountant" || socket.role === "admin") {
       socket.join("accountants");
-      console.log(`[Socket Room] User ${socket.userId} joined room: accountants`);
+      // console.log(`[Socket Room] User ${socket.userId} joined room: accountants`);
     } else {
       socket.join("customers");
-      console.log(`[Socket Room] User ${socket.userId} joined room: customers`);
+      // console.log(`[Socket Room] User ${socket.userId} joined room: customers`);
     }
 
     socket.on("disconnect", () => {
-      console.log(`[Socket Disconnected] Socket ID: ${socket.id}`);
+      // console.log(`[Socket Disconnected] Socket ID: ${socket.id}`);
     });
   });
 

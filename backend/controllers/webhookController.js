@@ -6,9 +6,9 @@ exports.verifyWebhook = async (req, res) => {
     const mode = req.query["hub.mode"];
     const challenge = req.query["hub.challenge"];
     const verifyToken = req.query["hub.verify_token"];
-    console.log("mode", mode);
-    console.log("challenge", challenge);
-    console.log("verifyToken", verifyToken);
+    // console.log("mode", mode);
+    // console.log("challenge", challenge);
+    // console.log("verifyToken", verifyToken);
     if (
       mode === "subscribe" &&
       verifyToken === process.env.WHATSAPP_VERIFY_TOKEN
@@ -143,7 +143,7 @@ exports.verifyWebhook = async (req, res) => {
 exports.webhookEvents = async (req, res) => {
   try {
     const body = req.body;
-    console.log("Webhook received:", JSON.stringify(body, null, 2));
+    // console.log("Webhook received:", JSON.stringify(body, null, 2));
 
     if (body.object === "whatsapp_business_account") {
       if (
@@ -161,7 +161,7 @@ exports.webhookEvents = async (req, res) => {
 
         if (messageObj.type === "text") {
           const messageText = messageObj.text.body.toLowerCase();
-          console.log("Message Text:", messageText);
+          // console.log("Message Text:", messageText);
 
           // Handle STOP
           if (messageText === "stop") {
@@ -193,7 +193,7 @@ exports.webhookEvents = async (req, res) => {
                 { $inc: { msgSent: 1 } },
                 { upsert: true, new: true },
               );
-              console.log("Stop reply sent successfully.");
+              // console.log("Stop reply sent successfully.");
             } catch (apiError) {
               console.log(
                 "Error sending WhatsApp reply:",
@@ -232,7 +232,7 @@ exports.webhookEvents = async (req, res) => {
                 { $inc: { msgSent: 1 } },
                 { upsert: true, new: true },
               );
-              console.log("Start reply sent successfully.");
+              // console.log("Start reply sent successfully.");
             } catch (apiError) {
               console.log(
                 "Error sending WhatsApp reply:",

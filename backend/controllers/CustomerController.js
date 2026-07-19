@@ -46,12 +46,12 @@ exports.sendOtp = async (req, res) => {
     // Send OTP through WhatsApp
     // We'll create this utility next
     // await sendWhatsapp(customerPhone, otp);
-    console.log(`OTP for ${customerPhone}: ${otp}`);
+    // console.log(`OTP for ${customerPhone}: ${otp}`);
 
     // [TESTING ONLY] Send OTP in response for development / testing convenience
     res.status(200).json({
       message: "OTP sent successfully",
-      otp, // [TESTING ONLY] Return generated OTP value
+      // otp, // [TESTING ONLY] Return generated OTP value
       isRegistered,
     });
   } catch (error) {

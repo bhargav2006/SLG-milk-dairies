@@ -35,7 +35,7 @@ const protect = async (req, res, next) => {
 };
 
 const admin = (req, res, next) => {
-  console.log("Admin Middleware - User:", req.user); // Log the user object to check if it's attached
+  // console.log("Admin Middleware - User:", req.user); // Log the user object to check if it's attached
   if (req.user && req.user.role === "admin") {
     next();
   } else {

@@ -47,7 +47,7 @@ exports.registerDeliveryBoy = async (req, res) => {
 exports.loginDeliveryBoy = async (req, res) => {
   try {
     const { phone, password } = req.body;
-    console.log("Login request received:", { phone, password });
+    // console.log("Login request received:", { phone, password });
     if (!phone || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -229,9 +229,9 @@ exports.sendDeliveryOtp = async (req, res) => {
     order.deliveryOtp = otp;
     await order.save();
 
-    console.log("\n==================================================");
-    console.log(`[SMS MOCK] Delivery OTP for Order ${order.OrderNumber}: ${otp}`);
-    console.log("==================================================\n");
+    // console.log("\n==================================================");
+    // console.log(`[SMS MOCK] Delivery OTP for Order ${order.OrderNumber}: ${otp}`);
+    // console.log("==================================================\n");
 
     res.status(200).json({ message: "Delivery confirmation OTP sent to customer. Check console logs." });
   } catch (error) {

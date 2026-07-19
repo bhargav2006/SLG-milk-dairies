@@ -308,9 +308,9 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
         showSuccess("Invoice generated successfully!");
 
         // Log the standalone receipt link to the console for external email operations
-        console.log(
-          `[INVOICE LINK] URL for billing statement: ${window.location.origin}/bill/${newBill._id}`,
-        );
+        // console.log(
+        //   `[INVOICE LINK] URL for billing statement: ${window.location.origin}/bill/${newBill._id}`,
+        // );
 
         setCreatedBill(newBill);
         setIsInvoiceOpen(true);

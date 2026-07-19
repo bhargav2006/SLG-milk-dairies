@@ -184,8 +184,8 @@ const getProductById = async (req, res) => {
 // @route   POST /api/products/
 const createProduct = async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
+    // console.log("BODY:", req.body);
+    // console.log("FILE:", req.file);
     let {
       name,
       serialNumber,

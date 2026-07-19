@@ -117,7 +117,7 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
 
-    console.log(`[Socket Connection] Connecting to ${socketUrl} for role: ${activeRole}`);
+    // console.log(`[Socket Connection] Connecting to ${socketUrl} for role: ${activeRole}`);
     const newSocket = io(socketUrl, {
       auth: {
         token: activeToken,
@@ -128,11 +128,11 @@ export const NotificationProvider = ({ children }) => {
     });
 
     newSocket.on("connect", () => {
-      console.log(`[Socket Connected] Socket ID: ${newSocket.id}`);
+      // console.log(`[Socket Connected] Socket ID: ${newSocket.id}`);
     });
 
     newSocket.on("new_notification", (notification) => {
-      console.log("[Socket Notification Received]", notification);
+      // console.log("[Socket Notification Received]", notification);
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
       // Fire UI toast message
@@ -147,7 +147,7 @@ export const NotificationProvider = ({ children }) => {
 
     return () => {
       newSocket.disconnect();
-      console.log("[Socket Cleanup] Disconnected socket");
+      // console.log("[Socket Cleanup] Disconnected socket");
     };
   }, [staffToken, customerToken, user, showInfo]);
 

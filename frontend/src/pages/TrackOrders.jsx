@@ -230,24 +230,13 @@ const TrackOrders = () => {
               {/* --- BYPASSED OTP LOGIN FORM --- */}
               <form onSubmit={handleDirectLogin} className="to-auth-form">
                 <div className="to-form-group">
-                  <label htmlFor="trackName">Your Name</label>
-                  <input
-                    type="text"
-                    id="trackName"
-                    placeholder="Enter your name (Optional if already registered)"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                  />
-                </div>
-
-                <div className="to-form-group" style={{ marginTop: "12px" }}>
                   <label htmlFor="trackPhone">Mobile Number</label>
                   <input
                     type="tel"
                     id="trackPhone"
                     placeholder="10-Digit Mobile Number"
                     value={customerPhone}
-                    onChange={(e) => setPhoneValue(e.target.value)}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
                     maxLength="10"
                     required
                   />
@@ -305,11 +294,6 @@ const TrackOrders = () => {
                       maxLength="6"
                       required
                     />
-                    {tempOtp && (
-                      <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "#d97706", fontWeight: "bold" }}>
-                        [TESTING ONLY] Temporary OTP: {tempOtp}
-                      </div>
-                    )}
                   </div>
                   <button type="submit" disabled={otpVerifying} className="to-btn-primary">
                     {otpVerifying ? "Verifying..." : "Verify & Track Orders"}
@@ -326,7 +310,7 @@ const TrackOrders = () => {
             <div className="to-orders-workspace lp-fade-in">
               <div className="to-workspace-header">
                 <div>
-                  <h3>Hello, {customerName || "Customer"}!</h3>
+                  <h3>Hello, {!customerName || customerName === "Anonymous" ? "Customer" : customerName}!</h3>
                   <p>Here are your orders from Sri Lakshmi Ganapathi Milk Dairys.</p>
                 </div>
                 <button onClick={fetchOrders} className="to-refresh-btn" disabled={loading}>

@@ -23,12 +23,12 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
     const customer = await Customer.findOne({
       customerPhone: tenDigitPhone,
     });
-    console.log("Customer OptOut Status:", customer?.optOut);
+    // console.log("Customer OptOut Status:", customer?.optOut);
 
     if (customer?.optOut) {
-      console.log(
-        `CustomerNumber:${tenDigitPhone} opted out... not sending message`,
-      );
+      // console.log(
+      //   `CustomerNumber:${tenDigitPhone} opted out... not sending message`,
+      // );
       return;
     } else {
       await Customer.findOneAndUpdate(
@@ -36,9 +36,9 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
         { optOut: false },
         { upsert: true },
       );
-      console.log(
-        `CustomerNumber:${tenDigitPhone} opted in... sending message`,
-      );
+      // console.log(
+      //   `CustomerNumber:${tenDigitPhone} opted in... sending message`,
+      // );
     }
 
     // CONFIGURATION NOTE: If your template URL button was created with a base URL like
@@ -101,14 +101,14 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
       { upsert: true },
     );
 
-    console.log("=================================");
-    console.log("✅ WhatsApp sent successfully");
-    console.log("Customer Entered:", customerNumber);
-    console.log("Message Sent To:", formattedCustomer);
-    console.log("Invoice:", invoice_number);
-    console.log("=================================");
+    // console.log("=================================");
+    // console.log("✅ WhatsApp sent successfully");
+    // console.log("Customer Entered:", customerNumber);
+    // console.log("Message Sent To:", formattedCustomer);
+    // console.log("Invoice:", invoice_number);
+    // console.log("=================================");
   } catch (error) {
-    console.log("=================================");
+    // console.log("=================================");
     // Pro-Tip: Deep logging ensures you see the exact reason why Meta rejected a request
     console.error(
       "❌ WhatsApp Error:",
@@ -116,7 +116,7 @@ const sendWhatsapp = async (customerNumber, invoice_number, bill_amount) => {
         ? JSON.stringify(error.response.data, null, 2)
         : error.message,
     );
-    console.log("=================================");
+    // console.log("=================================");
   }
 };
 

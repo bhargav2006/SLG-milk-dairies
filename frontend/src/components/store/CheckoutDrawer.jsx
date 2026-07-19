@@ -114,9 +114,9 @@ const CheckoutDrawer = ({
           <button
             type="button"
             onClick={() => {
-              console.log(
-                "[Checkout Debug] checkout back button clicked -> onGoBackToCart",
-              );
+              // console.log(
+              //   "[Checkout Debug] checkout back button clicked -> onGoBackToCart",
+              // );
               onGoBackToCart();
             }}
             className="checkout-back-btn"
@@ -127,9 +127,9 @@ const CheckoutDrawer = ({
           <h3>Secure Checkout</h3>
           <button
             onClick={() => {
-              console.log(
-                "[Checkout Debug] checkout close button clicked -> onClose",
-              );
+              // console.log(
+              //   "[Checkout Debug] checkout close button clicked -> onClose",
+              // );
               onClose();
             }}
             className="close-drawer-btn"
@@ -230,22 +230,10 @@ const CheckoutDrawer = ({
               <form
                 onSubmit={handleDirectLogin}
                 className="lp-checkout-form-step lp-fade-in">
-                <h4>Customer Details</h4>
+                <h4>Customer Sign In</h4>
                 <p className="checkout-step-desc">
-                  Enter your name and phone number to prepare order delivery.
+                  Enter your phone number to sign in and prepare order delivery.
                 </p>
-
-                <div className="lp-form-group">
-                  <label htmlFor="checkoutName">Full Name *</label>
-                  <input
-                    type="text"
-                    id="checkoutName"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
 
                 <div className="lp-form-group">
                   <label htmlFor="checkoutPhone">Mobile Number *</label>
@@ -351,11 +339,7 @@ const CheckoutDrawer = ({
                     maxLength="6"
                     required
                   />
-                  {tempOtp && (
-                    <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "#d97706", fontWeight: "bold" }}>
-                      [TESTING ONLY] Temporary OTP: {tempOtp}
-                    </div>
-                  )}
+                  
                 </div>
 
                 <button
@@ -387,6 +371,28 @@ const CheckoutDrawer = ({
               <form
                 onSubmit={handlePlaceOrder}
                 className="lp-checkout-form-step lp-fade-in">
+                {(!customerInfo?.customerName || customerInfo.customerName === "Anonymous") ? (
+                  <div className="checkout-section">
+                    <h4>Welcome!</h4>
+                    <p className="checkout-step-desc">Please enter your name to complete registration.</p>
+                    <div className="lp-form-group">
+                      <label htmlFor="checkoutRealName">Full Name *</label>
+                      <input
+                        type="text"
+                        id="checkoutRealName"
+                        value={customerName === "Anonymous" ? "" : customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Enter your name"
+                        required
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="checkout-section" style={{ borderBottom: "none", paddingBottom: "0" }}>
+                    <h4 style={{ color: "#1e3a8a", margin: "0" }}>Hello, {customerInfo.customerName}!</h4>
+                  </div>
+                )}
+
                 <div className="checkout-section">
                   <h4>Delivery Location Details</h4>
 

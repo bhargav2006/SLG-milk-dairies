@@ -442,10 +442,6 @@ const LandingPage = () => {
       showError("Please enter a valid 10-digit mobile number");
       return;
     }
-    if (!customerName.trim()) {
-      showError("Please enter your name");
-      return;
-    }
 
     try {
       setOtpVerifying(true);
@@ -501,26 +497,26 @@ const LandingPage = () => {
   // --- Place Order Logic ---
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    console.log("[Checkout Debug] handlePlaceOrder executed", {
-      customerToken,
-      placedOrder,
-      selectedAddressIndex,
-      addresses,
-      newAddress,
-      deliveryNotes,
-      isSubmittingOrder,
-      button: "Confirm COD Order",
-      cartItems: cart.length,
-    });
+    // console.log("[Checkout Debug] handlePlaceOrder executed", {
+    //   customerToken,
+    //   placedOrder,
+    //   selectedAddressIndex,
+    //   addresses,
+    //   newAddress,
+    //   deliveryNotes,
+    //   isSubmittingOrder,
+    //   button: "Confirm COD Order",
+    //   cartItems: cart.length,
+    // });
     if (cart.length === 0) {
       showError("Your cart is empty.");
-      console.log("[Checkout Debug] handlePlaceOrder aborted: cart is empty");
+      // console.log("[Checkout Debug] handlePlaceOrder aborted: cart is empty");
       return;
     }
 
     if (!customerName.trim()) {
       showError("Please enter your name.");
-      console.log("[Checkout Debug] handlePlaceOrder aborted: name missing");
+      // console.log("[Checkout Debug] handlePlaceOrder aborted: name missing");
       return;
     }
 
@@ -530,19 +526,19 @@ const LandingPage = () => {
     } else {
       if (!newAddress.street || !newAddress.city || !newAddress.pincode) {
         showError("Please fill in all address details (Street, City, Pincode)");
-        console.log(
-          "[Checkout Debug] handlePlaceOrder aborted: incomplete address",
-        );
+        // console.log(
+        //   "[Checkout Debug] handlePlaceOrder aborted: incomplete address",
+        // );
         return;
       }
       addressPayload = newAddress;
     }
 
-    console.log("step 1");
+    // console.log("step 1");
     try {
-      console.log("step 2");
+      // console.log("step 2");
       setIsSubmittingOrder(true);
-      console.log("step 3");
+      // console.log("step 3");
       const orderPayload = {
         products: cart.map((item) => ({
           product: item.product._id,
@@ -551,20 +547,21 @@ const LandingPage = () => {
         address: addressPayload,
         paymentMethod: "COD",
         notes: deliveryNotes || "",
+        customerName: customerName.trim(),
       };
 
-      console.log("step 4", orderPayload);
+      // console.log("step 4", orderPayload);
       const response = await customerService.placeOrder(orderPayload);
-      console.log("step 5", response);
+      // console.log("step 5", response);
       if (response && response.order) {
-        console.log("step 6", response.order);
+        // console.log("step 6", response.order);
         setPlacedOrder(response.order);
-        console.log("step 7");
+        // console.log("step 7");
         setCart([]); // Clear cart
-        console.log("step 8");
+        // console.log("step 8");
         setIsCartOpen(false);
         showSuccess("Order placed successfully!");
-        console.log("step 9");
+        // console.log("step 9");
 
         // Refresh customer profile to sync addresses
         const profileData = await customerService.getProfile();
@@ -578,12 +575,12 @@ const LandingPage = () => {
           setCustomerName(profileData.customer.customerName || "");
         }
       }
-      console.log("step 10");
+      // console.log("step 10");
     } catch (err) {
       console.error("Order error:", err);
       showError(err.response?.data?.message || "Failed to place order.");
     } finally {
-      console.log("step finally");
+      // console.log("step finally");
       setIsSubmittingOrder(false);
     }
   };
@@ -631,17 +628,17 @@ const LandingPage = () => {
   });
 
   const handleProceedToCheckout = () => {
-    console.log("[Checkout Debug] handleProceedToCheckout executed", {
-      isSubmittingOrder,
-      addresses,
-      selectedAddressIndex,
-      cart,
-      button: "Proceed to Checkout",
-      cartSubtotal,
-      cartCount,
-      customerToken: !!customerToken,
-      placedOrder: !!placedOrder,
-    });
+    // console.log("[Checkout Debug] handleProceedToCheckout executed", {
+    //   isSubmittingOrder,
+    //   addresses,
+    //   selectedAddressIndex,
+    //   cart,
+    //   button: "Proceed to Checkout",
+    //   cartSubtotal,
+    //   cartCount,
+    //   customerToken: !!customerToken,
+    //   placedOrder: !!placedOrder,
+    // });
     if (cartSubtotal < CONFIG.MIN_ORDER_AMOUNT) {
       showError(
         `Minimum order amount of ₹${CONFIG.MIN_ORDER_AMOUNT} required.`,
@@ -1096,9 +1093,9 @@ const LandingPage = () => {
               <h3>Shopping Cart</h3>
               <button
                 onClick={() => {
-                  console.log(
-                    "[Checkout Debug] cart drawer close clicked -> setIsCartOpen(false)",
-                  );
+                  // console.log(
+                  //   "[Checkout Debug] cart drawer close clicked -> setIsCartOpen(false)",
+                  // );
                   setIsCartOpen(false);
                 }}
                 className="close-drawer-btn">
@@ -1268,15 +1265,15 @@ const LandingPage = () => {
         key={checkoutSessionKey}
         isOpen={isCheckoutOpen}
         onClose={() => {
-          console.log(
-            "[Checkout Debug] checkout drawer close -> setIsCheckoutOpen(false)",
-          );
+          // console.log(
+          //   "[Checkout Debug] checkout drawer close -> setIsCheckoutOpen(false)",
+          // );
           setIsCheckoutOpen(false);
         }}
         onGoBackToCart={() => {
-          console.log(
-            "[Checkout Debug] onGoBackToCart executed -> return to cart drawer",
-          );
+          // console.log(
+          //   "[Checkout Debug] onGoBackToCart executed -> return to cart drawer",
+          // );
           setIsCheckoutOpen(false);
           setIsCartOpen(true);
         }}

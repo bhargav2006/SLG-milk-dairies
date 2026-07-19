@@ -109,6 +109,11 @@ exports.placeOrder = async (req, res) => {
     // Update Customer details
     const customer = await Customer.findById(customerId);
     if (customer) {
+      // Update customer name if it was previously Anonymous/unset
+      if (req.body.customerName && req.body.customerName.trim() && (!customer.customerName || customer.customerName === "Anonymous")) {
+        customer.customerName = req.body.customerName.trim();
+      }
+
       customer.totalOrders = (customer.totalOrders || 0) + 1;
       customer.totalSpent = (customer.totalSpent || 0) + totalAmount;
       
