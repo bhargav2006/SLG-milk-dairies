@@ -44,11 +44,13 @@ const CheckoutDrawer = ({
   placedOrder,
   setPlacedOrder,
   handleOpenOrdersHistory,
+  handleDirectLogin,
 }) => {
   const navigate = useNavigate();
   if (!isOpen) return null;
 
-  // Determine current active step index:
+  // Determine current active step index (OTP verification is bypassed):
+  /*
   // Steps: Cart (0), Details (1), Verification (2), Delivery (3), Confirm (4), Done (5)
   const getActiveStep = () => {
     if (placedOrder) return 5; // Done
@@ -74,6 +76,32 @@ const CheckoutDrawer = ({
     { label: "Delivery", index: 3 },
     { label: "Confirm", index: 4 },
     { label: "Done", index: 5 },
+  ];
+  */
+
+  // Steps: Cart (0), Details (1), Delivery (2), Confirm (3), Done (4)
+  const getActiveStep = () => {
+    if (placedOrder) return 4; // Done
+    if (!customerToken) {
+      return 1; // Details
+    }
+    // Authenticated, check address selection
+    if (
+      selectedAddressIndex === -1 &&
+      (!newAddress.street || !newAddress.pincode)
+    ) {
+      return 2; // Delivery selection
+    }
+    return 3; // Confirm
+  };
+
+  const activeStep = getActiveStep();
+  const steps = [
+    { label: "Cart", index: 0 },
+    { label: "Details", index: 1 },
+    { label: "Delivery", index: 2 },
+    { label: "Confirm", index: 3 },
+    { label: "Done", index: 4 },
   ];
 
   return (
@@ -122,13 +150,15 @@ const CheckoutDrawer = ({
                 {activeStep > st.index ? <Check size={12} /> : st.index}
               </div>
               <span className="node-label">{st.label}</span>
-              {st.index < 5 && <div className="step-connector"></div>}
+              {/* Originally index < 5, changed to < 4 since OTP step is bypassed */}
+              {st.index < 4 && <div className="step-connector"></div>}
             </div>
           ))}
         </div>
 
         {/* Checkout Steps Render */}
-        {activeStep === 5 && placedOrder ? (
+        {/* Originally activeStep === 5, changed to === 4 since OTP step is bypassed */}
+        {activeStep === 4 && placedOrder ? (
           /* Order Success Page */
           <div className="lp-success-screen lp-fade-in">
             <div className="success-icon-wrapper">
@@ -195,7 +225,58 @@ const CheckoutDrawer = ({
         ) : (
           /* Step Forms */
           <div className="lp-checkout-scroll-content">
-            {/* Step 1: Details (Name & Phone inputs) */}
+            {/* --- BYPASSED OTP FLOW --- */}
+            {!customerToken && (
+              <form
+                onSubmit={handleDirectLogin}
+                className="lp-checkout-form-step lp-fade-in">
+                <h4>Customer Details</h4>
+                <p className="checkout-step-desc">
+                  Enter your name and phone number to prepare order delivery.
+                </p>
+
+                <div className="lp-form-group">
+                  <label htmlFor="checkoutName">Full Name *</label>
+                  <input
+                    type="text"
+                    id="checkoutName"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Enter your name"
+                    required
+                  />
+                </div>
+
+                <div className="lp-form-group">
+                  <label htmlFor="checkoutPhone">Mobile Number *</label>
+                  <input
+                    type="tel"
+                    id="checkoutPhone"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="10-Digit Mobile Number"
+                    maxLength="10"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={otpVerifying}
+                  className="lp-btn lp-btn-primary lp-btn-block form-action-btn">
+                  {otpVerifying ? "Proceeding..." : "Continue to Delivery"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onGoBackToCart}
+                  className="lp-btn lp-btn-secondary lp-btn-block form-back-btn">
+                  Go Back to Cart
+                </button>
+              </form>
+            )}
+
+            {/* ORIGINAL OTP FLOW (COMMENTED OUT TO RESTORE LATER)
             {!customerToken && !otpSent && (
               <form
                 onSubmit={handleSendOtp}
@@ -235,7 +316,6 @@ const CheckoutDrawer = ({
               </form>
             )}
 
-            {/* Step 2: Verification (OTP verification input) */}
             {!customerToken && otpSent && (
               <form
                 onSubmit={handleVerifyOtp}
@@ -271,7 +351,6 @@ const CheckoutDrawer = ({
                     maxLength="6"
                     required
                   />
-                  {/* [TESTING ONLY] Temporary OTP placeholder printed directly under the field */}
                   {tempOtp && (
                     <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "#d97706", fontWeight: "bold" }}>
                       [TESTING ONLY] Temporary OTP: {tempOtp}
@@ -301,6 +380,7 @@ const CheckoutDrawer = ({
                 </button>
               </form>
             )}
+            */}
 
             {/* Step 3 & 4: Delivery (Address & Delivery Details) */}
             {customerToken && (

@@ -333,7 +333,8 @@ const LandingPage = () => {
   const cartTotal = cartSubtotal + deliveryFee;
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  // --- Customer Login/OTP Flow ---
+  // --- Customer Login/OTP Flow (Commented out to restore later) ---
+  /*
   const handleSendOtp = async (e) => {
     e.preventDefault();
     console.log("[Checkout Debug] handleSendOtp executed", {
@@ -419,6 +420,62 @@ const LandingPage = () => {
       console.error(err);
       showError(
         err.response?.data?.message || "OTP verification failed. Check again.",
+      );
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+  */
+
+  // --- Bypassed OTP Flow (Direct Login/Register) ---
+  const handleDirectLogin = async (e) => {
+    e.preventDefault();
+    console.log("[Checkout Debug] handleDirectLogin executed", {
+      customerPhone,
+      customerName,
+    });
+    if (
+      !customerPhone ||
+      customerPhone.length !== 10 ||
+      !/^\d+$/.test(customerPhone)
+    ) {
+      showError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    if (!customerName.trim()) {
+      showError("Please enter your name");
+      return;
+    }
+
+    try {
+      setOtpVerifying(true);
+      // We pass a dummy OTP "123456" which satisfies original service contracts
+      const data = await customerService.verifyOtp(
+        customerPhone,
+        customerName,
+        "123456",
+      );
+      if (data && data.token) {
+        localStorage.setItem("customer_token", data.token);
+        localStorage.setItem("customer_info", JSON.stringify(data.customer));
+        setCustomerToken(data.token);
+        setSocketCustomerToken(data.token);
+        setCustomerInfo(data.customer);
+        setAddresses(data.customer.addresses || []);
+        if (data.customer.addresses?.length > 0) {
+          setSelectedAddressIndex(0);
+        } else {
+          setSelectedAddressIndex(-1);
+        }
+
+        setCustomerName(data.customer.customerName || "");
+
+        showSuccess("Authenticated successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      showError(
+        err.response?.data?.message || "Authentication failed. Try again.",
       );
     } finally {
       setOtpVerifying(false);
@@ -1157,7 +1214,7 @@ const LandingPage = () => {
         </div>
       )}
 
-      {/* --- CHECKOUT & IDENTITY DRAWER --- */}
+      {/* --- CHECKOUT & IDENTITY DRAWER (ORIGINAL COMMENTED OUT TO RESTORE LATER) ---
       <CheckoutDrawer
         key={checkoutSessionKey}
         isOpen={isCheckoutOpen}
@@ -1189,6 +1246,48 @@ const LandingPage = () => {
         handleSendOtp={handleSendOtp}
         handleVerifyOtp={handleVerifyOtp}
         tempOtp={tempOtp}
+        handlePlaceOrder={handlePlaceOrder}
+        addresses={addresses}
+        selectedAddressIndex={selectedAddressIndex}
+        setSelectedAddressIndex={setSelectedAddressIndex}
+        newAddress={newAddress}
+        setNewAddress={setNewAddress}
+        deliveryNotes={deliveryNotes}
+        setDeliveryNotes={setDeliveryNotes}
+        cartSubtotal={cartSubtotal}
+        deliveryFee={deliveryFee}
+        cartTotal={cartTotal}
+        isSubmittingOrder={isSubmittingOrder}
+        placedOrder={placedOrder}
+        setPlacedOrder={setPlacedOrder}
+      />
+      */}
+
+      {/* --- BYPASSED OTP CHECKOUT & IDENTITY DRAWER --- */}
+      <CheckoutDrawer
+        key={checkoutSessionKey}
+        isOpen={isCheckoutOpen}
+        onClose={() => {
+          console.log(
+            "[Checkout Debug] checkout drawer close -> setIsCheckoutOpen(false)",
+          );
+          setIsCheckoutOpen(false);
+        }}
+        onGoBackToCart={() => {
+          console.log(
+            "[Checkout Debug] onGoBackToCart executed -> return to cart drawer",
+          );
+          setIsCheckoutOpen(false);
+          setIsCartOpen(true);
+        }}
+        customerToken={customerToken}
+        customerInfo={customerInfo}
+        customerName={customerName}
+        setCustomerName={setCustomerName}
+        customerPhone={customerPhone}
+        setCustomerPhone={setCustomerPhone}
+        otpVerifying={otpVerifying}
+        handleDirectLogin={handleDirectLogin}
         handlePlaceOrder={handlePlaceOrder}
         addresses={addresses}
         selectedAddressIndex={selectedAddressIndex}

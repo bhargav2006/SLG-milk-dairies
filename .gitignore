@@ -8,6 +8,7 @@ build/
 out/
 
 # Environment files and credentials
+frontend\.env
 # .env
 # .env.local
 # .env.development.local

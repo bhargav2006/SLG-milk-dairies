@@ -27,7 +27,8 @@ const TrackOrders = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("active"); // "active" (Placed, Accepted, Assigned, Out for Delivery) vs "past" (Delivered, Cancelled)
 
-  // Send auth OTP
+  // Send auth OTP (Commented out to restore later)
+  /*
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!customerPhone || customerPhone.length !== 10 || !/^\d+$/.test(customerPhone)) {
@@ -91,6 +92,38 @@ const TrackOrders = () => {
     } catch (err) {
       console.error(err);
       showError(err.response?.data?.message || "OTP verification failed. Check again.");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+  */
+
+  // --- Bypassed OTP Flow (Direct Login/Register) ---
+  const handleDirectLogin = async (e) => {
+    e.preventDefault();
+    if (!customerPhone || customerPhone.length !== 10 || !/^\d+$/.test(customerPhone)) {
+      showError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
+    try {
+      setOtpVerifying(true);
+      // We pass a dummy OTP "123456" which satisfies original service contracts
+      const data = await customerService.verifyOtp(customerPhone, customerName || "Anonymous", "123456");
+      if (data && data.token) {
+        localStorage.setItem("customer_token", data.token);
+        localStorage.setItem("customer_info", JSON.stringify(data.customer));
+        setCustomerToken(data.token);
+        setSocketCustomerToken(data.token);
+        if (data.customer.customerName && data.customer.customerName !== "Anonymous") {
+          setCustomerName(data.customer.customerName);
+        }
+        showSuccess("Authenticated successfully!");
+        fetchOrders();
+      }
+    } catch (err) {
+      console.error(err);
+      showError(err.response?.data?.message || "Authentication failed. Check details again.");
     } finally {
       setOtpVerifying(false);
     }
@@ -194,6 +227,37 @@ const TrackOrders = () => {
                 <p>Enter your 10-digit mobile phone number to log in and view your active order receipts.</p>
               </div>
 
+              {/* --- BYPASSED OTP LOGIN FORM --- */}
+              <form onSubmit={handleDirectLogin} className="to-auth-form">
+                <div className="to-form-group">
+                  <label htmlFor="trackName">Your Name</label>
+                  <input
+                    type="text"
+                    id="trackName"
+                    placeholder="Enter your name (Optional if already registered)"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                  />
+                </div>
+
+                <div className="to-form-group" style={{ marginTop: "12px" }}>
+                  <label htmlFor="trackPhone">Mobile Number</label>
+                  <input
+                    type="tel"
+                    id="trackPhone"
+                    placeholder="10-Digit Mobile Number"
+                    value={customerPhone}
+                    onChange={(e) => setPhoneValue(e.target.value)}
+                    maxLength="10"
+                    required
+                  />
+                </div>
+                <button type="submit" disabled={otpVerifying} className="to-btn-primary" style={{ marginTop: "16px" }}>
+                  {otpVerifying ? "Logging in..." : "Track Orders"}
+                </button>
+              </form>
+
+              {/* ORIGINAL OTP AUTH FORM (COMMENTED OUT TO RESTORE LATER)
               {!otpSent ? (
                 <form onSubmit={handleSendOtp} className="to-auth-form">
                   <div className="to-form-group">
@@ -241,7 +305,6 @@ const TrackOrders = () => {
                       maxLength="6"
                       required
                     />
-                    {/* [TESTING ONLY] Temporary OTP placeholder printed directly under the field */}
                     {tempOtp && (
                       <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "#d97706", fontWeight: "bold" }}>
                         [TESTING ONLY] Temporary OTP: {tempOtp}
@@ -256,6 +319,7 @@ const TrackOrders = () => {
                   </button>
                 </form>
               )}
+              */}
             </div>
           ) : (
             /* Active Tracking Orders Workspace */

@@ -67,9 +67,16 @@ exports.verifyOtp = async (req, res) => {
   try {
     let { customerPhone, customerName, otp } = req.body;
 
+    /*
     if (!customerPhone || !otp) {
       return res.status(400).json({
         message: "Phone number and OTP are required",
+      });
+    }
+    */
+    if (!customerPhone) {
+      return res.status(400).json({
+        message: "Phone number is required",
       });
     }
 
@@ -77,6 +84,7 @@ exports.verifyOtp = async (req, res) => {
       ? customerPhone
       : `91${customerPhone}`;
 
+    /*
     const otpRecord = await Otp.findOne({
       phone: customerPhone,
       otp,
@@ -95,6 +103,7 @@ exports.verifyOtp = async (req, res) => {
         message: "OTP has expired",
       });
     }
+    */
 
     // -----------------------------
     // Find Existing Customer
@@ -124,7 +133,10 @@ exports.verifyOtp = async (req, res) => {
       }
     }
 
+    /*
     await otpRecord.deleteOne();
+    */
+    await Otp.deleteMany({ phone: customerPhone });
 
     const token = generateToken({
       id: customer._id,
