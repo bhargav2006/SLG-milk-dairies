@@ -1,0 +1,27 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /services
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /track-orders
+
+# Disallow administrative, internal, and private user routes
+Disallow: /login
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /products
+Disallow: /bills
+Disallow: /orders
+Disallow: /users
+Disallow: /billing/
+Disallow: /delivery/
+Disallow: /bill/
+Disallow: /delivery-order/
+Disallow: /unauthorized
+Disallow: /api/
+
+# Host and Sitemap
+Host: https://slgmilkdairys.de
+Sitemap: https://slgmilkdairys.de/sitemap.xml
