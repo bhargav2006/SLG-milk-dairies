@@ -408,9 +408,9 @@ const Coupons = () => {
           </div>
         }
       >
-        <form id="coupon-form" onSubmit={handleSubmit}>
-          <div className="lp-form-group">
-            <label htmlFor="code">Coupon Code *</label>
+        <form id="coupon-form" onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" htmlFor="code">Coupon Code *</label>
             <input
               type="text"
               id="code"
@@ -419,28 +419,30 @@ const Coupons = () => {
               onChange={handleChange}
               placeholder="e.g. VISAKHA20"
               disabled={!!editingCoupon}
+              className="form-input"
               style={{ textTransform: "uppercase" }}
               required
             />
-            {errors.code && <span style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "4px", display: "block" }}>{errors.code}</span>}
+            {errors.code && <span className="form-error-msg">{errors.code}</span>}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div className="lp-form-group">
-              <label htmlFor="discountType">Discount Type *</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="discountType">Discount Type *</label>
               <select
                 id="discountType"
                 name="discountType"
                 value={couponData.discountType}
                 onChange={handleChange}
+                className="form-input"
                 required
               >
                 <option value="percentage">Percentage (%)</option>
                 <option value="flat">Flat Amount (₹)</option>
               </select>
             </div>
-            <div className="lp-form-group">
-              <label htmlFor="discountValue">Discount Value *</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="discountValue">Discount Value *</label>
               <input
                 type="number"
                 id="discountValue"
@@ -448,17 +450,18 @@ const Coupons = () => {
                 value={couponData.discountValue}
                 onChange={handleChange}
                 placeholder={couponData.discountType === "percentage" ? "e.g. 10" : "e.g. 50"}
+                className="form-input"
                 step="any"
                 min="0"
                 required
               />
-              {errors.discountValue && <span style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "4px", display: "block" }}>{errors.discountValue}</span>}
+              {errors.discountValue && <span className="form-error-msg">{errors.discountValue}</span>}
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div className="lp-form-group">
-              <label htmlFor="minPurchase">Min Purchase Amount (₹)</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="minPurchase">Min Purchase Amount (₹)</label>
               <input
                 type="number"
                 id="minPurchase"
@@ -466,12 +469,13 @@ const Coupons = () => {
                 value={couponData.minPurchase}
                 onChange={handleChange}
                 placeholder="e.g. 200"
+                className="form-input"
                 min="0"
               />
-              {errors.minPurchase && <span style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "4px", display: "block" }}>{errors.minPurchase}</span>}
+              {errors.minPurchase && <span className="form-error-msg">{errors.minPurchase}</span>}
             </div>
-            <div className="lp-form-group">
-              <label htmlFor="maxDiscount">Max Discount Limit (₹)</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="maxDiscount">Max Discount Limit (₹)</label>
               <input
                 type="number"
                 id="maxDiscount"
@@ -479,26 +483,28 @@ const Coupons = () => {
                 value={couponData.maxDiscount}
                 onChange={handleChange}
                 placeholder="e.g. 100"
+                className="form-input"
                 min="0"
                 disabled={couponData.discountType !== "percentage"}
               />
-              {errors.maxDiscount && <span style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "4px", display: "block" }}>{errors.maxDiscount}</span>}
+              {errors.maxDiscount && <span className="form-error-msg">{errors.maxDiscount}</span>}
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div className="lp-form-group">
-              <label htmlFor="expiryDate">Expiry Date</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="expiryDate">Expiry Date</label>
               <input
                 type="date"
                 id="expiryDate"
                 name="expiryDate"
                 value={couponData.expiryDate}
                 onChange={handleChange}
+                className="form-input"
               />
             </div>
-            <div className="lp-form-group">
-              <label htmlFor="usageLimit">Global Usage Limit</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="usageLimit">Global Usage Limit</label>
               <input
                 type="number"
                 id="usageLimit"
@@ -506,15 +512,16 @@ const Coupons = () => {
                 value={couponData.usageLimit}
                 onChange={handleChange}
                 placeholder="e.g. 100 (Blank = Unlimited)"
+                className="form-input"
                 min="0"
               />
-              {errors.usageLimit && <span style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "4px", display: "block" }}>{errors.usageLimit}</span>}
+              {errors.usageLimit && <span className="form-error-msg">{errors.usageLimit}</span>}
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div className="lp-form-group">
-              <label htmlFor="perCustomerLimit">Usage Limit Per User</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="perCustomerLimit">Usage Limit Per User</label>
               <input
                 type="number"
                 id="perCustomerLimit"
@@ -522,12 +529,13 @@ const Coupons = () => {
                 value={couponData.perCustomerLimit}
                 onChange={handleChange}
                 placeholder="e.g. 1"
+                className="form-input"
                 min="1"
               />
-              {errors.perCustomerLimit && <span style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "4px", display: "block" }}>{errors.perCustomerLimit}</span>}
+              {errors.perCustomerLimit && <span className="form-error-msg">{errors.perCustomerLimit}</span>}
             </div>
-            <div className="lp-form-group" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none", marginTop: "16px" }}>
+            <div className="form-group" style={{ display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: 0 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none", marginTop: "24px" }}>
                 <input
                   type="checkbox"
                   name="isActive"
@@ -535,7 +543,7 @@ const Coupons = () => {
                   onChange={handleChange}
                   style={{ width: "18px", height: "18px", margin: 0 }}
                 />
-                <span>Active and Redeemable</span>
+                <span className="form-label" style={{ margin: 0, fontWeight: 500 }}>Active and Redeemable</span>
               </label>
             </div>
           </div>
