@@ -72,6 +72,8 @@ const createInvoiceFromOrder = async (order) => {
       paymentMethod,
       billType,
       deliveryFee,
+      couponCode: order.couponCode || null,
+      discountAmount: order.discountAmount || 0,
     });
 
     await bill.save();
@@ -176,8 +178,14 @@ const createInvoiceFromOrder = async (order) => {
           <table style="width:100%;margin-top:20px;background:#FFF9E6;border:1px solid #FFD166;border-radius:12px;border-collapse:collapse;border-spacing:0;">
             <tr>
               <td style="font-size:14px;color:#6B7280;padding:10px 16px;border:0;vertical-align:middle;">Subtotal</td>
-              <td style="font-size:14px;font-weight:600;color:#1F2937;text-align:right;padding:10px 16px;border:0;vertical-align:middle;">₹${(totalAmount - deliveryFee).toFixed(2)}</td>
+              <td style="font-size:14px;font-weight:600;color:#1F2937;text-align:right;padding:10px 16px;border:0;vertical-align:middle;">₹${(totalAmount - deliveryFee + (order.discountAmount || 0)).toFixed(2)}</td>
             </tr>
+            ${order.couponCode ? `
+            <tr>
+              <td style="font-size:14px;color:#6B7280;padding:10px 16px;border:0;vertical-align:middle;">Discount (${order.couponCode})</td>
+              <td style="font-size:14px;font-weight:600;color:#DC2626;text-align:right;padding:10px 16px;border:0;vertical-align:middle;">-₹${order.discountAmount.toFixed(2)}</td>
+            </tr>
+            ` : ""}
             <tr>
               <td style="font-size:14px;color:#6B7280;padding:10px 16px;border:0;vertical-align:middle;">Delivery Fee</td>
               <td style="font-size:14px;font-weight:600;color:#1F2937;text-align:right;padding:10px 16px;border:0;vertical-align:middle;">${deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}</td>

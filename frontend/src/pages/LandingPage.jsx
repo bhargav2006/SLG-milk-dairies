@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import customerService from "../services/customerService";
+import couponService from "../services/couponService";
 import { useNotifications } from "../context/NotificationContext";
 
 // Import Refactored Subcomponents
@@ -102,6 +103,13 @@ const LandingPage = () => {
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [isRegistered, setIsRegistered] = useState(true);
   const [activeFaq, setActiveFaq] = useState(null);
+
+  // Coupon States
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   // Customer Auth Session
   const [customerInfo, setCustomerInfo] = useState(() => {
@@ -491,8 +499,71 @@ const LandingPage = () => {
     setOtp("");
     setOtpSent(false);
     setIsRegistered(true);
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setCouponCode("");
+    setCouponError("");
     showInfo("Logged out of customer session.");
   };
+
+  // Coupon Handlers & Effect
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setApplyingCoupon(true);
+    setCouponError("");
+    try {
+      const data = await couponService.validateCoupon(couponCode, cartSubtotal);
+      if (data && data.coupon) {
+        setAppliedCoupon(data.coupon);
+        setDiscountAmount(data.coupon.discountAmount);
+        showSuccess(`Coupon '${data.coupon.code}' applied successfully.`);
+      }
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.message || "Invalid coupon code.";
+      setCouponError(msg);
+      showError(msg);
+      setAppliedCoupon(null);
+      setDiscountAmount(0);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setCouponCode("");
+    setCouponError("");
+    showInfo("Coupon removed.");
+  };
+
+  // Re-evaluate coupon when cart subtotal changes
+  useEffect(() => {
+    if (appliedCoupon) {
+      if (cartSubtotal < appliedCoupon.minPurchase) {
+        setAppliedCoupon(null);
+        setDiscountAmount(0);
+        setCouponError(`Coupon removed: Minimum purchase of ₹${appliedCoupon.minPurchase} is required.`);
+        showInfo("Applied coupon was removed due to cart subtotal dropping below minimum required.");
+      } else {
+        // Recalculate discount value dynamically based on new subtotal
+        let newDiscount = 0;
+        if (appliedCoupon.discountType === "percentage") {
+          newDiscount = (cartSubtotal * appliedCoupon.discountValue) / 100;
+          if (appliedCoupon.maxDiscount !== null && newDiscount > appliedCoupon.maxDiscount) {
+            newDiscount = appliedCoupon.maxDiscount;
+          }
+        } else {
+          newDiscount = appliedCoupon.discountValue;
+        }
+        if (newDiscount > cartSubtotal) {
+          newDiscount = cartSubtotal;
+        }
+        setDiscountAmount(newDiscount);
+      }
+    }
+  }, [cartSubtotal, appliedCoupon]);
 
   // --- Place Order Logic ---
   const handlePlaceOrder = async (e) => {
@@ -548,6 +619,7 @@ const LandingPage = () => {
         paymentMethod: "COD",
         notes: deliveryNotes || "",
         customerName: customerName.trim(),
+        couponCode: appliedCoupon ? appliedCoupon.code : undefined,
       };
 
       // console.log("step 4", orderPayload);
@@ -558,6 +630,10 @@ const LandingPage = () => {
         setPlacedOrder(response.order);
         // console.log("step 7");
         setCart([]); // Clear cart
+        setAppliedCoupon(null);
+        setDiscountAmount(0);
+        setCouponCode("");
+        setCouponError("");
         // console.log("step 8");
         setIsCartOpen(false);
         showSuccess("Order placed successfully!");
@@ -1299,6 +1375,18 @@ const LandingPage = () => {
         isSubmittingOrder={isSubmittingOrder}
         placedOrder={placedOrder}
         setPlacedOrder={setPlacedOrder}
+        couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        appliedCoupon={appliedCoupon}
+        setAppliedCoupon={setAppliedCoupon}
+        discountAmount={discountAmount}
+        setDiscountAmount={setDiscountAmount}
+        couponError={couponError}
+        setCouponError={setCouponError}
+        applyingCoupon={applyingCoupon}
+        setApplyingCoupon={setApplyingCoupon}
+        handleApplyCoupon={handleApplyCoupon}
+        handleRemoveCoupon={handleRemoveCoupon}
       />
 
       {/* --- PRODUCT DETAILS POPUP MODAL --- */}

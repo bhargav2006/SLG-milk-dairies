@@ -45,6 +45,18 @@ const CheckoutDrawer = ({
   setPlacedOrder,
   handleOpenOrdersHistory,
   handleDirectLogin,
+  couponCode,
+  setCouponCode,
+  appliedCoupon,
+  setAppliedCoupon,
+  discountAmount,
+  setDiscountAmount,
+  couponError,
+  setCouponError,
+  applyingCoupon,
+  setApplyingCoupon,
+  handleApplyCoupon,
+  handleRemoveCoupon,
 }) => {
   const navigate = useNavigate();
   if (!isOpen) return null;
@@ -178,6 +190,12 @@ const CheckoutDrawer = ({
                 <span>Subtotal:</span>
                 <strong>₹{placedOrder.subtotal}</strong>
               </div>
+              {placedOrder.couponCode && (
+                <div className="receipt-row" style={{ color: "var(--color-danger)" }}>
+                  <span>Coupon Discount ({placedOrder.couponCode}):</span>
+                  <strong>-₹{placedOrder.discountAmount}</strong>
+                </div>
+              )}
               <div className="receipt-row">
                 <span>Delivery Fee:</span>
                 <strong>₹{placedOrder.deliveryFee}</strong>
@@ -552,18 +570,76 @@ const CheckoutDrawer = ({
                   </div>
                 </div>
 
+                <div className="checkout-section">
+                  <h4>Promo Code / Coupon</h4>
+                  {!appliedCoupon ? (
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="ENTER COUPON CODE"
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          border: "1px solid var(--color-border)",
+                          borderRadius: "6px",
+                          fontSize: "0.875rem",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          fontWeight: 600,
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={applyingCoupon || !couponCode.trim()}
+                        className="lp-btn lp-btn-primary"
+                        style={{ padding: "0 16px", height: "auto", fontSize: "0.85rem", width: "auto" }}
+                      >
+                        {applyingCoupon ? "..." : "Apply"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.2)", borderRadius: "6px", padding: "8px 12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <CheckCircle size={16} style={{ color: "var(--color-success)" }} />
+                        <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--color-success)", letterSpacing: "0.02em" }}>{appliedCoupon.code} Applied</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        style={{ background: "none", border: "none", color: "var(--color-danger)", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, padding: 0 }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {couponError && (
+                    <p style={{ color: "var(--color-danger)", fontSize: "0.78rem", margin: "6px 0 0 0", fontWeight: 500 }}>
+                      {couponError}
+                    </p>
+                  )}
+                </div>
+
                 <div className="checkout-bill-preview">
                   <div className="summary-row">
                     <span>Subtotal</span>
                     <span>₹{cartSubtotal}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="summary-row" style={{ color: "var(--color-danger)" }}>
+                      <span>Coupon Discount ({appliedCoupon.code})</span>
+                      <span>-₹{discountAmount}</span>
+                    </div>
+                  )}
                   <div className="summary-row">
                     <span>Delivery Fee</span>
                     <span>₹{deliveryFee}</span>
                   </div>
                   <div className="summary-row total">
                     <span>Grand Total</span>
-                    <span>₹{cartTotal}</span>
+                    <span>₹{cartTotal - discountAmount}</span>
                   </div>
                 </div>
 
@@ -573,7 +649,7 @@ const CheckoutDrawer = ({
                   className="lp-btn lp-btn-primary lp-btn-block checkout-submit-btn">
                   {isSubmittingOrder
                     ? "Confirming Order..."
-                    : `Confirm COD Order (₹${cartTotal})`}
+                    : `Confirm COD Order (₹${cartTotal - discountAmount})`}
                 </button>
 
                 <button

@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  ShoppingBag
+  ShoppingBag,
+  Ticket
 } from "lucide-react";
 
 const MainLayout = ({ children }) => {
@@ -51,6 +52,7 @@ const MainLayout = ({ children }) => {
     if (path.startsWith("/billing/retail")) return "Retail Billing Terminal";
     if (path.startsWith("/billing/wholesale")) return "Wholesale Billing Terminal";
     if (path.startsWith("/users")) return "User Accounts Management";
+    if (path.startsWith("/coupons")) return "Discount Coupon Management";
     if (path.startsWith("/profile")) return "Account Profile";
     return "SRI LAKSHMI GANAPATHI MILK DAIRYS System";
   };
@@ -61,6 +63,7 @@ const MainLayout = ({ children }) => {
     { name: "Bills", path: "/bills", icon: Receipt, roles: ["admin", "accountant"] },
     { name: "Orders", path: "/orders", icon: ShoppingBag, roles: ["admin", "accountant"] },
     { name: "Users", path: "/users", icon: UsersIcon, roles: ["admin"] },
+    { name: "Coupons", path: "/coupons", icon: Ticket, roles: ["admin"] },
     { name: "Profile", path: "/profile", icon: UserIcon, roles: ["admin", "accountant"] },
   ];
 

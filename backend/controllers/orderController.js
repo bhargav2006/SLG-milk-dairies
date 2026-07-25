@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const Counter = require("../models/Counter");
+const Coupon = require("../models/Coupon");
 const { sendNotification } = require("../utils/notificationHelper");
 
 // @desc    Place a new customer order
@@ -9,7 +10,7 @@ const { sendNotification } = require("../utils/notificationHelper");
 // @access  Private (Customer)
 exports.placeOrder = async (req, res) => {
   try {
-    const { products, address, paymentMethod, notes } = req.body;
+    const { products, address, paymentMethod, notes, couponCode } = req.body;
     const customerId = req.customer._id;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
@@ -56,7 +57,67 @@ exports.placeOrder = async (req, res) => {
 
     // Calculate delivery fee: free if subtotal >= 500, else 20
     const deliveryFee = subtotal >= 500 ? 0 : 20;
-    const totalAmount = subtotal + deliveryFee;
+
+    // Apply coupon if code is present
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      const uppercaseCode = couponCode.toUpperCase().trim();
+      appliedCoupon = await Coupon.findOne({ code: uppercaseCode });
+
+      if (!appliedCoupon) {
+        return res.status(400).json({ message: "Coupon code not found" });
+      }
+
+      if (!appliedCoupon.isActive) {
+        return res.status(400).json({ message: "This coupon is no longer active" });
+      }
+
+      if (appliedCoupon.expiryDate && new Date(appliedCoupon.expiryDate) < new Date()) {
+        return res.status(400).json({ message: "This coupon has expired" });
+      }
+
+      if (appliedCoupon.usageLimit !== null && appliedCoupon.usedCount >= appliedCoupon.usageLimit) {
+        return res.status(400).json({ message: "This coupon's total usage limit has been reached" });
+      }
+
+      if (appliedCoupon.perCustomerLimit !== null) {
+        const customerUsageCount = await Order.countDocuments({
+          customerId,
+          couponCode: appliedCoupon.code,
+          orderStatus: { $ne: "Cancelled" }
+        });
+
+        if (customerUsageCount >= appliedCoupon.perCustomerLimit) {
+          return res.status(400).json({
+            message: `You have reached the maximum usage limit of ${appliedCoupon.perCustomerLimit} time(s) for this coupon`
+          });
+        }
+      }
+
+      if (subtotal < appliedCoupon.minPurchase) {
+        return res.status(400).json({
+          message: `Minimum purchase of ₹${appliedCoupon.minPurchase} is required to apply this coupon`
+        });
+      }
+
+      // Calculate discount amount
+      if (appliedCoupon.discountType === "percentage") {
+        discountAmount = (subtotal * appliedCoupon.discountValue) / 100;
+        if (appliedCoupon.maxDiscount !== null && discountAmount > appliedCoupon.maxDiscount) {
+          discountAmount = appliedCoupon.maxDiscount;
+        }
+      } else if (appliedCoupon.discountType === "flat") {
+        discountAmount = appliedCoupon.discountValue;
+      }
+
+      if (discountAmount > subtotal) {
+        discountAmount = subtotal;
+      }
+    }
+
+    const totalAmount = subtotal - discountAmount + deliveryFee;
 
     // Generate Order Number: ORD-YYYYMM-XXXX
     const today = new Date();
@@ -90,6 +151,8 @@ exports.placeOrder = async (req, res) => {
       },
       subtotal,
       deliveryFee,
+      couponCode: appliedCoupon ? appliedCoupon.code : null,
+      discountAmount,
       totalAmount,
       paymentMethod: paymentMethod || "COD",
       paymentStatus: "pending",
@@ -98,6 +161,11 @@ exports.placeOrder = async (req, res) => {
     });
 
     await order.save();
+
+    if (appliedCoupon) {
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
 
     // Deduct stock for each product
     for (const item of products) {
@@ -249,6 +317,14 @@ exports.cancelOrder = async (req, res) => {
     }
 
     await order.save();
+
+    // Restore coupon usage if coupon was applied
+    if (order.couponCode) {
+      await Coupon.findOneAndUpdate(
+        { code: order.couponCode },
+        { $inc: { usedCount: -1 } }
+      );
+    }
 
     // Restore stock
     for (const item of order.products) {

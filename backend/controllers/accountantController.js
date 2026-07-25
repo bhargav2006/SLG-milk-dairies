@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const DeliveryBoy = require("../models/DeliveryBoy");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
+const Coupon = require("../models/Coupon");
 const { createInvoiceFromOrder } = require("../utils/invoiceHelper");
 const { sendNotification } = require("../utils/notificationHelper");
 
@@ -236,6 +237,14 @@ exports.updateOrderStatus = async (req, res) => {
           customer.totalSpent = Math.max(0, (customer.totalSpent || 0) - order.totalAmount);
           await customer.save();
         }
+      }
+
+      // Restore coupon usage if coupon was applied
+      if (order.couponCode) {
+        await Coupon.findOneAndUpdate(
+          { code: order.couponCode },
+          { $inc: { usedCount: -1 } }
+        );
       }
     }
 

@@ -230,6 +230,12 @@ const DeliveryOrderStandalone = () => {
               <span>Subtotal</span>
               <span>₹{order.subtotal?.toFixed(2)}</span>
             </div>
+            {order.couponCode && (
+              <div className="summary-row" style={{ color: "var(--color-danger)" }}>
+                <span>Coupon Discount ({order.couponCode})</span>
+                <span>-₹{order.discountAmount?.toFixed(2)}</span>
+              </div>
+            )}
             <div className="summary-row">
               <span>Delivery Fee</span>
               <span>₹{order.deliveryFee?.toFixed(2)}</span>

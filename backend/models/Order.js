@@ -50,6 +50,14 @@ const OrderSchema = new mongoose.Schema(
     totalAmount: {
       type: Number,
     },
+    couponCode: {
+      type: String,
+      default: null,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
     paymentMethod: {
       type: String,
       enum: ["COD", "card", "online"],
