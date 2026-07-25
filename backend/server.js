@@ -20,6 +20,7 @@ const deliveryRoutes = require("./routes/deliveryRoutes");
 const customerProductRoutes = require("./routes/customerProductRoutes");
 const accountantRoutes = require("./routes/accountantRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const couponRoutes = require("./routes/couponRoutes");
 const { initSocket } = require("./utils/socket");
 
 const app = express();
@@ -85,6 +86,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/accountant", accountantRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/coupons", couponRoutes);
 // // Public customer products
 app.use("/api/shop/products", customerProductRoutes);
 
