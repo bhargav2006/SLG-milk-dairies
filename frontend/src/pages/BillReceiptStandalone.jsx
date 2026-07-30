@@ -323,9 +323,25 @@ const BillReceiptStandalone = () => {
                   fontWeight: 500,
                 }}
               >
-                ₹{(bill.totalAmount - (bill.deliveryFee || 0)).toFixed(2)}
+                ₹{(bill.totalAmount - (bill.deliveryFee || 0) + (bill.discountAmount || 0)).toFixed(2)}
               </span>
             </div>
+            {bill.couponCode && (
+              <div>
+                <span style={{ color: "var(--color-danger)" }}>Discount (Code: {bill.couponCode}): </span>
+                <span
+                  style={{
+                    width: "100px",
+                    display: "inline-block",
+                    textAlign: "right",
+                    fontWeight: 500,
+                    color: "var(--color-danger)",
+                  }}
+                >
+                  -₹{(bill.discountAmount || 0).toFixed(2)}
+                </span>
+              </div>
+            )}
             {bill.billType === "delivery" && (
               <div>
                 <span>Delivery Fee: </span>

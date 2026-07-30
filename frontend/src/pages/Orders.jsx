@@ -424,6 +424,12 @@ const Orders = () => {
                     <span>Subtotal</span>
                     <span>₹{selectedOrderDetails.subtotal}</span>
                   </div>
+                  {selectedOrderDetails.couponCode && (
+                    <div className="summary-line" style={{ color: "var(--color-danger)" }}>
+                      <span>Discount (Code: {selectedOrderDetails.couponCode})</span>
+                      <span>-₹{selectedOrderDetails.discountAmount}</span>
+                    </div>
+                  )}
                   <div className="summary-line">
                     <span>Delivery Fee</span>
                     <span>₹{selectedOrderDetails.deliveryFee}</span>

@@ -33,7 +33,8 @@ api.interceptors.request.use(
     // If the request targets customer routes, use the customer token
     if (
       config.url.startsWith("/api/orders") ||
-      config.url.startsWith("/api/customer/profile")
+      config.url.startsWith("/api/customer/profile") ||
+      config.url.startsWith("/api/coupons/validate")
     ) {
       const customerToken = localStorage.getItem("customer_token");
       if (customerToken) {

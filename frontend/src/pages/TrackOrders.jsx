@@ -418,7 +418,10 @@ const TrackOrders = () => {
                         <div className="collect-totals">
                           {ord.deliveryFee !== undefined && (
                             <span className="lbl" style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "4px" }}>
-                              Subtotal: ₹{ord.subtotal !== undefined ? ord.subtotal : (ord.totalAmount - (ord.deliveryFee || 0))} | Delivery Fee: {ord.deliveryFee === 0 ? "Free" : `₹${ord.deliveryFee}`}
+                              Subtotal: ₹{ord.subtotal !== undefined ? ord.subtotal : (ord.totalAmount - (ord.deliveryFee || 0) + (ord.discountAmount || 0))}
+                              {ord.couponCode && ` | Coupon: ${ord.couponCode} (-₹${ord.discountAmount})`}
+                              {" | "}
+                              Delivery Fee: {ord.deliveryFee === 0 ? "Free" : `₹${ord.deliveryFee}`}
                             </span>
                           )}
                           <span className="lbl">Total Paid (COD):</span>

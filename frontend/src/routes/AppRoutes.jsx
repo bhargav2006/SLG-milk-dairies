@@ -13,6 +13,7 @@ import CreateBill from "../pages/CreateBill";
 import Bills from "../pages/Bills";
 import Users from "../pages/Users";
 import Profile from "../pages/Profile";
+import Coupons from "../pages/Coupons";
 import BillReceiptStandalone from "../pages/BillReceiptStandalone";
 import DeliveryOrderStandalone from "../pages/DeliveryOrderStandalone";
 import LandingPage from "../pages/LandingPage";
@@ -157,6 +158,14 @@ const AppRoutes = () => {
             element={
               <MainLayout>
                 <Users />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/coupons"
+            element={
+              <MainLayout>
+                <Coupons />
               </MainLayout>
             }
           />
