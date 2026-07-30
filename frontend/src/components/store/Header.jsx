@@ -29,13 +29,11 @@ const Header = ({
     <>
       <div className="lp-announce-bar" aria-label="Delivery announcements">
         <div className="lp-announce-track">
-          {/* <span>Pan India Shipping</span> */}
           <span>Fresh Dairy Products</span>
-          <span>No Added Charges</span>
+          <span style={{ color: "#fef08a", fontWeight: 700 }}>🎉 Use Code: SLG05 for 5% OFF (Unlimited!)</span>
           <span>Same Day Delivery</span>
-          {/* <span>Pan India Shipping</span> */}
           <span>Fresh Dairy Products</span>
-          <span>No Added Charges</span>
+          <span style={{ color: "#fef08a", fontWeight: 700 }}>🎉 Use Code: SLG05 for 5% OFF (Unlimited!)</span>
           <span>Same Day Delivery</span>
         </div>
       </div>

@@ -572,6 +572,42 @@ const CheckoutDrawer = ({
 
                 <div className="checkout-section">
                   <h4>Promo Code / Coupon</h4>
+                  {!appliedCoupon && (
+                    <div
+                      style={{
+                        marginBottom: "12px",
+                        padding: "8px 12px",
+                        backgroundColor: "rgba(16, 185, 129, 0.08)",
+                        border: "1px dashed rgba(16, 185, 129, 0.4)",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "8px",
+                      }}>
+                      <span style={{ fontSize: "0.82rem", color: "#065f46", fontWeight: 500 }}>
+                        🎁 Use code <strong style={{ fontFamily: "monospace", fontSize: "0.92rem", color: "#047857" }}>SLG05</strong> for <strong>5% OFF</strong> (Unlimited Uses)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCouponCode("SLG05");
+                        }}
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid #059669",
+                          color: "#059669",
+                          borderRadius: "4px",
+                          fontWeight: 600,
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                          padding: "3px 8px",
+                          whiteSpace: "nowrap",
+                        }}>
+                        Auto Fill
+                      </button>
+                    </div>
+                  )}
                   {!appliedCoupon ? (
                     <div style={{ display: "flex", gap: "8px" }}>
                       <input

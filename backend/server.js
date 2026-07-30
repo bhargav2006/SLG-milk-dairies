@@ -132,12 +132,37 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ message });
 });
 
+// Auto-seed default SLG05 coupon if not present
+const seedDefaultCoupons = async () => {
+  try {
+    const Coupon = require("./models/Coupon");
+    const existing = await Coupon.findOne({ code: "SLG05" });
+    if (!existing) {
+      await Coupon.create({
+        code: "SLG05",
+        discountType: "percentage",
+        discountValue: 5,
+        minPurchase: 0,
+        maxDiscount: null,
+        expiryDate: null,
+        usageLimit: null,
+        perCustomerLimit: null,
+        isActive: true,
+      });
+      console.log("Default coupon 'SLG05' (5% off unlimited) seeded successfully.");
+    }
+  } catch (err) {
+    console.error("Error seeding default coupon:", err);
+  }
+};
+
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB and start the server
 const startServer = async () => {
   try {
     await connectDB();
+    await seedDefaultCoupons();
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -148,3 +173,4 @@ const startServer = async () => {
 };
 
 startServer();
+
