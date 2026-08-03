@@ -60,8 +60,16 @@ const OrderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["COD", "card", "online"],
+      enum: ["COD", "card", "online", "QR_PAYMENT"],
       default: "COD",
+    },
+    paymentProofScreenshot: {
+      type: String,
+      default: null,
+    },
+    transactionId: {
+      type: String,
+      default: null,
     },
     paymentStatus: {
       type: String,

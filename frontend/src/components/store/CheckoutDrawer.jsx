@@ -8,7 +8,12 @@ import {
   Info,
   CheckCircle,
   Check,
+  Upload,
+  QrCode,
+  CreditCard,
+  Image as ImageIcon
 } from "lucide-react";
+import qrScannerImg from "../../assets/QR_SCANNER.jpeg";
 
 const CheckoutDrawer = ({
   isOpen,
@@ -59,6 +64,73 @@ const CheckoutDrawer = ({
   handleRemoveCoupon,
 }) => {
   const navigate = useNavigate();
+
+  // Payment states for Scan & Pay (QR)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("COD");
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+  const [screenshotPreview, setScreenshotPreview] = useState(null);
+  const [transactionId, setTransactionId] = useState("");
+  const [uploadError, setUploadError] = useState("");
+
+  const handleScreenshotChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please upload a valid image file (PNG, JPG, JPEG).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("File size is too large. Please upload an image under 10MB.");
+      return;
+    }
+
+    setUploadError("");
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1200;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
+        setPaymentScreenshot(compressedBase64);
+        setScreenshotPreview(compressedBase64);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const onSubmitCheckoutForm = (e) => {
+    e.preventDefault();
+    if (selectedPaymentMethod === "QR_PAYMENT") {
+      if (!paymentScreenshot && !transactionId.trim()) {
+        setUploadError("Please upload payment screenshot or enter Transaction ID / UTR.");
+        return;
+      }
+    }
+    handlePlaceOrder(e, {
+      paymentMethod: selectedPaymentMethod,
+      paymentProofScreenshot: paymentScreenshot,
+      transactionId: transactionId.trim(),
+    });
+  };
+
   if (!isOpen) return null;
 
   // Determine current active step index (OTP verification is bypassed):
@@ -387,7 +459,7 @@ const CheckoutDrawer = ({
             {/* Step 3 & 4: Delivery (Address & Delivery Details) */}
             {customerToken && (
               <form
-                onSubmit={handlePlaceOrder}
+                onSubmit={onSubmitCheckoutForm}
                 className="lp-checkout-form-step lp-fade-in">
                 {(!customerInfo?.customerName || customerInfo.customerName === "Anonymous") ? (
                   <div className="checkout-section">
@@ -554,20 +626,161 @@ const CheckoutDrawer = ({
 
                 <div className="checkout-section">
                   <h4>Payment Mode</h4>
-                  <div className="payment-options">
-                    <label className="payment-card selected">
+                  <div className="payment-options" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <label
+                      className={`payment-card ${selectedPaymentMethod === "COD" ? "selected" : ""}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "12px",
+                        border: selectedPaymentMethod === "COD" ? "2px solid #059669" : "1px solid var(--color-border)",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        background: selectedPaymentMethod === "COD" ? "rgba(16, 185, 129, 0.05)" : "#fff",
+                      }}>
                       <input
                         type="radio"
                         name="paymentMethod"
-                        checked
-                        readOnly
+                        value="COD"
+                        checked={selectedPaymentMethod === "COD"}
+                        onChange={() => setSelectedPaymentMethod("COD")}
                       />
                       <div className="payment-details">
                         <strong>Cash on Delivery (COD)</strong>
-                        <span>UPI or Cash accepted at delivery.</span>
+                        <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block" }}>Pay with Cash or UPI upon order delivery.</span>
+                      </div>
+                    </label>
+
+                    <label
+                      className={`payment-card ${selectedPaymentMethod === "QR_PAYMENT" ? "selected" : ""}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "12px",
+                        border: selectedPaymentMethod === "QR_PAYMENT" ? "2px solid #059669" : "1px solid var(--color-border)",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        background: selectedPaymentMethod === "QR_PAYMENT" ? "rgba(16, 185, 129, 0.05)" : "#fff",
+                      }}>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="QR_PAYMENT"
+                        checked={selectedPaymentMethod === "QR_PAYMENT"}
+                        onChange={() => setSelectedPaymentMethod("QR_PAYMENT")}
+                      />
+                      <div className="payment-details">
+                        <strong style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          📱 Scan & Pay (UPI QR Code)
+                          <span style={{ fontSize: "0.7rem", background: "#10b981", color: "#fff", padding: "2px 6px", borderRadius: "4px" }}>Fast Pay</span>
+                        </strong>
+                        <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block" }}>Pay using PhonePe, Google Pay, Paytm & upload proof.</span>
                       </div>
                     </label>
                   </div>
+
+                  {selectedPaymentMethod === "QR_PAYMENT" && (
+                    <div
+                      style={{
+                        marginTop: "14px",
+                        padding: "16px",
+                        backgroundColor: "#f8fafc",
+                        border: "1px dashed #cbd5e1",
+                        borderRadius: "12px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "14px",
+                      }}>
+                      <div style={{ textAlign: "center" }}>
+                        <p style={{ margin: "0 0 8px 0", fontSize: "0.85rem", fontWeight: 700, color: "#1e293b" }}>
+                          Scan QR Code using PhonePe / GPay / Paytm
+                        </p>
+                        <div style={{ background: "#ffffff", padding: "10px", borderRadius: "12px", display: "inline-block", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
+                          <img
+                            src={qrScannerImg}
+                            alt="SLG Milk Dairys Payment QR Code"
+                            style={{ width: "210px", height: "210px", objectFit: "contain", borderRadius: "8px" }}
+                          />
+                        </div>
+                        <p style={{ margin: "8px 0 0 0", fontSize: "0.95rem", fontWeight: 800, color: "#059669" }}>
+                          Amount to Pay: ₹{cartTotal - discountAmount}
+                        </p>
+                      </div>
+
+                      <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px" }}>
+                        <label style={{ fontSize: "0.82rem", fontWeight: 700, color: "#334155", display: "block", marginBottom: "6px" }}>
+                          1. Upload Payment Screenshot (Recommended)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleScreenshotChange}
+                          style={{ fontSize: "0.8rem", width: "100%" }}
+                        />
+                        {screenshotPreview && (
+                          <div style={{ marginTop: "10px", position: "relative", display: "inline-block" }}>
+                            <img
+                              src={screenshotPreview}
+                              alt="Payment Screenshot Preview"
+                              style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px", border: "2px solid #10b981" }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPaymentScreenshot(null);
+                                setScreenshotPreview(null);
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: "-6px",
+                                right: "-6px",
+                                background: "#ef4444",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "50%",
+                                width: "20px",
+                                height: "20px",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}>
+                              ×
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: "0.82rem", fontWeight: 700, color: "#334155", display: "block", marginBottom: "6px" }}>
+                          2. Transaction ID / UTR Number
+                        </label>
+                        <input
+                          type="text"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          placeholder="e.g. 12-digit UTR (e.g. 4235XXXXXXXX)"
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "6px",
+                            fontSize: "0.85rem",
+                            fontWeight: 600,
+                          }}
+                        />
+                      </div>
+
+                      {uploadError && (
+                        <p style={{ color: "#ef4444", fontSize: "0.8rem", margin: 0, fontWeight: 600 }}>
+                          {uploadError}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="checkout-section">
@@ -685,6 +898,8 @@ const CheckoutDrawer = ({
                   className="lp-btn lp-btn-primary lp-btn-block checkout-submit-btn">
                   {isSubmittingOrder
                     ? "Confirming Order..."
+                    : selectedPaymentMethod === "QR_PAYMENT"
+                    ? `Confirm QR Payment (₹${cartTotal - discountAmount})`
                     : `Confirm COD Order (₹${cartTotal - discountAmount})`}
                 </button>
 

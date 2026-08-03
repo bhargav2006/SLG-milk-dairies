@@ -594,3 +594,14 @@
     padding-right: 16px;
   }
 }
+
+.qr-time-bold {
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  font-size: 0.82rem !important;
+}
+
+.payment-verification-section img:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}

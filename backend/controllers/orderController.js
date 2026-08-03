@@ -10,7 +10,7 @@ const { sendNotification } = require("../utils/notificationHelper");
 // @access  Private (Customer)
 exports.placeOrder = async (req, res) => {
   try {
-    const { products, address, paymentMethod, notes, couponCode } = req.body;
+    const { products, address, paymentMethod, notes, couponCode, paymentProofScreenshot, transactionId } = req.body;
     const customerId = req.customer._id;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
@@ -55,8 +55,12 @@ exports.placeOrder = async (req, res) => {
       });
     }
 
-    // Calculate delivery fee: free if subtotal >= 500, else 20
-    const deliveryFee = subtotal >= 500 ? 0 : 20;
+    // Calculate delivery fee: free if subtotal >= 500, else 15
+    const deliveryFee = subtotal >= 500 ? 0 : 15;
+
+    if (subtotal < 100) {
+      return res.status(400).json({ message: "Minimum order amount of ₹100 is required for home delivery." });
+    }
 
     // Apply coupon if code is present
     let discountAmount = 0;
@@ -155,7 +159,9 @@ exports.placeOrder = async (req, res) => {
       discountAmount,
       totalAmount,
       paymentMethod: paymentMethod || "COD",
-      paymentStatus: "pending",
+      paymentProofScreenshot: paymentProofScreenshot || null,
+      transactionId: transactionId || null,
+      paymentStatus: paymentMethod === "QR_PAYMENT" ? "completed" : "pending",
       orderStatus: "Placed",
       notes: notes || null
     });

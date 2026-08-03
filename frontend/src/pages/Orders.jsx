@@ -14,6 +14,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+  const [viewImageModal, setViewImageModal] = useState(null);
 
   // Assignment Modal States
   const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -240,12 +241,19 @@ const Orders = () => {
                 <tr key={ord._id}>
                   <td data-label="Order Number" className="ord-num-cell">
                     <strong>{ord.OrderNumber}</strong>
-                    <span className="ord-date">{new Date(ord.placedAt).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    })}</span>
+                    <span className={`ord-date ${ord.paymentMethod === "QR_PAYMENT" ? "qr-time-bold" : ""}`}>
+                      {new Date(ord.placedAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </span>
+                    {ord.paymentMethod === "QR_PAYMENT" && (
+                      <span className="qr-badge" style={{ marginTop: "4px", display: "inline-block", fontSize: "0.72rem", fontWeight: 800, background: "#dcfce7", color: "#15803d", padding: "2px 8px", borderRadius: "4px", border: "1px solid #86efac" }}>
+                        📱 QR Paid
+                      </span>
+                    )}
                   </td>
                   <td data-label="Customer">
                     <div className="cust-info-cell">
@@ -435,11 +443,59 @@ const Orders = () => {
                     <span>₹{selectedOrderDetails.deliveryFee}</span>
                   </div>
                   <div className="summary-line grand-total">
-                    <span>Grand Total (COD)</span>
+                    <span>Grand Total ({selectedOrderDetails.paymentMethod === "QR_PAYMENT" ? "QR Code / UPI" : "COD"})</span>
                     <span>₹{selectedOrderDetails.totalAmount}</span>
                   </div>
                 </div>
               </div>
+
+              {(selectedOrderDetails.paymentMethod === "QR_PAYMENT" || selectedOrderDetails.paymentProofScreenshot || selectedOrderDetails.transactionId) && (
+                <div className="modal-section payment-verification-section" style={{ background: "#f8fafc", padding: "14px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <h5 style={{ marginTop: 0, color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+                    📱 Payment Verification (Scan & Pay)
+                  </h5>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "0.85rem", marginBottom: "12px" }}>
+                    <div>
+                      <strong style={{ color: "#64748b" }}>Order Time (Verification):</strong>
+                      <div style={{ fontWeight: 800, fontSize: "1rem", color: "#0f172a", marginTop: "2px" }}>
+                        {new Date(selectedOrderDetails.placedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}
+                        <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500, marginLeft: "4px" }}>
+                          ({new Date(selectedOrderDetails.placedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })})
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <strong style={{ color: "#64748b" }}>Transaction ID / UTR:</strong>
+                      <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#047857", marginTop: "2px" }}>
+                        {selectedOrderDetails.transactionId || "Not Provided"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedOrderDetails.paymentProofScreenshot ? (
+                    <div>
+                      <strong style={{ color: "#64748b", fontSize: "0.82rem", display: "block", marginBottom: "6px" }}>
+                        Payment Screenshot Proof (Click image to enlarge):
+                      </strong>
+                      <div
+                        onClick={() => setViewImageModal(selectedOrderDetails.paymentProofScreenshot)}
+                        style={{ cursor: "pointer", display: "inline-block", borderRadius: "8px", overflow: "hidden", border: "2px solid #10b981", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                        <img
+                          src={selectedOrderDetails.paymentProofScreenshot}
+                          alt="Payment Screenshot"
+                          style={{ width: "160px", height: "160px", objectFit: "cover", display: "block" }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8", fontStyle: "italic" }}>
+                      No screenshot uploaded by customer. Cross-verify with Order Time ({new Date(selectedOrderDetails.placedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}) or UTR.
+                    </p>
+                  )}
+                </div>
+              )}
 
                {selectedOrderDetails.notes && (
                 <div className="modal-section">
@@ -448,6 +504,41 @@ const Orders = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full Image Modal View */}
+      {viewImageModal && (
+        <div
+          className="orders-modal-overlay"
+          style={{ zIndex: 1100, backgroundColor: "rgba(0,0,0,0.85)" }}
+          onClick={() => setViewImageModal(null)}>
+          <div
+            style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}
+            onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setViewImageModal(null)}
+              style={{
+                position: "absolute",
+                top: "-40px",
+                right: "0",
+                background: "#fff",
+                border: "none",
+                borderRadius: "50%",
+                width: "32px",
+                height: "32px",
+                fontSize: "18px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}>
+              ×
+            </button>
+            <img
+              src={viewImageModal}
+              alt="Full Payment Proof Screenshot"
+              style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: "10px", objectFit: "contain", display: "block", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}
+            />
           </div>
         </div>
       )}

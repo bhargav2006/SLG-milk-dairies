@@ -39,9 +39,9 @@ import maniKondaImg from "../assets/MANI_KONDA_SWAMY_YARRAMSETTI.PNG";
 
 // Configuration Constants
 const CONFIG = {
-  MIN_ORDER_AMOUNT: 200,
+  MIN_ORDER_AMOUNT: 100,
   FREE_DELIVERY_AMOUNT: 500,
-  DELIVERY_CHARGE: 20,
+  DELIVERY_CHARGE: 15,
   DELIVERY_LOCATION_DEFAULT: null, // "Select Delivery Location"
   BUSINESS_HOURS: "8:00 AM - 7:00 PM",
   DELIVERY_TODAY_CUTOFF: "7:00 PM",
@@ -566,28 +566,15 @@ const LandingPage = () => {
   }, [cartSubtotal, appliedCoupon]);
 
   // --- Place Order Logic ---
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
-    // console.log("[Checkout Debug] handlePlaceOrder executed", {
-    //   customerToken,
-    //   placedOrder,
-    //   selectedAddressIndex,
-    //   addresses,
-    //   newAddress,
-    //   deliveryNotes,
-    //   isSubmittingOrder,
-    //   button: "Confirm COD Order",
-    //   cartItems: cart.length,
-    // });
+  const handlePlaceOrder = async (e, paymentDetails = {}) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (cart.length === 0) {
       showError("Your cart is empty.");
-      // console.log("[Checkout Debug] handlePlaceOrder aborted: cart is empty");
       return;
     }
 
     if (!customerName.trim()) {
       showError("Please enter your name.");
-      // console.log("[Checkout Debug] handlePlaceOrder aborted: name missing");
       return;
     }
 
@@ -597,26 +584,22 @@ const LandingPage = () => {
     } else {
       if (!newAddress.street || !newAddress.city || !newAddress.pincode) {
         showError("Please fill in all address details (Street, City, Pincode)");
-        // console.log(
-        //   "[Checkout Debug] handlePlaceOrder aborted: incomplete address",
-        // );
         return;
       }
       addressPayload = newAddress;
     }
 
-    // console.log("step 1");
     try {
-      // console.log("step 2");
       setIsSubmittingOrder(true);
-      // console.log("step 3");
       const orderPayload = {
         products: cart.map((item) => ({
           product: item.product._id,
           quantity: item.quantity,
         })),
         address: addressPayload,
-        paymentMethod: "COD",
+        paymentMethod: paymentDetails.paymentMethod || "COD",
+        paymentProofScreenshot: paymentDetails.paymentProofScreenshot || null,
+        transactionId: paymentDetails.transactionId || null,
         notes: deliveryNotes || "",
         customerName: customerName.trim(),
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
@@ -1089,7 +1072,7 @@ const LandingPage = () => {
               {[
                 {
                   q: "What is the minimum order quantity for delivery?",
-                  a: "The minimum order amount to qualify for home delivery is just ₹200. There is no minimum quantity requirement as long as the subtotal is at or above ₹200."
+                  a: "The minimum order amount to qualify for home delivery is just ₹100. There is no minimum quantity requirement as long as the subtotal is at or above ₹100."
                 },
                 {
                   q: "What areas do you deliver to?",
