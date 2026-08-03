@@ -55,8 +55,8 @@ exports.placeOrder = async (req, res) => {
       });
     }
 
-    // Calculate delivery fee: free if subtotal >= 500, else 15
-    const deliveryFee = subtotal >= 500 ? 0 : 15;
+    // Calculate delivery fee: free if subtotal >= 300, else 15
+    const deliveryFee = subtotal >= 300 ? 0 : 15;
 
     if (subtotal < 100) {
       return res.status(400).json({ message: "Minimum order amount of ₹100 is required for home delivery." });

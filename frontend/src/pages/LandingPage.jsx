@@ -40,7 +40,7 @@ import maniKondaImg from "../assets/MANI_KONDA_SWAMY_YARRAMSETTI.PNG";
 // Configuration Constants
 const CONFIG = {
   MIN_ORDER_AMOUNT: 100,
-  FREE_DELIVERY_AMOUNT: 500,
+  FREE_DELIVERY_AMOUNT: 300,
   DELIVERY_CHARGE: 15,
   DELIVERY_LOCATION_DEFAULT: null, // "Select Delivery Location"
   BUSINESS_HOURS: "8:00 AM - 7:00 PM",

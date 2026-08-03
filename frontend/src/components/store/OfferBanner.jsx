@@ -39,7 +39,7 @@ const OfferBanner = ({ minOrderAmount, freeDeliveryAmount, businessHours, delive
             <span className="lp-info-icon">🛒</span>
             <div className="lp-info-texts">
               <span className="lp-info-title">Min. Order ₹{minOrderAmount || 100}</span>
-              <span className="lp-info-desc">Free delivery above ₹{freeDeliveryAmount || 500}</span>
+              <span className="lp-info-desc">Free delivery above ₹{freeDeliveryAmount || 300}</span>
             </div>
           </div>
 
