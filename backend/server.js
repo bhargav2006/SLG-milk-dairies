@@ -164,7 +164,9 @@ const startServer = async () => {
     await connectDB();
     await seedDefaultCoupons();
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      const now = new Date();
+      console.log(`[${now.toLocaleString()}] Server running on port ${PORT}`);
+      console.log(`Server started at: ${now.toISOString()}`);
     });
   } catch (error) {
     console.error("Failed to connect to database:", error);

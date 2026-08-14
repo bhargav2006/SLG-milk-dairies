@@ -4,6 +4,7 @@ import { useToast } from "../context/ToastContext";
 import productService from "../services/productService";
 import { Skeleton } from "../components/common/Skeleton";
 import { ArrowLeft, Save, UploadCloud } from "lucide-react";
+import { compressImage } from "../utils/imageCompressor";
 
 const AddEditProduct = () => {
   const { id } = useParams();
@@ -70,36 +71,16 @@ const AddEditProduct = () => {
     }
   }, [id, isEditMode, navigate, showError]);
 
-  const handleFileSelect = (file) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 1000;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.8);
-        setImage(compressedBase64);
-        setPreview(compressedBase64);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+  const handleFileSelect = async (file) => {
+    if (!file) return;
+    try {
+      const compressedBase64 = await compressImage(file, { maxDim: 900, quality: 0.75 });
+      setImage(compressedBase64);
+      setPreview(compressedBase64);
+    } catch (err) {
+      console.error("Image compression error:", err);
+      showError(err.message || "Failed to process selected image.");
+    }
   };
 
   const handleChange = (e) => {

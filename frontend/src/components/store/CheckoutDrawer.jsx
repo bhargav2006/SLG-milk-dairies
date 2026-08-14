@@ -14,6 +14,7 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import qrScannerImg from "../../assets/QR_SCANNER.jpeg";
+import { compressImage } from "../../utils/imageCompressor";
 
 const CheckoutDrawer = ({
   isOpen,
@@ -72,7 +73,7 @@ const CheckoutDrawer = ({
   const [transactionId, setTransactionId] = useState("");
   const [uploadError, setUploadError] = useState("");
 
-  const handleScreenshotChange = (e) => {
+  const handleScreenshotChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -80,40 +81,16 @@ const CheckoutDrawer = ({
       setUploadError("Please upload a valid image file (PNG, JPG, JPEG).");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError("File size is too large. Please upload an image under 10MB.");
-      return;
-    }
 
     setUploadError("");
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 1200;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
-        setPaymentScreenshot(compressedBase64);
-        setScreenshotPreview(compressedBase64);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedBase64 = await compressImage(file, { maxDim: 900, quality: 0.75 });
+      setPaymentScreenshot(compressedBase64);
+      setScreenshotPreview(compressedBase64);
+    } catch (err) {
+      console.error("Screenshot compression error:", err);
+      setUploadError(err.message || "Failed to process screenshot.");
+    }
   };
 
   const onSubmitCheckoutForm = (e) => {
