@@ -13,7 +13,7 @@ const {
 } = require("../controllers/productController.js");
 
 // Create a new product (admin only)
-router.post("/", protect, admin, upload.single("image"), createProduct);
+router.post("/", protect, admin, createProduct);
 
 // Get next serial number for a category
 router.get("/next-serial", protect, admin, getNextSerialNumber);
@@ -25,7 +25,7 @@ router.get("/", protect, getProducts);
 router.get("/:id", protect, getProductById);
 
 // Update a product (admin only)
-router.put("/:id", protect, admin, upload.single("image"), updateProduct);
+router.put("/:id", protect, admin, updateProduct);
 
 // Delete a product (admin only)
 router.delete("/:id", protect, admin, deleteProduct);

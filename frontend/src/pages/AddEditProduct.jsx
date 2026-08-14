@@ -48,9 +48,14 @@ const AddEditProduct = () => {
         });
         setPreview(
           product.image
-            ? `${import.meta.env.VITE_BACKEND_URI}${product.image}`
+            ? (product.image.startsWith("data:") || product.image.startsWith("http")
+                ? product.image
+                : `${import.meta.env.VITE_BACKEND_URI}${product.image}`)
             : "",
         );
+        if (product.image) {
+          setImage(product.image);
+        }
       } catch (err) {
         console.error("Error loading product:", err);
         showError("Failed to load product details.");
@@ -64,6 +69,38 @@ const AddEditProduct = () => {
       fetchProduct();
     }
   }, [id, isEditMode, navigate, showError]);
+
+  const handleFileSelect = (file) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1000;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.8);
+        setImage(compressedBase64);
+        setPreview(compressedBase64);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,26 +153,24 @@ const AddEditProduct = () => {
 
     setSubmitting(true);
     try {
-      const payload = new FormData();
+      const payload = {
+        name: formData.name.trim(),
+        serialNumber: formData.serialNumber.trim().toUpperCase(),
+        category: formData.category,
+        description: formData.description.trim(),
+        productType: formData.productType,
+        stock: Number(formData.stock),
+      };
 
-      payload.append("name", formData.name.trim());
-      payload.append(
-        "serialNumber",
-        formData.serialNumber.trim().toUpperCase(),
-      );
-      payload.append("category", formData.category);
       if (formData.productType === "retail" || formData.productType === "both") {
-        payload.append("retailPrice", formData.retailPrice);
+        payload.retailPrice = Number(formData.retailPrice);
       }
       if (formData.productType === "wholesale" || formData.productType === "both") {
-        payload.append("wholesalePrice", formData.wholesalePrice);
+        payload.wholesalePrice = Number(formData.wholesalePrice);
       }
-      payload.append("description", formData.description.trim());
-      payload.append("productType", formData.productType);
-      payload.append("stock", formData.stock);
 
-      if (image) {
-        payload.append("image", image);
+      if (image !== null) {
+        payload.image = image;
       }
 
       if (isEditMode) {
@@ -521,9 +556,8 @@ const AddEditProduct = () => {
                 e.currentTarget.style.borderColor = "var(--color-border)";
                 e.currentTarget.style.background = "var(--color-bg)";
                 const file = e.dataTransfer.files[0];
-                if (file && file.type.startsWith("image/")) {
-                  setImage(file);
-                  setPreview(URL.createObjectURL(file));
+                if (file) {
+                  handleFileSelect(file);
                 }
               }}
             >
@@ -534,8 +568,7 @@ const AddEditProduct = () => {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    setImage(file);
-                    setPreview(URL.createObjectURL(file));
+                    handleFileSelect(file);
                   }
                 }}
                 style={{ display: "none" }}
@@ -600,8 +633,9 @@ const AddEditProduct = () => {
                         e.stopPropagation();
                         setImage(null);
                         setPreview("");
-                        document.getElementById("product-image-input").value =
-                          "";
+                        if (document.getElementById("product-image-input")) {
+                          document.getElementById("product-image-input").value = "";
+                        }
                       }}
                       className="btn btn-danger btn-sm"
                       style={{ padding: "6px 12px" }}

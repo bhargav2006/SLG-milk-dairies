@@ -196,8 +196,9 @@ const createProduct = async (req, res) => {
       category,
       productType,
       stock,
+      image,
     } = req.body;
-    const image = req.file ? `/uploads/products/${req.file.filename}` : null;
+    const productImage = image || (req.file ? `/uploads/products/${req.file.filename}` : null);
 
     if (productType) {
       const typeLower = productType.toLowerCase();
@@ -242,7 +243,7 @@ const createProduct = async (req, res) => {
       wholesalePrice: wholesalePrice !== undefined ? Number(wholesalePrice) : 0,
       description: description || "",
       category,
-      image,
+      image: productImage,
       productType,
       stock: Number(stock),
     });
@@ -268,6 +269,7 @@ const updateProduct = async (req, res) => {
       category,
       productType,
       stock,
+      image,
     } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -310,7 +312,9 @@ const updateProduct = async (req, res) => {
       }
       product.serialNumber = serialNumber;
     }
-    if (req.file) {
+    if (image !== undefined) {
+      product.image = image;
+    } else if (req.file) {
       product.image = `/uploads/products/${req.file.filename}`;
     }
     await product.save();

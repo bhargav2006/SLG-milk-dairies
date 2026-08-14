@@ -647,7 +647,7 @@ const LandingPage = () => {
   // --- Filtering & Image Utilities ---
   const getProductImage = (product) => {
     if (product.image && product.image.trim() !== "") {
-      return product.image.startsWith("http")
+      return product.image.startsWith("http") || product.image.startsWith("data:")
         ? product.image
         : `${import.meta.env.VITE_BACKEND_URI}${product.image}`;
     }

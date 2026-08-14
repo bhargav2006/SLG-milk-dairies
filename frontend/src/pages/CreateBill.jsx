@@ -64,6 +64,9 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
 
   const getProductImageUrl = (product) => {
     if (product && product.image && product.image.trim() !== "") {
+      if (product.image.startsWith("data:") || product.image.startsWith("http")) {
+        return product.image;
+      }
       return `${import.meta.env.VITE_BACKEND_URI}${product.image}`;
     }
     const categoryImageMap = {
