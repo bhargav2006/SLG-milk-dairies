@@ -3,17 +3,46 @@ const DeliveryBoy = require("../models/DeliveryBoy");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const Coupon = require("../models/Coupon");
+const Branch = require("../models/Branch");
 const { createInvoiceFromOrder } = require("../utils/invoiceHelper");
 const { sendNotification } = require("../utils/notificationHelper");
+
+// Helper to resolve branch query for orders
+const resolveOrderBranchQuery = async (req, baseFilter = {}) => {
+  const query = { ...baseFilter };
+  const mainBranch = await Branch.findOne({ isMain: true });
+
+  if (req.user) {
+    if (req.user.role === "accountant" || req.user.role === "branch_admin") {
+      const userBranchId = req.user.branch?._id || req.user.branch;
+      if (userBranchId) {
+        query.$or = [
+          { branch: userBranchId },
+          // If accountant belongs to Main Branch, also show unassigned legacy orders
+          ...(mainBranch && userBranchId.toString() === mainBranch._id.toString()
+            ? [{ branch: { $exists: false } }, { branch: null }]
+            : [])
+        ];
+      }
+    } else if (req.user.role === "admin") {
+      if (req.query.branchId && req.query.branchId !== "all") {
+        query.branch = req.query.branchId;
+      }
+    }
+  }
+  return query;
+};
 
 // @desc    Get pending orders (status: Placed)
 // @route   GET /api/accountant/orders/pending
 // @access  Private (Accountant/Admin)
 exports.getPendingOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ orderStatus: "Placed" })
+    const query = await resolveOrderBranchQuery(req, { orderStatus: "Placed" });
+    const orders = await Order.find(query)
       .populate("customerId", "customerName customerPhone")
       .populate("products.product", "name price retailPrice category")
+      .populate("branch", "name code")
       .sort({ placedAt: -1 });
     res.status(200).json({ orders });
   } catch (error) {
@@ -27,9 +56,11 @@ exports.getPendingOrders = async (req, res) => {
 // @access  Private (Accountant/Admin)
 exports.getAcceptedOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ orderStatus: "Accepted" })
+    const query = await resolveOrderBranchQuery(req, { orderStatus: "Accepted" });
+    const orders = await Order.find(query)
       .populate("customerId", "customerName customerPhone")
       .populate("products.product", "name price retailPrice category")
+      .populate("branch", "name code")
       .sort({ placedAt: -1 });
     res.status(200).json({ orders });
   } catch (error) {
@@ -43,13 +74,15 @@ exports.getAcceptedOrders = async (req, res) => {
 // @access  Private (Accountant/Admin)
 exports.getAssignedOrders = async (req, res) => {
   try {
-    const orders = await Order.find({
+    const query = await resolveOrderBranchQuery(req, {
       orderStatus: { $in: ["Assigned", "Out for Delivery", "Delivered", "Cancelled"] }
-    })
+    });
+    const orders = await Order.find(query)
       .populate("customerId", "customerName customerPhone")
       .populate("products.product", "name price retailPrice category")
       .populate("deliveryBoy", "name phone")
       .populate("accountantId", "name email phone")
+      .populate("branch", "name code")
       .sort({ updatedAt: -1 });
     res.status(200).json({ orders });
   } catch (error) {

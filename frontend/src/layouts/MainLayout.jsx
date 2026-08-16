@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import NotificationBell from "../components/NotificationBell";
 import {
@@ -13,11 +14,14 @@ import {
   Menu,
   X,
   ShoppingBag,
-  Ticket
+  Ticket,
+  Building2,
+  GitBranch,
 } from "lucide-react";
 
 const MainLayout = ({ children }) => {
   const { user, logout } = useAuth();
+  const { branches, selectedBranch, setSelectedBranch, currentBranch } = useBranch();
   const { showSuccess } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,19 +56,21 @@ const MainLayout = ({ children }) => {
     if (path.startsWith("/billing/retail")) return "Retail Billing Terminal";
     if (path.startsWith("/billing/wholesale")) return "Wholesale Billing Terminal";
     if (path.startsWith("/users")) return "User Accounts Management";
+    if (path.startsWith("/branches")) return "Store Branches Control";
     if (path.startsWith("/coupons")) return "Discount Coupon Management";
     if (path.startsWith("/profile")) return "Account Profile";
     return "SRI LAKSHMI GANAPATHI MILK DAIRYS System";
   };
 
   const menuItems = [
-    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["admin", "accountant"] },
-    { name: "Products", path: "/products", icon: Milk, roles: ["admin", "accountant"] },
-    { name: "Bills", path: "/bills", icon: Receipt, roles: ["admin", "accountant"] },
-    { name: "Orders", path: "/orders", icon: ShoppingBag, roles: ["admin", "accountant"] },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["admin", "accountant", "branch_admin"] },
+    { name: "Products", path: "/products", icon: Milk, roles: ["admin", "accountant", "branch_admin"] },
+    { name: "Bills", path: "/bills", icon: Receipt, roles: ["admin", "accountant", "branch_admin"] },
+    { name: "Orders", path: "/orders", icon: ShoppingBag, roles: ["admin", "accountant", "branch_admin"] },
+    { name: "Branches", path: "/branches", icon: Building2, roles: ["admin"] },
     { name: "Users", path: "/users", icon: UsersIcon, roles: ["admin"] },
     { name: "Coupons", path: "/coupons", icon: Ticket, roles: ["admin"] },
-    { name: "Profile", path: "/profile", icon: UserIcon, roles: ["admin", "accountant"] },
+    { name: "Profile", path: "/profile", icon: UserIcon, roles: ["admin", "accountant", "branch_admin"] },
   ];
 
   // Render navigation links
@@ -143,7 +149,33 @@ const MainLayout = ({ children }) => {
             <h2 className="page-title">{getPageTitle()}</h2>
           </div>
 
-          <div className="header-right" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div className="header-right">
+            {/* Branch Selector / Badge */}
+            {user?.role === "admin" ? (
+              <div className="header-branch-wrapper">
+                <GitBranch size={16} style={{ color: "#2563EB", flexShrink: 0 }} />
+                <select
+                  value={selectedBranch}
+                  onChange={(e) => setSelectedBranch(e.target.value)}
+                  className="header-branch-select"
+                >
+                  <option value="all">🏢 All Branches</option>
+                  {branches.map((b) => (
+                    <option key={b._id} value={b._id}>
+                      {b.isMain ? "⭐ " : ""}{b.name} ({b.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="header-branch-wrapper staff">
+                <GitBranch size={15} style={{ color: "#059669", flexShrink: 0 }} />
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {currentBranch ? `${currentBranch.name} (${currentBranch.code})` : (user?.branch?.name || "Main Branch")}
+                </span>
+              </div>
+            )}
+
             <NotificationBell />
             <div className="user-profile-badge">
               <div className="user-avatar">{userInitials}</div>

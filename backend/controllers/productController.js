@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const Branch = require("../models/Branch");
 const categoryDefaults = {
   Milk: "/uploads/defaults/Milk.jpg",
   Curd: "/uploads/defaults/Curd.jpg",
@@ -28,9 +29,31 @@ const getProducts = async (req, res) => {
       page = 1,
       limit = 20,
       productType,
+      branchId,
     } = req.query;
 
     const filter = {};
+
+    // Branch scoping
+    if (req.user) {
+      if (req.user.role === "accountant" || req.user.role === "branch_admin") {
+        filter.branch = req.user.branch?._id || req.user.branch;
+      } else if (req.user.role === "admin") {
+        if (branchId && branchId !== "all") {
+          filter.branch = branchId;
+        }
+      }
+    } else {
+      // Unauthenticated / Customer Storefront: Default to Main Branch
+      if (branchId) {
+        filter.branch = branchId;
+      } else {
+        const mainBranch = await Branch.findOne({ isMain: true });
+        if (mainBranch) {
+          filter.branch = mainBranch._id;
+        }
+      }
+    }
 
     // Product Type filter
     if (productType) {
@@ -120,7 +143,7 @@ const getProducts = async (req, res) => {
     const skip = (pageNum - 1) * limitNum;
 
     const [products, total] = await Promise.all([
-      Product.find(filter).sort(sort).skip(skip).limit(limitNum),
+      Product.find(filter).populate("branch", "name code").sort(sort).skip(skip).limit(limitNum),
       Product.countDocuments(filter),
     ]);
 
@@ -184,8 +207,6 @@ const getProductById = async (req, res) => {
 // @route   POST /api/products/
 const createProduct = async (req, res) => {
   try {
-    // console.log("BODY:", req.body);
-    // console.log("FILE:", req.file);
     let {
       name,
       serialNumber,
@@ -197,8 +218,22 @@ const createProduct = async (req, res) => {
       productType,
       stock,
       image,
+      branch: reqBranch,
     } = req.body;
     const productImage = image || (req.file ? `/uploads/products/${req.file.filename}` : null);
+
+    let targetBranch = reqBranch;
+    if (req.user && (req.user.role === "accountant" || req.user.role === "branch_admin")) {
+      targetBranch = req.user.branch?._id || req.user.branch;
+    }
+    if (!targetBranch) {
+      const mainBranch = await Branch.findOne({ isMain: true });
+      if (mainBranch) targetBranch = mainBranch._id;
+    }
+
+    if (!targetBranch) {
+      return res.status(400).json({ message: "Branch ID is required to create a product" });
+    }
 
     if (productType) {
       const typeLower = productType.toLowerCase();
@@ -230,15 +265,17 @@ const createProduct = async (req, res) => {
       });
     }
 
-    const existingProduct = await Product.findOne({ serialNumber });
+    const existingProduct = await Product.findOne({ serialNumber, branch: targetBranch });
     if (existingProduct) {
       return res
         .status(400)
-        .json({ message: "Product with this serial number already exists" });
+        .json({ message: "Product with this serial number already exists in this branch" });
     }
+
     const product = new Product({
       name,
       serialNumber,
+      branch: targetBranch,
       retailPrice: retailPrice !== undefined ? Number(retailPrice) : 0,
       wholesalePrice: wholesalePrice !== undefined ? Number(wholesalePrice) : 0,
       description: description || "",
@@ -270,10 +307,15 @@ const updateProduct = async (req, res) => {
       productType,
       stock,
       image,
+      branch: reqBranch,
     } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (req.user && req.user.role === "admin" && reqBranch) {
+      product.branch = reqBranch;
     }
 
     if (productType !== undefined) {
@@ -303,11 +345,12 @@ const updateProduct = async (req, res) => {
     if (serialNumber) {
       const existingProduct = await Product.findOne({
         serialNumber,
+        branch: product.branch,
         _id: { $ne: req.params.id },
       });
       if (existingProduct) {
         return res.status(400).json({
-          message: "Another product with this serial number already exists",
+          message: "Another product with this serial number already exists in this branch",
         });
       }
       product.serialNumber = serialNumber;
@@ -360,22 +403,34 @@ const categoryPrefixes = {
   "Ice Cream": "ICE",
 };
 
-// @desc    Get next serial number for a category
+// @desc    Get next serial number for a category in a branch
 // @route   GET /api/products/next-serial
 const getNextSerialNumber = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, branchId } = req.query;
     if (!category) {
       return res
         .status(400)
         .json({ message: "Category query parameter is required" });
     }
 
+    let targetBranch = branchId;
+    if (req.user && (req.user.role === "accountant" || req.user.role === "branch_admin")) {
+      targetBranch = req.user.branch?._id || req.user.branch;
+    }
+    if (!targetBranch) {
+      const mainBranch = await Branch.findOne({ isMain: true });
+      if (mainBranch) targetBranch = mainBranch._id;
+    }
+
     const prefix =
       categoryPrefixes[category] || category.substring(0, 3).toUpperCase();
 
-    // Find all products in this category
-    const products = await Product.find({ category }).select("serialNumber");
+    const query = { category };
+    if (targetBranch) query.branch = targetBranch;
+
+    // Find all products in this category and branch
+    const products = await Product.find(query).select("serialNumber");
 
     let maxNum = 0;
     const regex = new RegExp(`^${prefix}(\\d+)$`, "i");

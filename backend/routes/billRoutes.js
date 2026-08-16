@@ -15,8 +15,8 @@ const {
 // Create a new bill (admin and accountant)
 router.post("/", protect, createBill);
 
-// Get all bills (admin)
-router.get("/", protect, admin, getBills);
+// Get bills (admin gets all/filtered by branch, accountant gets assigned branch bills)
+router.get("/", protect, getBills);
 
 // Get bills by customer Number (admin and accountant )
 router.get("/customer/:customerNumber", protect, getBillByCustomerNumber);

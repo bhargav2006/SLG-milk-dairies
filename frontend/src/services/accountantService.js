@@ -1,18 +1,18 @@
 import api from "./api";
 
 const accountantService = {
-  getPendingOrders: async () => {
-    const response = await api.get("/api/accountant/orders/pending");
+  getPendingOrders: async (params = {}) => {
+    const response = await api.get("/api/accountant/orders/pending", { params });
     return response.data;
   },
 
-  getAcceptedOrders: async () => {
-    const response = await api.get("/api/accountant/orders/accepted");
+  getAcceptedOrders: async (params = {}) => {
+    const response = await api.get("/api/accountant/orders/accepted", { params });
     return response.data;
   },
 
-  getAssignedOrders: async () => {
-    const response = await api.get("/api/accountant/orders/assigned");
+  getAssignedOrders: async (params = {}) => {
+    const response = await api.get("/api/accountant/orders/assigned", { params });
     return response.data;
   },
 

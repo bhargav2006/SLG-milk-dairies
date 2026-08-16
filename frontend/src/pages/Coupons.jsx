@@ -231,7 +231,7 @@ const Coupons = () => {
   return (
     <div className="card-panel">
       {/* Header and Add Action */}
-      <div className="panel-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+      <div className="panel-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h3 className="panel-title" style={{ display: "flex", alignItems: "center", gap: "10px", margin: 0 }}>
             <Ticket size={24} style={{ color: "var(--color-primary)" }} />
@@ -260,8 +260,8 @@ const Coupons = () => {
           onAction={currentUser?.role === "admin" ? handleOpenAddModal : null}
         />
       ) : (
-        <div className="table-responsive">
-          <table className="table">
+        <div className="table-wrapper">
+          <table className="custom-table responsive-table">
             <thead>
               <tr>
                 <th>Coupon Code</th>
@@ -279,7 +279,7 @@ const Coupons = () => {
                 const isExpired = coupon.expiryDate && new Date(coupon.expiryDate) < new Date();
                 return (
                   <tr key={coupon._id} style={{ opacity: isExpired ? 0.65 : 1 }}>
-                    <td>
+                    <td data-label="Coupon Code">
                       <span className="badge" style={{
                         fontFamily: "monospace",
                         fontSize: "0.95rem",
@@ -292,10 +292,10 @@ const Coupons = () => {
                         {coupon.code}
                       </span>
                     </td>
-                    <td style={{ textTransform: "capitalize", fontWeight: 600 }}>
+                    <td data-label="Discount Type" style={{ textTransform: "capitalize", fontWeight: 600 }}>
                       {coupon.discountType}
                     </td>
-                    <td style={{ fontWeight: 700, color: "var(--color-success)" }}>
+                    <td data-label="Benefit Value" style={{ fontWeight: 700, color: "var(--color-success)" }}>
                       {coupon.discountType === "percentage" ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}
                       {coupon.discountType === "percentage" && coupon.maxDiscount && (
                         <span style={{ fontSize: "0.75rem", display: "block", fontWeight: 400, color: "var(--color-text-secondary)" }}>
@@ -303,15 +303,15 @@ const Coupons = () => {
                         </span>
                       )}
                     </td>
-                    <td>₹{coupon.minPurchase || 0}</td>
-                    <td>
+                    <td data-label="Min Purchase">₹{coupon.minPurchase || 0}</td>
+                    <td data-label="Usage Limit">
                       <span style={{ fontWeight: 600 }}>{coupon.usedCount}</span>
                       {coupon.usageLimit ? ` / ${coupon.usageLimit}` : " (Unlimited)"}
                       <span style={{ fontSize: "0.72rem", display: "block", color: "var(--color-text-secondary)", fontWeight: 400 }}>
                         Limit: {coupon.perCustomerLimit || "No limit"} per user
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Expires">
                       {coupon.expiryDate ? (
                         <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.85rem" }}>
                           <Calendar size={13} />
@@ -330,7 +330,7 @@ const Coupons = () => {
                         </span>
                       )}
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td data-label="Status" style={{ textAlign: "center" }}>
                       {currentUser?.role === "admin" ? (
                         <button
                           onClick={() => handleToggleActive(coupon)}
@@ -353,23 +353,23 @@ const Coupons = () => {
                       )}
                     </td>
                     {currentUser?.role === "admin" && (
-                      <td style={{ textAlign: "right" }}>
+                      <td data-label="Actions" style={{ textAlign: "right" }}>
                         <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
                           <button
                             onClick={() => handleOpenEditModal(coupon)}
                             className="btn btn-secondary btn-sm"
-                            style={{ padding: "6px" }}
                             title="Edit Coupon"
+                            style={{ padding: "6px 10px" }}
                           >
-                            <Edit size={16} />
+                            <Edit size={16} /> Edit
                           </button>
                           <button
                             onClick={() => handleOpenDeleteModal(coupon)}
                             className="btn btn-danger btn-sm"
-                            style={{ padding: "6px" }}
                             title="Delete Coupon"
+                            style={{ padding: "6px 10px" }}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={16} /> Delete
                           </button>
                         </div>
                       </td>

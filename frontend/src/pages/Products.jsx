@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import productService from "../services/productService";
 import { CardSkeleton, TableSkeleton } from "../components/common/Skeleton";
@@ -16,10 +17,12 @@ import {
   ChevronLeft,
   ChevronRight,
   FilterX,
+  Building2,
 } from "lucide-react";
 
 const Products = () => {
   const { user } = useAuth();
+  const { selectedBranch } = useBranch();
   const { showSuccess, showError } = useToast();
 
   // View Mode: grid or table, persisted
@@ -103,6 +106,7 @@ const Products = () => {
       const params = {
         page,
         limit,
+        branchId: selectedBranch !== "all" ? selectedBranch : undefined,
         search: search.trim() || undefined,
         category: category || undefined,
         productType: productTypeFilter || undefined,
@@ -134,7 +138,7 @@ const Products = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, search, category, productTypeFilter, minPrice, maxPrice, sortBy, showError]);
+  }, [page, selectedBranch, search, category, productTypeFilter, minPrice, maxPrice, sortBy, showError]);
 
   useEffect(() => {
     // Reset page to 1 when filters change to avoid paging issues
@@ -450,6 +454,7 @@ const Products = () => {
               }}
             >
               <div
+                className="product-card-image-container"
                 style={{
                   height: "180px",
                   overflow: "hidden",

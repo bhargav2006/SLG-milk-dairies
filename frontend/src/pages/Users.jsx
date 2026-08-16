@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import userService from "../services/userService";
 import deliveryBoyService from "../services/deliveryBoyService";
 import { TableSkeleton } from "../components/common/Skeleton";
 import Modal from "../components/common/Modal";
 import EmptyState from "../components/common/EmptyState";
-import { Users as UsersIcon, Trash2, ShieldCheck, UserCheck, Edit, Plus, Truck, MapPin } from "lucide-react";
+import { Users as UsersIcon, Trash2, ShieldCheck, UserCheck, Edit, Plus, Truck, MapPin, Building2 } from "lucide-react";
 
 const Users = () => {
   const { user: currentUser } = useAuth();
+  const { branches } = useBranch();
   const { showSuccess, showError, showInfo } = useToast();
 
   const [activeTab, setActiveTab] = useState("staff"); // "staff" or "delivery"
@@ -31,6 +33,7 @@ const Users = () => {
     password: "",
     role: "accountant",
     phone: "",
+    branch: "",
   });
   const [userErrors, setUserErrors] = useState({});
   const [submittingUser, setSubmittingUser] = useState(false);
@@ -89,6 +92,7 @@ const Users = () => {
 
   // STAFF ACTIONS
   const handleOpenAddUserModal = () => {
+    const mainBranch = branches.find((b) => b.isMain) || branches[0];
     setEditingUser(null);
     setUserData({
       name: "",
@@ -96,6 +100,7 @@ const Users = () => {
       password: "",
       role: "accountant",
       phone: "",
+      branch: mainBranch ? mainBranch._id : "",
     });
     setUserErrors({});
     setUserModalOpen(true);
@@ -109,6 +114,7 @@ const Users = () => {
       password: "",
       role: usr.role || "accountant",
       phone: usr.phone || "",
+      branch: usr.branch?._id || usr.branch || "",
     });
     setUserErrors({});
     setUserModalOpen(true);
@@ -153,6 +159,7 @@ const Users = () => {
         email: userData.email.trim(),
         role: userData.role,
         phone: userData.phone.trim(),
+        branch: userData.branch || null,
       };
       if (userData.password) {
         payload.password = userData.password;
@@ -390,6 +397,7 @@ const Users = () => {
                     <th>Name</th>
                     <th>Email Address</th>
                     <th>Mobile Number</th>
+                    <th>Assigned Branch</th>
                     <th>Role Permissions</th>
                     <th style={{ textAlign: "center" }}>Actions</th>
                   </tr>
@@ -400,6 +408,19 @@ const Users = () => {
                       <td data-label="Name" style={{ fontWeight: 600 }}>{usr.name}</td>
                       <td data-label="Email Address">{usr.email}</td>
                       <td data-label="Mobile Number">{usr.phone || "N/A"}</td>
+                      <td data-label="Assigned Branch">
+                        {usr.role === "admin" ? (
+                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1E293B", background: "#F1F5F9", padding: "3px 8px", borderRadius: "6px" }}>
+                            🏢 All Branches (Global)
+                          </span>
+                        ) : usr.branch ? (
+                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2563EB", background: "#EFF6FF", padding: "3px 8px", borderRadius: "6px", border: "1px solid #BFDBFE" }}>
+                            📍 {usr.branch.name || "Branch"} ({usr.branch.code || ""})
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: "0.75rem", color: "#94A3B8" }}>Main Branch</span>
+                        )}
+                      </td>
                       <td data-label="Role Permissions">
                         <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                           {usr.role === "admin" ? (
@@ -638,9 +659,30 @@ const Users = () => {
               disabled={submittingUser || (editingUser && editingUser._id === currentUser._id)}
             >
               <option value="accountant">Accountant</option>
-              <option value="admin">Admin</option>
+              <option value="admin">Super Admin</option>
             </select>
           </div>
+
+          {userData.role !== "admin" && (
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" htmlFor="user-branch">Assigned Store Branch *</label>
+              <select
+                id="user-branch"
+                name="branch"
+                className="form-input"
+                value={userData.branch}
+                onChange={handleUserChange}
+                disabled={submittingUser}
+              >
+                <option value="">-- Select Store Branch --</option>
+                {branches.map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.isMain ? "⭐ " : ""}{b.name} ({b.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" htmlFor="user-password">

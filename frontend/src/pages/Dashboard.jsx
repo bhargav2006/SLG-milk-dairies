@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import productService from "../services/productService";
 import billService from "../services/billService";
@@ -20,10 +21,12 @@ import {
   Calendar,
   CreditCard,
   Printer,
+  Building2,
 } from "lucide-react";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { selectedBranch, currentBranch } = useBranch();
   const { showError } = useToast();
   const navigate = useNavigate();
 
@@ -53,23 +56,22 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        // Fetch products count
-        const prodData = await productService.getProducts({ limit: 1 });
+        const branchParam = selectedBranch !== "all" ? selectedBranch : undefined;
+
+        // Fetch products count for active branch
+        const prodData = await productService.getProducts({ limit: 1, branchId: branchParam });
         const productsCount = prodData.total || 0;
 
         let usersCount = 0;
         let billsList = [];
 
         if (user.role === "admin") {
-          // Admin has access to get all users
           const usersData = await userService.getUsers();
           usersCount = usersData.length || 0;
 
-          // Admin has access to get all bills
-          billsList = await billService.getBills();
+          billsList = await billService.getBills(branchParam ? { branchId: branchParam } : {});
         } else {
-          // Accountant has access to only their bills
-          billsList = await billService.getBillsByAccountant(user._id);
+          billsList = await billService.getBills();
         }
 
         // Calculate today's sales and payment method breakdown
@@ -145,7 +147,7 @@ const Dashboard = () => {
     if (user) {
       fetchDashboardData();
     }
-  }, [user, showError]);
+  }, [user, selectedBranch, showError]);
 
   const handleSearchBillsSubmit = (e) => {
     e.preventDefault();

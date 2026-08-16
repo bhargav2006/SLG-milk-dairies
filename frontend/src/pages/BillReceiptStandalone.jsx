@@ -193,6 +193,12 @@ const BillReceiptStandalone = () => {
             >
               Retail & Wholesale
             </p>
+            {bill.branch && (
+              <div style={{ marginTop: "6px", fontSize: "0.9rem", fontWeight: "700", color: "var(--color-primary)" }}>
+                📍 {bill.branch.name} ({bill.branch.code})
+                {bill.branch.address && <div style={{ fontSize: "0.8rem", fontWeight: "normal", color: "var(--color-text-secondary)" }}>{bill.branch.address}</div>}
+              </div>
+            )}
             <div
               style={{
                 fontSize: "0.8rem",

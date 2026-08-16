@@ -17,8 +17,8 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Fetch user from DB (without password) and attach to req
-      req.user = await User.findById(decoded.id).select("-password");
+      // Fetch user from DB (without password) and populate branch info
+      req.user = await User.findById(decoded.id).select("-password").populate("branch");
 
       if (!req.user) {
         return res.status(401).json({ message: "User not found" });
@@ -26,7 +26,10 @@ const protect = async (req, res, next) => {
 
       next(); // proceed to the route handler
     } catch (error) {
-      console.error(error);
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({ message: "Session expired, please log in again." });
+      }
+      console.error("Auth Error:", error.message);
       return res.status(401).json({ message: "Not authorized, token failed" });
     }
   } else {

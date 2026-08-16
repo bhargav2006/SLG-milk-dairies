@@ -7,6 +7,11 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
     accountantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

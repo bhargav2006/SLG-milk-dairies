@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
+import { useBranch } from "../context/BranchContext";
+import { useAuth } from "../context/AuthContext";
 import productService from "../services/productService";
 import { Skeleton } from "../components/common/Skeleton";
-import { ArrowLeft, Save, UploadCloud } from "lucide-react";
+import { ArrowLeft, Save, UploadCloud, Building2 } from "lucide-react";
 import { compressImage } from "../utils/imageCompressor";
 
 const AddEditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
+  const { branches, selectedBranch } = useBranch();
 
   const isEditMode = !!id;
 
@@ -23,6 +27,7 @@ const AddEditProduct = () => {
     description: "",
     productType: "retail",
     stock: "",
+    branch: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -30,6 +35,14 @@ const AddEditProduct = () => {
   const [errors, setErrors] = useState({});
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
+
+  // Default branch when adding product
+  useEffect(() => {
+    if (!isEditMode && branches.length > 0 && !formData.branch) {
+      const defaultB = selectedBranch !== "all" ? selectedBranch : (branches.find(b => b.isMain)?._id || branches[0]._id);
+      setFormData((prev) => ({ ...prev, branch: defaultB }));
+    }
+  }, [branches, selectedBranch, isEditMode, formData.branch]);
 
   // Fetch product details for edit mode
   useEffect(() => {
@@ -46,6 +59,7 @@ const AddEditProduct = () => {
           description: product.description || "",
           productType: (product.productType || "retail").toLowerCase(),
           stock: product.stock !== undefined ? product.stock.toString() : "0",
+          branch: product.branch?._id || product.branch || "",
         });
         setPreview(
           product.image
@@ -141,6 +155,7 @@ const AddEditProduct = () => {
         description: formData.description.trim(),
         productType: formData.productType,
         stock: Number(formData.stock),
+        branch: formData.branch,
       };
 
       if (formData.productType === "retail" || formData.productType === "both") {
@@ -297,6 +312,31 @@ const AddEditProduct = () => {
         </h2>
 
         <form onSubmit={handleSubmit}>
+          {/* Store Branch selection for Admin */}
+          {user?.role === "admin" && (
+            <div className="form-group" style={{ background: "#F8FAFC", padding: "12px", borderRadius: "10px", border: "1px solid #E2E8F0", marginBottom: "20px" }}>
+              <label className="form-label" htmlFor="product-branch" style={{ display: "flex", alignItems: "center", gap: "6px", color: "#1E293B", fontWeight: 700 }}>
+                <Building2 size={16} style={{ color: "#2563EB" }} /> Store Branch *
+              </label>
+              <select
+                id="product-branch"
+                name="branch"
+                value={formData.branch}
+                onChange={handleChange}
+                className="form-input"
+                disabled={submitting}
+                style={{ background: "#FFFFFF", fontWeight: "600" }}
+              >
+                <option value="">-- Select Store Branch --</option>
+                {branches.map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.isMain ? "⭐ " : ""}{b.name} ({b.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Product Name */}
           <div className="form-group">
             <label className="form-label" htmlFor="name">

@@ -138,9 +138,14 @@ exports.placeOrder = async (req, res) => {
     const sequence = counter.sequence.toString().padStart(4, "0");
     const orderNumber = `ORD-${yearMonthStr}-${sequence}`;
 
+    // Find Main Branch for online customer orders
+    const Branch = require("../models/Branch");
+    const mainBranch = await Branch.findOne({ isMain: true });
+
     // Create Order
     const order = new Order({
       OrderNumber: orderNumber,
+      branch: mainBranch ? mainBranch._id : null,
       customerId,
       products: orderProducts,
       address: {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import productService from "../services/productService";
 import billService from "../services/billService";
@@ -17,12 +18,14 @@ import {
   Milk,
   Receipt,
   UserCheck,
+  Building2,
 } from "lucide-react";
 
 const CreateBill = ({ billType = "retail", isEditMode = false }) => {
   const { invoiceNumber } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { selectedBranch, currentBranch } = useBranch();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
 
   // POS State
@@ -114,6 +117,7 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
         search: search.trim() || undefined,
         category: category || undefined,
         productType: activeBillType,
+        branchId: selectedBranch !== "all" ? selectedBranch : undefined,
         limit: 100, // Load all for POS selection
       });
       setProducts(data.products || []);
@@ -123,7 +127,7 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
     } finally {
       setLoadingCatalog(false);
     }
-  }, [search, category, activeBillType, showError]);
+  }, [search, category, activeBillType, selectedBranch, showError]);
 
   useEffect(() => {
     loadCatalog();
@@ -299,6 +303,7 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
         paymentMethod,
         customerMail,
         billType: activeBillType,
+        branch: selectedBranch !== "all" ? selectedBranch : undefined,
       };
 
       if (isEditMode) {

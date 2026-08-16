@@ -7,6 +7,11 @@ const DeliveryBoySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
     email: {
       type: String,
       default: null,

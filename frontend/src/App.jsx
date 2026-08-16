@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
+import { BranchProvider } from "./context/BranchContext";
 import AppRoutes from "./routes/AppRoutes";
 
 function App() {
@@ -10,9 +11,11 @@ function App() {
     <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
-          <NotificationProvider>
-            <AppRoutes />
-          </NotificationProvider>
+          <BranchProvider>
+            <NotificationProvider>
+              <AppRoutes />
+            </NotificationProvider>
+          </BranchProvider>
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

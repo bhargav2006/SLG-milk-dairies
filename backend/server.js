@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const billRoutes = require("./routes/billRoutes");
+const branchRoutes = require("./routes/branchRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
 
 const customerRoutes = require("./routes/customerRoutes");
@@ -21,6 +22,7 @@ const customerProductRoutes = require("./routes/customerProductRoutes");
 const accountantRoutes = require("./routes/accountantRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const couponRoutes = require("./routes/couponRoutes");
+const initBranches = require("./utils/initBranches");
 const { initSocket } = require("./utils/socket");
 
 const app = express();
@@ -80,6 +82,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/bill", billRoutes);
+app.use("/api/branches", branchRoutes);
 
 app.use("/api/customer", customerRoutes);
 app.use("/api/orders", orderRoutes);
@@ -162,6 +165,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+    await initBranches();
     await seedDefaultCoupons();
     server.listen(PORT, () => {
       const now = new Date();

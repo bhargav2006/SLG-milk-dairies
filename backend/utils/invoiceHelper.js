@@ -63,6 +63,7 @@ const createInvoiceFromOrder = async (order) => {
 
     // Create the Bill (Invoice)
     const bill = new Bill({
+      branch: order.branch || null,
       invoiceNumber,
       customerNumber,
       customerMail,

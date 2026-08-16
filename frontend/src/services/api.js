@@ -42,8 +42,11 @@ api.interceptors.request.use(
         return config;
       }
     }
-    // If the request targets delivery boy routes, use the delivery token
-    if (config.url.startsWith("/api/delivery")) {
+    // If the request targets delivery boy portal routes, use the delivery token if present
+    if (
+      config.url.startsWith("/api/delivery/orders") ||
+      config.url.startsWith("/api/delivery/availability")
+    ) {
       const deliveryToken = localStorage.getItem("delivery_token");
       if (deliveryToken) {
         config.headers.Authorization = `Bearer ${deliveryToken}`;

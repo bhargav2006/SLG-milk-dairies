@@ -1,5 +1,6 @@
 const Bill = require("../models/Bill");
 const Product = require("../models/Product");
+const Branch = require("../models/Branch");
 const sendEmail = require("../utils/sendEmail");
 const sendWhatsapp = require("../utils/sendWhatsapp");
 const Counter = require("../models/Counter");
@@ -29,10 +30,27 @@ const mapBillProductsPrice = (bill) => {
 // Create a new bill
 exports.createBill = async (req, res) => {
   try {
-    let { customerNumber, customerMail, products, paymentMethod, billType } =
+    let { customerNumber, customerMail, products, paymentMethod, billType, branch: reqBranch } =
       req.body;
     customerMail = customerMail || null; // Set to null if not provided
     billType = billType || "retail";
+
+    // Resolve branch
+    let targetBranchId = reqBranch;
+    if (req.user && (req.user.role === "accountant" || req.user.role === "branch_admin")) {
+      targetBranchId = req.user.branch?._id || req.user.branch;
+    }
+    if (!targetBranchId) {
+      const mainBranch = await Branch.findOne({ isMain: true });
+      if (mainBranch) targetBranchId = mainBranch._id;
+    }
+
+    if (!targetBranchId) {
+      return res.status(400).json({ message: "Branch ID is required to generate a bill" });
+    }
+
+    const branchDoc = await Branch.findById(targetBranchId);
+    const branchCode = branchDoc ? branchDoc.code : "MAIN";
 
     if (billType !== "retail" && billType !== "wholesale") {
       return res.status(400).json({
@@ -90,7 +108,7 @@ exports.createBill = async (req, res) => {
         lineTotal,
       });
     }
-    // Generate sequential invoice number combining year and month (e.g. INV-202606-0001)
+    // Generate sequential invoice number combining branch code, year and month (e.g. INV-R-MAIN-202608-0001)
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth() + 1; // 1-indexed
@@ -98,7 +116,7 @@ exports.createBill = async (req, res) => {
 
     const prefix = billType === "wholesale" ? "INV-W" : "INV-R";
 
-    const counterName = `${prefix}-${yearMonthStr}`;
+    const counterName = `${prefix}-${branchCode}-${yearMonthStr}`;
     const counter = await Counter.findOneAndUpdate(
       { name: counterName },
       { $inc: { sequence: 1 } },
@@ -106,9 +124,10 @@ exports.createBill = async (req, res) => {
     );
 
     const sequence = counter.sequence.toString().padStart(4, "0");
-    const invoiceNumber = `${prefix}-${yearMonthStr}-${sequence}`;
+    const invoiceNumber = `${prefix}-${branchCode}-${yearMonthStr}-${sequence}`;
 
     const bill = new Bill({
+      branch: targetBranchId,
       invoiceNumber,
       customerNumber,
       customerMail,
@@ -286,9 +305,21 @@ exports.getBills = async (req, res) => {
   try {
     const filter = {};
     if (req.query.billType) filter.billType = req.query.billType;
+
+    if (req.user) {
+      if (req.user.role === "accountant" || req.user.role === "branch_admin") {
+        filter.branch = req.user.branch?._id || req.user.branch;
+      } else if (req.user.role === "admin") {
+        if (req.query.branchId && req.query.branchId !== "all") {
+          filter.branch = req.query.branchId;
+        }
+      }
+    }
+
     const bills = await Bill.find(filter)
       .sort({ createdAt: -1 })
       .populate("accountant", "name")
+      .populate("branch", "name code address phone")
       .populate(
         "products.product",
         "name price retailPrice wholesalePrice productType",
@@ -305,6 +336,7 @@ exports.getBillById = async (req, res) => {
   try {
     const bill = await Bill.findOne({ invoiceNumber: req.params.invoiceNumber })
       .populate("accountant", "name")
+      .populate("branch", "name code address phone")
       .populate(
         "products.product",
         "name price retailPrice wholesalePrice productType",

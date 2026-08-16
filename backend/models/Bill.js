@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const BillSchema = new mongoose.Schema(
   {
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true,
+    },
     invoiceNumber: {
       type: String,
       required: true,

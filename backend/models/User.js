@@ -18,8 +18,13 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "accountant"],
+      enum: ["admin", "branch_admin", "accountant"],
       default: "accountant",
+    },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
     },
     phone: {
       type: String,

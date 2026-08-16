@@ -2,10 +2,14 @@ const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema(
   {
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true,
+    },
     serialNumber: {
       type: String,
       required: true,
-      unique: true,
     },
     name: {
       type: String,
@@ -52,6 +56,9 @@ const ProductSchema = new mongoose.Schema(
     timestamps: true, // adds createdAt and updatedAt automatically
   },
 );
+
+// Compound index so serial numbers are unique per branch
+ProductSchema.index({ branch: 1, serialNumber: 1 }, { unique: true });
 
 ProductSchema.post("init", function (doc) {
   if (doc.price && doc.price > 0) {

@@ -55,7 +55,7 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("branch", "name code address phone isMain");
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -79,6 +79,7 @@ const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         phone: user.phone || "",
+        branch: user.branch || null,
       },
     });
   } catch (error) {

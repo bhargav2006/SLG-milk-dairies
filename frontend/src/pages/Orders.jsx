@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../context/ToastContext";
+import { useBranch } from "../context/BranchContext";
 import accountantService from "../services/accountantService";
-import { Check, Truck, Clock, AlertCircle, RefreshCw, Eye, X, Copy, CheckCircle2 } from "lucide-react";
+import { Check, Truck, Clock, AlertCircle, RefreshCw, Eye, X, Copy, CheckCircle2, Building2 } from "lucide-react";
 import Modal from "../components/common/Modal";
 import "./Orders.css";
 
 const Orders = () => {
   const { showSuccess, showError, showInfo } = useToast();
+  const { selectedBranch, currentBranch } = useBranch();
 
   const [activeTab, setActiveTab] = useState("pending");
   const [orders, setOrders] = useState([]);
@@ -29,16 +31,21 @@ const Orders = () => {
   const [generatedLink, setGeneratedLink] = useState("");
 
   // Fetch orders based on active tab
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
+      const params = {};
+      if (selectedBranch !== "all") {
+        params.branchId = selectedBranch;
+      }
+
       let res;
       if (activeTab === "pending") {
-        res = await accountantService.getPendingOrders();
+        res = await accountantService.getPendingOrders(params);
       } else if (activeTab === "accepted") {
-        res = await accountantService.getAcceptedOrders();
+        res = await accountantService.getAcceptedOrders(params);
       } else {
-        res = await accountantService.getAssignedOrders();
+        res = await accountantService.getAssignedOrders(params);
       }
       setOrders(res.orders || []);
     } catch (err) {
@@ -47,7 +54,7 @@ const Orders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, selectedBranch, showError]);
 
   // Fetch available delivery boys
   const fetchDeliveryBoys = async () => {
@@ -64,7 +71,7 @@ const Orders = () => {
     if (activeTab === "accepted") {
       fetchDeliveryBoys();
     }
-  }, [activeTab]);
+  }, [activeTab, fetchOrders]);
 
   const handleAcceptOrder = async (orderNumber) => {
     try {
@@ -229,6 +236,7 @@ const Orders = () => {
             <thead>
               <tr>
                 <th>Order Number</th>
+                <th>Store Branch</th>
                 <th>Customer</th>
                 <th>Products Count</th>
                 <th>Total Amount</th>
@@ -254,6 +262,11 @@ const Orders = () => {
                         📱 QR Paid
                       </span>
                     )}
+                  </td>
+                  <td data-label="Store Branch">
+                    <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2563EB", background: "#EFF6FF", padding: "3px 8px", borderRadius: "6px", border: "1px solid #BFDBFE" }}>
+                      📍 {ord.branch?.name || "Main Branch"}
+                    </span>
                   </td>
                   <td data-label="Customer">
                     <div className="cust-info-cell">

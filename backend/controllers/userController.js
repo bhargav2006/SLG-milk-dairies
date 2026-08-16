@@ -1,15 +1,14 @@
 const User = require("../models/User");
+const Branch = require("../models/Branch");
 
 // @desc    Get all users (admin only)
 // @route   GET /api/users/
 const getAllUsers = async (req, res) => {
   try {
-    // console.log("Authenticated user:", req.user); // Log the authenticated user
-    // console.log("Fetched users:", users); // Log the fetched users
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ message: "Access denied, admin only" });
     }
-    const users = await User.find().select("-password"); // exclude password
+    const users = await User.find().select("-password").populate("branch", "name code"); // exclude password
     res.json(users);
   } catch (error) {
     console.error(error);
@@ -46,7 +45,7 @@ const deleteUser = async (req, res) => {
 // @route   POST /api/users/
 const createUser = async (req, res) => {
   try {
-    const { name, email, password, role, phone } = req.body;
+    const { name, email, password, role, phone, branch } = req.body;
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -54,13 +53,25 @@ const createUser = async (req, res) => {
     if (userExists) {
       return res.status(400).json({ message: "User already exists with this email" });
     }
-    const user = new User({ name, email, password, role, phone: phone || "" });
+
+    let targetBranch = branch;
+    if (!targetBranch && role !== "admin") {
+      const mainBranch = await Branch.findOne({ isMain: true });
+      if (mainBranch) targetBranch = mainBranch._id;
+    }
+
+    const user = new User({
+      name,
+      email,
+      password,
+      role,
+      phone: phone || "",
+      branch: targetBranch || null,
+    });
     await user.save();
     
-    // Return user without password
-    const userObj = user.toObject();
-    delete userObj.password;
-    res.status(201).json(userObj);
+    const populatedUser = await User.findById(user._id).select("-password").populate("branch", "name code");
+    res.status(201).json(populatedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -71,7 +82,7 @@ const createUser = async (req, res) => {
 // @route   PUT /api/users/:id
 const updateUser = async (req, res) => {
   try {
-    const { name, email, role, password, phone } = req.body;
+    const { name, email, role, password, phone, branch } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -89,12 +100,12 @@ const updateUser = async (req, res) => {
     if (role) user.role = role;
     if (password) user.password = password;
     if (phone !== undefined) user.phone = phone;
+    if (branch !== undefined) user.branch = branch || null;
 
     await user.save();
 
-    const userObj = user.toObject();
-    delete userObj.password;
-    res.json(userObj);
+    const populatedUser = await User.findById(user._id).select("-password").populate("branch", "name code");
+    res.json(populatedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import billService from "../services/billService";
 import userService from "../services/userService";
@@ -23,10 +24,12 @@ import {
   History,
   Edit,
   Trash2,
+  Building2,
 } from "lucide-react";
 
 const Bills = () => {
   const { user } = useAuth();
+  const { selectedBranch, currentBranch } = useBranch();
   const { showError, showSuccess } = useToast();
   const location = useLocation();
 
@@ -98,6 +101,10 @@ const Bills = () => {
       if (billTypeFilter) {
         params.billType = billTypeFilter;
       }
+      if (selectedBranch !== "all") {
+        params.branchId = selectedBranch;
+      }
+
       if (user.role === "admin") {
         data = await billService.getBills(params);
       } else {
@@ -110,7 +117,7 @@ const Bills = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, billTypeFilter, showError]);
+  }, [user, billTypeFilter, selectedBranch, showError]);
 
   useEffect(() => {
     loadBills();
