@@ -123,7 +123,7 @@ export const NotificationProvider = ({ children }) => {
         token: activeToken,
         role: activeRole,
       },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       reconnectionAttempts: 5,
     });
 
@@ -141,6 +141,9 @@ export const NotificationProvider = ({ children }) => {
 
     newSocket.on("connect_error", (error) => {
       console.error("[Socket Connect Error]", error.message);
+      if (error.message && error.message.includes("Authentication error")) {
+        newSocket.disconnect();
+      }
     });
 
     setSocket(newSocket);

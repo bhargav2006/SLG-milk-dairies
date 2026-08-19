@@ -170,7 +170,6 @@ const startServer = async () => {
     server.listen(PORT, () => {
       const now = new Date();
       console.log(`[${now.toLocaleString()}] Server running on port ${PORT}`);
-      console.log(`Server started at: ${now.toISOString()}`);
     });
   } catch (error) {
     console.error("Failed to connect to database:", error);

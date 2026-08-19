@@ -71,7 +71,10 @@ const Dashboard = () => {
 
           billsList = await billService.getBills(branchParam ? { branchId: branchParam } : {});
         } else {
-          billsList = await billService.getBills();
+          billsList = await billService.getBillsByAccountant(
+            user._id,
+            branchParam ? { branchId: branchParam } : {}
+          );
         }
 
         // Calculate today's sales and payment method breakdown
