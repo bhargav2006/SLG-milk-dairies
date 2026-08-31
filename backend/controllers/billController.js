@@ -310,15 +310,10 @@ exports.getBills = async (req, res) => {
 
     if (req.user) {
       if (req.user.role === "accountant" || req.user.role === "branch_admin") {
-        const userBranchId = req.user.branch?._id || req.user.branch;
-        if (userBranchId) {
-          filter.$or = [
-            { branch: userBranchId },
-            { branch: { $exists: false } },
-            { branch: null },
-          ];
-        }
+        // Accountant role: strictly show only bills created by this accountant
+        filter.accountant = req.user._id;
       } else if (req.user.role === "admin") {
+        // Admin role: show all bills (or filter by branch if selected)
         if (req.query.branchId && req.query.branchId !== "all") {
           const targetBranch = req.query.branchId;
           if (mainBranch && targetBranch.toString() === mainBranch._id.toString()) {
@@ -398,15 +393,12 @@ exports.getBillByCustomerNumber = async (req, res) => {
 // Get bills by Accountant ID
 exports.getBillByAccountantId = async (req, res) => {
   try {
-    const userBranchId = req.user?.branch?._id || req.user?.branch;
-    const filter = {
-      $or: [
-        { accountant: req.params.accountantId },
-        ...(userBranchId ? [{ branch: userBranchId }] : []),
-        { branch: { $exists: false } },
-        { branch: null },
-      ]
-    };
+    // If request user is accountant/branch_admin, force their own accountant ID
+    const targetAccountantId = (req.user && (req.user.role === "accountant" || req.user.role === "branch_admin"))
+      ? req.user._id
+      : req.params.accountantId;
+
+    const filter = { accountant: targetAccountantId };
     if (req.query.billType) filter.billType = req.query.billType;
 
     const bills = await Bill.find(filter)
