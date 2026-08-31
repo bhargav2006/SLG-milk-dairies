@@ -1,23 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 import api from "../services/api";
 
 const NotificationContext = createContext(null);
-
-let socketUrl = import.meta.env.VITE_BACKEND_URI;
-if (
-  socketUrl &&
-  socketUrl.includes("localhost") &&
-  typeof window !== "undefined" &&
-  window.location &&
-  window.location.hostname &&
-  window.location.hostname !== "localhost" &&
-  window.location.hostname !== "127.0.0.1"
-) {
-  socketUrl = socketUrl.replace("localhost", window.location.hostname);
-}
 
 export const NotificationProvider = ({ children }) => {
   const { user, token: staffToken } = useAuth();
@@ -25,7 +11,6 @@ export const NotificationProvider = ({ children }) => {
   const [customerToken, setCustomerToken] = useState(() => localStorage.getItem("customer_token"));
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [socket, setSocket] = useState(null);
 
   // Sync customer token when localStorage changes
   const syncCustomerToken = useCallback(() => {
@@ -96,63 +81,14 @@ export const NotificationProvider = ({ children }) => {
     }
   }, [staffToken, customerToken, user]);
 
-  // Fetch list when auth state changes
+  // Fetch list on auth state change & periodic polling (every 30 seconds)
   useEffect(() => {
     fetchNotifications();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+    return () => clearInterval(interval);
   }, [fetchNotifications]);
-
-  // Manage socket connection
-  useEffect(() => {
-    const activeStaffToken = localStorage.getItem("dairy_token") || staffToken;
-    const activeCustomerToken = localStorage.getItem("customer_token") || customerToken;
-
-    const activeToken = activeStaffToken || activeCustomerToken;
-    const activeRole = activeStaffToken ? (user?.role || "accountant") : "customer";
-
-    if (!activeToken) {
-      if (socket) {
-        socket.disconnect();
-        setSocket(null);
-      }
-      return;
-    }
-
-    // console.log(`[Socket Connection] Connecting to ${socketUrl} for role: ${activeRole}`);
-    const newSocket = io(socketUrl, {
-      auth: {
-        token: activeToken,
-        role: activeRole,
-      },
-      transports: ["polling", "websocket"],
-      reconnectionAttempts: 5,
-    });
-
-    newSocket.on("connect", () => {
-      // console.log(`[Socket Connected] Socket ID: ${newSocket.id}`);
-    });
-
-    newSocket.on("new_notification", (notification) => {
-      // console.log("[Socket Notification Received]", notification);
-      setNotifications((prev) => [notification, ...prev]);
-      setUnreadCount((prev) => prev + 1);
-      // Fire UI toast message
-      showInfo(`${notification.title}: ${notification.message}`);
-    });
-
-    newSocket.on("connect_error", (error) => {
-      console.error("[Socket Connect Error]", error.message);
-      if (error.message && error.message.includes("Authentication error")) {
-        newSocket.disconnect();
-      }
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-      // console.log("[Socket Cleanup] Disconnected socket");
-    };
-  }, [staffToken, customerToken, user, showInfo]);
 
   return (
     <NotificationContext.Provider

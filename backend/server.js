@@ -23,7 +23,6 @@ const accountantRoutes = require("./routes/accountantRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 const initBranches = require("./utils/initBranches");
-const { initSocket } = require("./utils/socket");
 
 const app = express();
 const server = require("http").createServer(app);
@@ -76,9 +75,6 @@ const corsOptions = {
   origin: (origin, callback) => callback(null, true),
   credentials: true
 };
-
-// Initialize Sockets
-initSocket(server, corsOptions);
 
 // Middleware
 app.use(cors(corsOptions));

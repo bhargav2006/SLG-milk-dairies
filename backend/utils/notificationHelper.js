@@ -1,9 +1,8 @@
 const Notification = require("../models/Notification");
 const User = require("../models/User");
-const { getIO } = require("./socket");
 
 /**
- * Creates a notification in the database and broadcasts it in real-time.
+ * Creates a notification in the database.
  * 
  * @param {Object} params
  * @param {string} params.recipientId - Target user ID (only required/used for specific recipients like customers)
@@ -24,8 +23,6 @@ const sendNotification = async ({
   from,
 }) => {
   try {
-    const io = getIO();
-
     if (recipientType === "accountant" || recipientType === "admin") {
       // Find all staff users (accountants & admins) to create DB records for each
       const staffUsers = await User.find({ role: { $in: ["accountant", "admin"] } });
@@ -49,17 +46,6 @@ const sendNotification = async ({
         await Notification.insertMany(notifications);
       }
 
-      // Send to the accountants socket room in real-time
-      if (io) {
-        io.to("accountants").emit("new_notification", {
-          title,
-          message,
-          type,
-          referenceId,
-          from,
-          at: new Date(),
-        });
-      }
       return notifications;
     } else {
       // Single recipient notification (e.g. customer or delivery boy)
@@ -79,14 +65,10 @@ const sendNotification = async ({
       });
       await notification.save();
 
-      // Emit to the specific user's socket room
-      if (io) {
-        io.to(recipientId.toString()).emit("new_notification", notification);
-      }
       return notification;
     }
   } catch (error) {
-    console.error("Error creating/sending notification:", error);
+    console.error("Error creating notification:", error);
   }
 };
 
