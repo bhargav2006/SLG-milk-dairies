@@ -44,13 +44,34 @@ const Bills = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper to get today's date in YYYY-MM-DD local format
-  const getTodayDateString = () => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+  // Helper to format date as YYYY-MM-DD in Asia/Kolkata store timezone (or local time fallback)
+  const getLocalDateString = (dateInput) => {
+    if (!dateInput) return "";
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return "";
+    try {
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      return formatter.format(d);
+    } catch (err) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+  };
+
+  const normalizePaymentMethod = (method) => {
+    if (!method) return "cash";
+    const m = String(method).trim().toLowerCase();
+    if (m === "cash" || m === "cod") return "cash";
+    if (m === "card" || m === "credit_card" || m === "debit_card") return "card";
+    if (m === "online" || m === "qr_payment" || m === "upi" || m === "upidelivery") return "online";
+    return m;
   };
 
   // Filters State
@@ -61,13 +82,12 @@ const Bills = () => {
   const [page, setPage] = useState(1);
   const limit = 10; // items per page
 
-  // Selected target date string for matching and title rendering
-  const targetDateStr = useMemo(() => {
+  // Selected target date string (YYYY-MM-DD) for matching
+  const targetDateFormatted = useMemo(() => {
     if (filterDate) {
-      const [year, month, day] = filterDate.split("-").map(Number);
-      return new Date(year, month - 1, day).toDateString();
+      return filterDate;
     }
-    return new Date().toDateString();
+    return getLocalDateString(new Date());
   }, [filterDate]);
 
   const dateLabel = useMemo(() => {
@@ -183,8 +203,8 @@ const Bills = () => {
       const amt = bill.totalAmount || 0;
       map[accId].totalSales += amt;
 
-      const billDateStr = new Date(bill.createdAt).toDateString();
-      if (billDateStr === targetDateStr) {
+      const billDateStr = getLocalDateString(bill.createdAt);
+      if (billDateStr === targetDateFormatted) {
         map[accId].todaySales += amt;
       } else {
         map[accId].beforeSales += amt;
@@ -192,7 +212,7 @@ const Bills = () => {
     });
 
     return Object.values(map).sort((a, b) => b.todaySales - a.todaySales);
-  }, [bills, users, user.role, targetDateStr]);
+  }, [bills, users, user.role, targetDateFormatted]);
 
   // Selected accountant details for stats tracker card
   const selectedAccountantStats = useMemo(() => {
@@ -213,18 +233,19 @@ const Bills = () => {
     let onlineCount = 0;
 
     bills.forEach((bill) => {
-      const billDate = new Date(bill.createdAt).toDateString();
-      if (billDate === targetDateStr) {
-        totalSales += bill.totalAmount;
+      const billDate = getLocalDateString(bill.createdAt);
+      if (billDate === targetDateFormatted) {
+        totalSales += bill.totalAmount || 0;
         totalBills += 1;
-        if (bill.paymentMethod === "cash") {
-          cashAmount += bill.totalAmount;
+        const mode = normalizePaymentMethod(bill.paymentMethod);
+        if (mode === "cash") {
+          cashAmount += bill.totalAmount || 0;
           cashCount += 1;
-        } else if (bill.paymentMethod === "card") {
-          cardAmount += bill.totalAmount;
+        } else if (mode === "card") {
+          cardAmount += bill.totalAmount || 0;
           cardCount += 1;
-        } else if (bill.paymentMethod === "online") {
-          onlineAmount += bill.totalAmount;
+        } else if (mode === "online") {
+          onlineAmount += bill.totalAmount || 0;
           onlineCount += 1;
         }
       }
@@ -240,27 +261,22 @@ const Bills = () => {
       onlineAmount,
       onlineCount,
     };
-  }, [bills, targetDateStr]);
+  }, [bills, targetDateFormatted]);
 
   // Client-side filtering
   const filteredBills = useMemo(() => {
     return bills.filter((bill) => {
       // 1. Phone number filter
-      if (search.trim() && !bill.customerNumber.includes(search.trim())) {
+      if (search.trim() && !(bill.customerNumber || "").includes(search.trim())) {
         return false;
       }
       // 2. Payment method filter
-      if (paymentMethod && bill.paymentMethod !== paymentMethod) {
+      if (paymentMethod && normalizePaymentMethod(bill.paymentMethod) !== normalizePaymentMethod(paymentMethod)) {
         return false;
       }
       // 3. Day-wise date filter
       if (filterDate) {
-        const bDate = new Date(bill.createdAt);
-        const yyyy = bDate.getFullYear();
-        const mm = String(bDate.getMonth() + 1).padStart(2, "0");
-        const dd = String(bDate.getDate()).padStart(2, "0");
-        const formattedBillDate = `${yyyy}-${mm}-${dd}`;
-        if (formattedBillDate !== filterDate) return false;
+        if (getLocalDateString(bill.createdAt) !== filterDate) return false;
       }
       // 4. Accountant filter
       if (

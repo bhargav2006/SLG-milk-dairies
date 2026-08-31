@@ -380,11 +380,22 @@ exports.getBillByCustomerNumber = async (req, res) => {
 // Get bills by Accountant ID
 exports.getBillByAccountantId = async (req, res) => {
   try {
-    const filter = { accountant: req.params.accountantId };
+    const userBranchId = req.user?.branch?._id || req.user?.branch;
+    const filter = {
+      $or: [
+        { accountant: req.params.accountantId },
+        ...(userBranchId ? [{ branch: userBranchId }] : [])
+      ]
+    };
     if (req.query.billType) filter.billType = req.query.billType;
+    if (req.query.branchId && req.query.branchId !== "all") {
+      filter.branch = req.query.branchId;
+    }
+
     const bills = await Bill.find(filter)
       .sort({ createdAt: -1 })
       .populate("accountant", "name")
+      .populate("branch", "name code address phone")
       .populate(
         "products.product",
         "name price retailPrice wholesalePrice productType",

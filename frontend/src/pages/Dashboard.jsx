@@ -24,6 +24,37 @@ import {
   Building2,
 } from "lucide-react";
 
+// Helper to format date as YYYY-MM-DD in Asia/Kolkata store timezone (or local time fallback)
+const getLocalDateString = (dateInput) => {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  try {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    return formatter.format(d);
+  } catch (err) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+};
+
+// Helper to normalize payment methods
+const normalizePaymentMethod = (method) => {
+  if (!method) return "cash";
+  const m = String(method).trim().toLowerCase();
+  if (m === "cash" || m === "cod") return "cash";
+  if (m === "card" || m === "credit_card" || m === "debit_card") return "card";
+  if (m === "online" || m === "qr_payment" || m === "upi" || m === "upidelivery") return "online";
+  return m;
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
   const { selectedBranch, currentBranch } = useBranch();
@@ -77,8 +108,8 @@ const Dashboard = () => {
           );
         }
 
-        // Calculate today's sales and payment method breakdown
-        const todayStr = new Date().toDateString();
+        // Calculate today's sales and payment method breakdown in store timezone
+        const todayStr = getLocalDateString(new Date());
         let todaySales = 0;
         let todayRetailSales = 0;
         let todayWholesaleSales = 0;
@@ -91,25 +122,26 @@ const Dashboard = () => {
         let onlineCount = 0;
 
         billsList.forEach((bill) => {
-          const billDate = new Date(bill.createdAt).toDateString();
+          const billDate = getLocalDateString(bill.createdAt);
           if (billDate === todayStr) {
-            todaySales += bill.totalAmount;
+            todaySales += bill.totalAmount || 0;
             todayBillsCount += 1;
 
             if (bill.billType === "wholesale") {
-              todayWholesaleSales += bill.totalAmount;
+              todayWholesaleSales += bill.totalAmount || 0;
             } else {
-              todayRetailSales += bill.totalAmount;
+              todayRetailSales += bill.totalAmount || 0;
             }
 
-            if (bill.paymentMethod === "cash") {
-              cashAmount += bill.totalAmount;
+            const mode = normalizePaymentMethod(bill.paymentMethod);
+            if (mode === "cash") {
+              cashAmount += bill.totalAmount || 0;
               cashCount += 1;
-            } else if (bill.paymentMethod === "card") {
-              cardAmount += bill.totalAmount;
+            } else if (mode === "card") {
+              cardAmount += bill.totalAmount || 0;
               cardCount += 1;
-            } else if (bill.paymentMethod === "online") {
-              onlineAmount += bill.totalAmount;
+            } else if (mode === "online") {
+              onlineAmount += bill.totalAmount || 0;
               onlineCount += 1;
             }
           }
@@ -132,7 +164,7 @@ const Dashboard = () => {
 
         // Filter and set today's bills only
         const todayBills = billsList.filter((bill) => {
-          return new Date(bill.createdAt).toDateString() === todayStr;
+          return getLocalDateString(bill.createdAt) === todayStr;
         });
 
         const sorted = [...todayBills].sort(
