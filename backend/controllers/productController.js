@@ -33,24 +33,41 @@ const getProducts = async (req, res) => {
     } = req.query;
 
     const filter = {};
+    const andConditions = [];
 
     // Branch scoping
+    const mainBranch = await Branch.findOne({ isMain: true });
+
     if (req.user) {
       if (req.user.role === "accountant" || req.user.role === "branch_admin") {
-        filter.branch = req.user.branch?._id || req.user.branch;
+        const userBranchId = req.user.branch?._id || req.user.branch;
+        if (userBranchId) {
+          andConditions.push({
+            $or: [
+              { branch: userBranchId },
+              { branch: { $exists: false } },
+              { branch: null },
+            ],
+          });
+        }
       } else if (req.user.role === "admin") {
         if (branchId && branchId !== "all") {
           filter.branch = branchId;
         }
       }
     } else {
-      // Unauthenticated / Customer Storefront: Default to Main Branch
-      if (branchId) {
+      // Unauthenticated / Customer Storefront
+      if (branchId && branchId !== "all") {
         filter.branch = branchId;
       } else {
-        const mainBranch = await Branch.findOne({ isMain: true });
         if (mainBranch) {
-          filter.branch = mainBranch._id;
+          andConditions.push({
+            $or: [
+              { branch: mainBranch._id },
+              { branch: { $exists: false } },
+              { branch: null },
+            ],
+          });
         }
       }
     }
@@ -59,28 +76,38 @@ const getProducts = async (req, res) => {
     if (productType) {
       const typeLower = productType.toLowerCase();
       if (typeLower === "retail") {
-        filter.$or = [
-          { productType: "Retail" },
-          { productType: "retail" },
-          { productType: "Both" },
-          { productType: "both" },
-          { productType: { $exists: false } },
-        ];
+        andConditions.push({
+          $or: [
+            { productType: "Retail" },
+            { productType: "retail" },
+            { productType: "Both" },
+            { productType: "both" },
+            { productType: { $exists: false } },
+          ],
+        });
       } else if (typeLower === "wholesale") {
-        filter.$or = [
-          { productType: "Wholesale" },
-          { productType: "wholesale" },
-          { productType: "Both" },
-          { productType: "both" },
-        ];
+        andConditions.push({
+          $or: [
+            { productType: "Wholesale" },
+            { productType: "wholesale" },
+            { productType: "Both" },
+            { productType: "both" },
+          ],
+        });
       } else if (typeLower === "both") {
-        filter.$or = [
-          { productType: "Both" },
-          { productType: "both" },
-        ];
+        andConditions.push({
+          $or: [
+            { productType: "Both" },
+            { productType: "both" },
+          ],
+        });
       } else {
         filter.productType = productType;
       }
+    }
+
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
 
     // Search by name

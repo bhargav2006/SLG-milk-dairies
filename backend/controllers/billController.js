@@ -308,7 +308,14 @@ exports.getBills = async (req, res) => {
 
     if (req.user) {
       if (req.user.role === "accountant" || req.user.role === "branch_admin") {
-        filter.branch = req.user.branch?._id || req.user.branch;
+        const userBranchId = req.user.branch?._id || req.user.branch;
+        if (userBranchId) {
+          filter.$or = [
+            { branch: userBranchId },
+            { branch: { $exists: false } },
+            { branch: null },
+          ];
+        }
       } else if (req.user.role === "admin") {
         if (req.query.branchId && req.query.branchId !== "all") {
           filter.branch = req.query.branchId;
@@ -384,7 +391,9 @@ exports.getBillByAccountantId = async (req, res) => {
     const filter = {
       $or: [
         { accountant: req.params.accountantId },
-        ...(userBranchId ? [{ branch: userBranchId }] : [])
+        ...(userBranchId ? [{ branch: userBranchId }] : []),
+        { branch: { $exists: false } },
+        { branch: null },
       ]
     };
     if (req.query.billType) filter.billType = req.query.billType;
