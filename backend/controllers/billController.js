@@ -306,6 +306,8 @@ exports.getBills = async (req, res) => {
     const filter = {};
     if (req.query.billType) filter.billType = req.query.billType;
 
+    const mainBranch = await Branch.findOne({ isMain: true });
+
     if (req.user) {
       if (req.user.role === "accountant" || req.user.role === "branch_admin") {
         const userBranchId = req.user.branch?._id || req.user.branch;
@@ -318,7 +320,16 @@ exports.getBills = async (req, res) => {
         }
       } else if (req.user.role === "admin") {
         if (req.query.branchId && req.query.branchId !== "all") {
-          filter.branch = req.query.branchId;
+          const targetBranch = req.query.branchId;
+          if (mainBranch && targetBranch.toString() === mainBranch._id.toString()) {
+            filter.$or = [
+              { branch: targetBranch },
+              { branch: { $exists: false } },
+              { branch: null },
+            ];
+          } else {
+            filter.branch = targetBranch;
+          }
         }
       }
     }
@@ -397,9 +408,6 @@ exports.getBillByAccountantId = async (req, res) => {
       ]
     };
     if (req.query.billType) filter.billType = req.query.billType;
-    if (req.query.branchId && req.query.branchId !== "all") {
-      filter.branch = req.query.branchId;
-    }
 
     const bills = await Bill.find(filter)
       .sort({ createdAt: -1 })
