@@ -28,6 +28,7 @@ const { initSocket } = require("./utils/socket");
 const app = express();
 const server = require("http").createServer(app);
 
+/*
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost",
@@ -66,6 +67,13 @@ const corsOptions = {
     
     callback(new Error("Not allowed by CORS"));
   },
+  credentials: true
+};
+*/
+
+// Public CORS configuration allowing all origins dynamically
+const corsOptions = {
+  origin: (origin, callback) => callback(null, true),
   credentials: true
 };
 
