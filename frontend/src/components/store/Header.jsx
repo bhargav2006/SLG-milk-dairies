@@ -3,6 +3,20 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, LogOut, Menu, X } from "lucide-react";
 import NotificationBell from "../NotificationBell";
 
+const ANNOUNCEMENTS = [
+  { text: "Fresh Dairy Products" },
+  { text: "🎉 Use Code: SLG05 for 5% OFF (Unlimited!)", highlight: true },
+  { text: "Same Day Delivery" },
+  { text: "Trusted Visakha Dairy Partner" },
+  { text: "Farm Fresh Milk, Curd, Butter & Ghee" },
+  { text: "Free Delivery Above ₹300" },
+  { text: "Cash on Delivery Available" },
+  { text: "Orders Before 7:00 PM Delivered Today" },
+];
+
+// Double the items so a single group easily spans any viewport width (up to 4K)
+const ANNOUNCEMENT_LIST = [...ANNOUNCEMENTS, ...ANNOUNCEMENTS];
+
 const Header = ({
   user,
   customerToken,
@@ -29,12 +43,26 @@ const Header = ({
     <>
       <div className="lp-announce-bar" aria-label="Delivery announcements">
         <div className="lp-announce-track">
-          <span>Fresh Dairy Products</span>
-          <span style={{ color: "#fef08a", fontWeight: 700 }}>🎉 Use Code: SLG05 for 5% OFF (Unlimited!)</span>
-          <span>Same Day Delivery</span>
-          <span>Fresh Dairy Products</span>
-          <span style={{ color: "#fef08a", fontWeight: 700 }}>🎉 Use Code: SLG05 for 5% OFF (Unlimited!)</span>
-          <span>Same Day Delivery</span>
+          <div className="lp-announce-group">
+            {ANNOUNCEMENT_LIST.map((item, idx) => (
+              <span
+                key={`grp1-${idx}`}
+                className={`lp-announce-item ${item.highlight ? "lp-announce-highlight" : ""}`}
+              >
+                {item.text}
+              </span>
+            ))}
+          </div>
+          <div className="lp-announce-group" aria-hidden="true">
+            {ANNOUNCEMENT_LIST.map((item, idx) => (
+              <span
+                key={`grp2-${idx}`}
+                className={`lp-announce-item ${item.highlight ? "lp-announce-highlight" : ""}`}
+              >
+                {item.text}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 

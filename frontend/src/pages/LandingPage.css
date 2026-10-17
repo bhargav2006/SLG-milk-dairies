@@ -177,36 +177,60 @@ html {
   margin-top: 80px;
   z-index: 110;
   overflow: hidden;
-  white-space: nowrap;
+  user-select: none;
   background: linear-gradient(90deg, var(--lp-primary-dark) 0%, var(--lp-primary) 50%, var(--lp-primary-dark) 100%);
   color: #f7d46b;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
 }
 
 .landing-page-root .lp-announce-track {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  animation: lp-marquee 70s linear infinite;
+  will-change: transform;
+}
+
+.landing-page-root .lp-announce-bar:hover .lp-announce-track {
+  animation-play-state: paused;
+}
+
+.landing-page-root .lp-announce-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 32px;
+  padding: 8px 16px;
+}
+
+.landing-page-root .lp-announce-item {
   display: inline-flex;
   align-items: center;
-  gap: 32px;
-  min-width: max-content;
-  padding: 8px 16px;
-  animation: lp-marquee 18s linear infinite;
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.landing-page-root .lp-announce-track span::before {
+.landing-page-root .lp-announce-item::before {
   content: "✦";
-  margin-right: 10px;
+  margin-right: 12px;
   color: #f3cf6a;
 }
 
+.landing-page-root .lp-announce-highlight {
+  color: #fef08a;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(254, 240, 138, 0.35);
+}
+
 @keyframes lp-marquee {
-  from {
+  0% {
     transform: translateX(0);
   }
-  to {
+  100% {
     transform: translateX(-50%);
   }
 }
@@ -2690,10 +2714,12 @@ html {
 .landing-page-root .lp-product-card-title{
     font-size:.9rem;
 }
-  .landing-page-root .lp-announce-track {
-    gap: 24px;
+  .landing-page-root .lp-announce-group {
+    gap: 20px;
+    padding: 7px 10px;
+  }
+  .landing-page-root .lp-announce-item {
     font-size: 0.76rem;
-    padding: 7px 12px;
   }
 
   .landing-page-root .lp-container {
