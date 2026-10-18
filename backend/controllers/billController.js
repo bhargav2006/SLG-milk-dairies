@@ -336,7 +336,8 @@ exports.getBills = async (req, res) => {
       .populate(
         "products.product",
         "name price retailPrice wholesalePrice productType",
-      );
+      )
+      .lean();
     res.json(bills.map(mapBillProductsPrice));
   } catch (error) {
     console.error(error);
@@ -408,7 +409,8 @@ exports.getBillByAccountantId = async (req, res) => {
       .populate(
         "products.product",
         "name price retailPrice wholesalePrice productType",
-      );
+      )
+      .lean();
     res.json(bills.map(mapBillProductsPrice));
   } catch (error) {
     console.error(error);

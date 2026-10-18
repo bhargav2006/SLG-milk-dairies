@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../context/ToastContext";
 import { useBranch } from "../context/BranchContext";
 import { useAuth } from "../context/AuthContext";
@@ -11,6 +12,7 @@ import { compressImage } from "../utils/imageCompressor";
 const AddEditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showSuccess, showError } = useToast();
   const { user } = useAuth();
   const { branches, selectedBranch } = useBranch();
@@ -176,6 +178,8 @@ const AddEditProduct = () => {
         await productService.createProduct(payload);
         showSuccess("Product created successfully!");
       }
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       navigate("/products");
     } catch (err) {
       console.error("Product save error details:", err);

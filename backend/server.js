@@ -24,6 +24,8 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 const initBranches = require("./utils/initBranches");
 
+const compression = require("compression");
+
 const app = express();
 const server = require("http").createServer(app);
 
@@ -77,6 +79,7 @@ const corsOptions = {
 };
 
 // Middleware
+app.use(compression());
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
@@ -98,7 +101,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/shop/products", customerProductRoutes);
 
 // Serve static files from the uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), { maxAge: "1d" }));
 
 // webhook routes
 app.use(bodyParser.json());

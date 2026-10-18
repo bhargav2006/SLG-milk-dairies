@@ -70,6 +70,11 @@ const BillSchema = new mongoose.Schema(
   },
 );
 
+BillSchema.index({ createdAt: -1 });
+BillSchema.index({ accountant: 1, createdAt: -1 });
+BillSchema.index({ branch: 1, createdAt: -1 });
+BillSchema.index({ customerNumber: 1 });
+
 const Bill = mongoose.model("Bill", BillSchema);
 
 module.exports = Bill;

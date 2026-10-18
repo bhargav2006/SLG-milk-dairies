@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
 import billService from "../services/billService";
 import userService from "../services/userService";
+import useDebounce from "../utils/useDebounce";
 import { TableSkeleton } from "../components/common/Skeleton";
 import Modal from "../components/common/Modal";
 import EmptyState from "../components/common/EmptyState";
@@ -27,11 +29,45 @@ import {
   Building2,
 } from "lucide-react";
 
+// Helper to format date as YYYY-MM-DD in Asia/Kolkata store timezone (or local time fallback)
+const getLocalDateString = (dateInput) => {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  try {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    return formatter.format(d);
+  } catch (err) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+};
+
+const EMPTY_STATS = {
+  totalSales: 0,
+  totalBills: 0,
+  cashAmount: 0,
+  cashCount: 0,
+  cardAmount: 0,
+  cardCount: 0,
+  onlineAmount: 0,
+  onlineCount: 0,
+};
+const NO_ITEMS = [];
+
 const Bills = () => {
   const { user } = useAuth();
-  const { selectedBranch, currentBranch } = useBranch();
+  const { selectedBranch } = useBranch();
   const { showError, showSuccess } = useToast();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   // Read optional URL search parameters (e.g. from Dashboard search action)
   const queryParams = useMemo(
@@ -39,40 +75,6 @@ const Bills = () => {
     [location.search],
   );
   const initialSearch = queryParams.get("search") || "";
-
-  // Bills State
-  const [bills, setBills] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Helper to format date as YYYY-MM-DD in Asia/Kolkata store timezone (or local time fallback)
-  const getLocalDateString = (dateInput) => {
-    if (!dateInput) return "";
-    const d = new Date(dateInput);
-    if (isNaN(d.getTime())) return "";
-    try {
-      const formatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Asia/Kolkata",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
-      return formatter.format(d);
-    } catch (err) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    }
-  };
-
-  const normalizePaymentMethod = (method) => {
-    if (!method) return "cash";
-    const m = String(method).trim().toLowerCase();
-    if (m === "cash" || m === "cod") return "cash";
-    if (m === "card" || m === "credit_card" || m === "debit_card") return "card";
-    if (m === "online" || m === "qr_payment" || m === "upi" || m === "upidelivery") return "online";
-    return m;
-  };
 
   // Filters State
   const [search, setSearch] = useState(initialSearch);
@@ -82,11 +84,17 @@ const Bills = () => {
   const [page, setPage] = useState(1);
   const limit = 10; // items per page
 
-  // Selected target date string (YYYY-MM-DD) for matching
+  // Admin and Accountant Specific States
+  const [selectedAccountantStatsId, setSelectedAccountantStatsId] = useState("");
+  const [selectedAccountantFilter, setSelectedAccountantFilter] = useState("");
+
+  // Invoice Detail Preview State
+  const [selectedBill, setSelectedBill] = useState(null);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+
+  // Selected target date string (YYYY-MM-DD) used for the summary cards
   const targetDateFormatted = useMemo(() => {
-    if (filterDate) {
-      return filterDate;
-    }
+    if (filterDate) return filterDate;
     return getLocalDateString(new Date());
   }, [filterDate]);
 
@@ -102,61 +110,61 @@ const Bills = () => {
     return "Today";
   }, [filterDate]);
 
-  // Admin and Accountant Specific States
-  const [users, setUsers] = useState([]);
-  const [selectedAccountantStatsId, setSelectedAccountantStatsId] =
-    useState("");
-  const [selectedAccountantFilter, setSelectedAccountantFilter] = useState("");
+  const branchParam = selectedBranch !== "all" ? selectedBranch : undefined;
+  const debouncedSearch = useDebounce(search, 400);
 
-  // Invoice Detail Preview State
-  const [selectedBill, setSelectedBill] = useState(null);
-  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+  // 1) The table: only ONE page of bills (10 rows) comes from the server.
+  //    placeholderData keeps the old rows on screen while the next page loads.
+  const {
+    data: listData,
+    isLoading: loading,
+    isError: listError,
+  } = useQuery({
+    queryKey: [
+      "bills", "list", user._id, branchParam, billTypeFilter, debouncedSearch,
+      paymentMethod, filterDate, selectedAccountantFilter, page,
+    ],
+    queryFn: () =>
+      billService.listBills({
+        page,
+        limit,
+        branchId: branchParam,
+        billType: billTypeFilter || undefined,
+        search: debouncedSearch || undefined,
+        paymentMethod: paymentMethod || undefined,
+        date: filterDate || undefined,
+        accountant: selectedAccountantFilter || undefined,
+      }),
+    placeholderData: keepPreviousData,
+  });
+  const paginatedBills = listData?.bills || NO_ITEMS;
+  const totalCount = listData?.total || 0;
+  const totalPages = listData?.pages || 1;
 
-  // Load bills depending on user role
-  const loadBills = useCallback(async () => {
-    setLoading(true);
-    try {
-      let data = [];
-      const params = {};
-      if (billTypeFilter) {
-        params.billType = billTypeFilter;
-      }
-      if (selectedBranch !== "all") {
-        params.branchId = selectedBranch;
-      }
+  // 2) The summary cards (totals, payment split, sales per accountant): computed by the database.
+  const { data: summary } = useQuery({
+    queryKey: ["bills", "summary", user._id, branchParam, billTypeFilter, targetDateFormatted],
+    queryFn: () =>
+      billService.getBillSummary({
+        branchId: branchParam,
+        billType: billTypeFilter || undefined,
+        date: targetDateFormatted,
+      }),
+    placeholderData: keepPreviousData,
+  });
+  const todayStats = summary?.stats || EMPTY_STATS;
 
-      if (user.role === "admin") {
-        data = await billService.getBills(params);
-      } else {
-        data = await billService.getBillsByAccountant(user._id, params);
-      }
-      setBills(data || []);
-    } catch (err) {
-      console.error(err);
-      showError("Failed to fetch billing history log.");
-    } finally {
-      setLoading(false);
-    }
-  }, [user, billTypeFilter, selectedBranch, showError]);
+  // 3) Users list (admin only). Rarely changes -> cached for 10 minutes.
+  const { data: users = NO_ITEMS } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => userService.getUsers(),
+    enabled: user.role === "admin",
+    staleTime: 10 * 60_000,
+  });
 
   useEffect(() => {
-    loadBills();
-  }, [loadBills]);
-
-  // Load registered users if admin
-  useEffect(() => {
-    if (user.role === "admin") {
-      const fetchUsers = async () => {
-        try {
-          const data = await userService.getUsers();
-          setUsers(data || []);
-        } catch (err) {
-          console.error("Failed to load users for dashboard:", err);
-        }
-      };
-      fetchUsers();
-    }
-  }, [user]);
+    if (listError) showError("Failed to fetch billing history log.");
+  }, [listError, showError]);
 
   // Sync search input if URL changes
   useEffect(() => {
@@ -164,151 +172,40 @@ const Bills = () => {
     if (s) setSearch(s);
   }, [queryParams]);
 
-  // Group sales by accountant (admin-only computation)
-  const salesByAccountant = useMemo(() => {
-    if (user.role !== "admin" || !bills.length) return [];
-
-    const map = {};
-
-    // Initialize with all loaded users
-    users.forEach((u) => {
-      map[u._id] = {
-        id: u._id,
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        totalSales: 0,
-        todaySales: 0,
-        beforeSales: 0,
-      };
-    });
-
-    // Populate from bills
-    bills.forEach((bill) => {
-      const accId = bill.accountant?._id;
-      if (!accId) return;
-
-      if (!map[accId]) {
-        map[accId] = {
-          id: accId,
-          name: bill.accountant?.name || "Deleted User",
-          email: "",
-          role: "accountant",
-          totalSales: 0,
-          todaySales: 0,
-          beforeSales: 0,
-        };
-      }
-
-      const amt = bill.totalAmount || 0;
-      map[accId].totalSales += amt;
-
-      const billDateStr = getLocalDateString(bill.createdAt);
-      if (billDateStr === targetDateFormatted) {
-        map[accId].todaySales += amt;
-      } else {
-        map[accId].beforeSales += amt;
-      }
-    });
-
-    return Object.values(map).sort((a, b) => b.todaySales - a.todaySales);
-  }, [bills, users, user.role, targetDateFormatted]);
-
-  // Selected accountant details for stats tracker card
-  const selectedAccountantStats = useMemo(() => {
-    return (
-      salesByAccountant.find((s) => s.id === selectedAccountantStatsId) || null
-    );
-  }, [salesByAccountant, selectedAccountantStatsId]);
-
-  // Stats breakdown by payment method for the selected date
-  const todayStats = useMemo(() => {
-    let totalSales = 0;
-    let totalBills = 0;
-    let cashAmount = 0;
-    let cashCount = 0;
-    let cardAmount = 0;
-    let cardCount = 0;
-    let onlineAmount = 0;
-    let onlineCount = 0;
-
-    bills.forEach((bill) => {
-      const billDate = getLocalDateString(bill.createdAt);
-      if (billDate === targetDateFormatted) {
-        totalSales += bill.totalAmount || 0;
-        totalBills += 1;
-        const mode = normalizePaymentMethod(bill.paymentMethod);
-        if (mode === "cash") {
-          cashAmount += bill.totalAmount || 0;
-          cashCount += 1;
-        } else if (mode === "card") {
-          cardAmount += bill.totalAmount || 0;
-          cardCount += 1;
-        } else if (mode === "online") {
-          onlineAmount += bill.totalAmount || 0;
-          onlineCount += 1;
-        }
-      }
-    });
-
-    return {
-      totalSales,
-      totalBills,
-      cashAmount,
-      cashCount,
-      cardAmount,
-      cardCount,
-      onlineAmount,
-      onlineCount,
-    };
-  }, [bills, targetDateFormatted]);
-
-  // Client-side filtering
-  const filteredBills = useMemo(() => {
-    return bills.filter((bill) => {
-      // 1. Phone number filter
-      if (search.trim() && !(bill.customerNumber || "").includes(search.trim())) {
-        return false;
-      }
-      // 2. Payment method filter
-      if (paymentMethod && normalizePaymentMethod(bill.paymentMethod) !== normalizePaymentMethod(paymentMethod)) {
-        return false;
-      }
-      // 3. Day-wise date filter
-      if (filterDate) {
-        if (getLocalDateString(bill.createdAt) !== filterDate) return false;
-      }
-      // 4. Accountant filter
-      if (
-        user.role === "admin" &&
-        selectedAccountantFilter &&
-        bill.accountant?._id !== selectedAccountantFilter
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [
-    bills,
-    search,
-    paymentMethod,
-    filterDate,
-    selectedAccountantFilter,
-    user.role,
-  ]);
-
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
   }, [search, paymentMethod, filterDate, selectedAccountantFilter, billTypeFilter]);
 
-  // Pagination slicing
-  const paginatedBills = useMemo(() => {
-    const startIdx = (page - 1) * limit;
-    return filteredBills.slice(startIdx, startIdx + limit);
-  }, [filteredBills, page, limit]);
+  // Group sales by accountant (admin-only) - the totals come from the server now
+  const salesByAccountant = useMemo(() => {
+    if (user.role !== "admin" || !summary?.accountants?.length) return [];
 
-  const totalPages = Math.ceil(filteredBills.length / limit) || 1;
+    const map = {};
+    users.forEach((u) => {
+      map[u._id] = {
+        id: u._id, name: u.name, email: u.email, role: u.role,
+        totalSales: 0, todaySales: 0, beforeSales: 0,
+      };
+    });
+    summary.accountants.forEach((a) => {
+      if (!map[a.id]) {
+        map[a.id] = {
+          id: a.id, name: a.name || "Deleted User", email: "", role: "accountant",
+          totalSales: 0, todaySales: 0, beforeSales: 0,
+        };
+      }
+      map[a.id].totalSales = a.totalSales;
+      map[a.id].todaySales = a.todaySales;
+      map[a.id].beforeSales = a.totalSales - a.todaySales;
+    });
+    return Object.values(map).sort((a, b) => b.todaySales - a.todaySales);
+  }, [summary, users, user.role]);
+
+  // Selected accountant details for stats tracker card
+  const selectedAccountantStats = useMemo(() => {
+    return salesByAccountant.find((s) => s.id === selectedAccountantStatsId) || null;
+  }, [salesByAccountant, selectedAccountantStatsId]);
 
   const handleClearFilters = () => {
     setSearch("");
@@ -318,9 +215,16 @@ const Bills = () => {
     setBillTypeFilter("");
   };
 
-  const handleViewBill = (bill) => {
-    setSelectedBill(bill);
-    setIsInvoiceOpen(true);
+  // The list is lightweight (no products), so fetch the full bill only when "view" is clicked
+  const handleViewBill = async (bill) => {
+    try {
+      const full = await billService.getBillById(bill.invoiceNumber);
+      setSelectedBill(full);
+      setIsInvoiceOpen(true);
+    } catch (err) {
+      console.error(err);
+      showError("Could not load invoice details.");
+    }
   };
 
   const handlePrint = () => {
@@ -332,7 +236,10 @@ const Bills = () => {
       try {
         await billService.deleteBill(bill.invoiceNumber);
         showSuccess(`Invoice ${bill.invoiceNumber} deleted successfully.`);
-        loadBills(); // Re-fetch the bills list
+        // Tell the cache these are out of date, so they reload
+        queryClient.invalidateQueries({ queryKey: ["bills"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        queryClient.invalidateQueries({ queryKey: ["products"] }); // stock was restored
       } catch (err) {
         console.error(err);
         const msg = err.response?.data?.message || "Failed to delete invoice.";
@@ -1093,7 +1000,7 @@ const Bills = () => {
         <div className="card-panel">
           <TableSkeleton rows={limit} cols={7} />
         </div>
-      ) : filteredBills.length === 0 ? (
+      ) : totalCount === 0 ? (
         <EmptyState
           title="No Invoices Found"
           subtitle="No receipts match those query limits."
@@ -1230,8 +1137,8 @@ const Bills = () => {
           <div className="pagination">
             <span className="pagination-info">
               Showing <strong>{(page - 1) * limit + 1}</strong> to{" "}
-              <strong>{Math.min(page * limit, filteredBills.length)}</strong> of{" "}
-              <strong>{filteredBills.length}</strong> invoices
+              <strong>{Math.min(page * limit, totalCount)}</strong> of{" "}
+              <strong>{totalCount}</strong> invoices
             </span>
 
             <div className="pagination-controls">

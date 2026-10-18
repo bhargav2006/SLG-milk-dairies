@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
@@ -10,6 +11,7 @@ import EmptyState from "../components/common/EmptyState";
 import { Users as UsersIcon, Trash2, ShieldCheck, UserCheck, Edit, Plus, Truck, MapPin, Building2 } from "lucide-react";
 
 const Users = () => {
+  const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
   const { branches } = useBranch();
   const { showSuccess, showError, showInfo } = useToast();
@@ -172,6 +174,8 @@ const Users = () => {
         await userService.createUser(payload);
         showSuccess(`Account for ${userData.name} created successfully!`);
       }
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       setUserModalOpen(false);
       loadUsers();
     } catch (err) {
@@ -299,6 +303,8 @@ const Users = () => {
       if (activeTab === "staff") {
         await userService.deleteUser(itemToDelete._id);
         showSuccess(`Staff account for ${itemToDelete.name} has been removed.`);
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         loadUsers();
       } else {
         await deliveryBoyService.adminDeleteDeliveryBoy(itemToDelete._id);

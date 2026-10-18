@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
@@ -24,36 +25,11 @@ import {
   Building2,
 } from "lucide-react";
 
-// Helper to format date as YYYY-MM-DD in Asia/Kolkata store timezone (or local time fallback)
-const getLocalDateString = (dateInput) => {
-  if (!dateInput) return "";
-  const d = new Date(dateInput);
-  if (isNaN(d.getTime())) return "";
-  try {
-    const formatter = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    return formatter.format(d);
-  } catch (err) {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
+const EMPTY_STATS = {
+  products: 0, bills: 0, users: 0, sales: 0, retailSales: 0, wholesaleSales: 0,
+  cashAmount: 0, cashCount: 0, cardAmount: 0, cardCount: 0, onlineAmount: 0, onlineCount: 0,
 };
-
-// Helper to normalize payment methods
-const normalizePaymentMethod = (method) => {
-  if (!method) return "cash";
-  const m = String(method).trim().toLowerCase();
-  if (m === "cash" || m === "cod") return "cash";
-  if (m === "card" || m === "credit_card" || m === "debit_card") return "card";
-  if (m === "online" || m === "qr_payment" || m === "upi" || m === "upidelivery") return "online";
-  return m;
-};
+const NO_BILLS = [];
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -61,128 +37,43 @@ const Dashboard = () => {
   const { showError } = useToast();
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState({
-    products: 0,
-    bills: 0,
-    users: 0,
-    sales: 0,
-    retailSales: 0,
-    wholesaleSales: 0,
-    cashAmount: 0,
-    cashCount: 0,
-    cardAmount: 0,
-    cardCount: 0,
-    onlineAmount: 0,
-    onlineCount: 0,
-  });
-  const [recentBills, setRecentBills] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchBillQuery, setSearchBillQuery] = useState("");
 
   // Modal for Invoice Details Preview
   const [selectedBill, setSelectedBill] = useState(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
+  const branchParam = selectedBranch !== "all" ? selectedBranch : undefined;
+
+  // All three requests run AT THE SAME TIME, and the result is cached:
+  // leaving the dashboard and coming back within 30s shows it instantly, no loading.
+  const { data, isLoading: loading, isError } = useQuery({
+    queryKey: ["dashboard", user?._id, branchParam],
+    queryFn: async () => {
+      const [prodData, usersData, today] = await Promise.all([
+        productService.getProducts({ limit: 1, branchId: branchParam }),
+        user.role === "admin" ? userService.getUsers() : Promise.resolve(null),
+        billService.getTodayDashboard(branchParam ? { branchId: branchParam } : {}),
+      ]);
+      return {
+        stats: {
+          ...today.stats,
+          products: prodData.total || 0,
+          users: user.role === "admin" ? usersData?.length || 0 : "N/A",
+        },
+        bills: today.bills,
+      };
+    },
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
+  const stats = data?.stats || EMPTY_STATS;
+  const recentBills = data?.bills || NO_BILLS;
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        const branchParam = selectedBranch !== "all" ? selectedBranch : undefined;
-
-        // Fetch products count for active branch
-        const prodData = await productService.getProducts({ limit: 1, branchId: branchParam });
-        const productsCount = prodData.total || 0;
-
-        let usersCount = 0;
-        let billsList = [];
-
-        if (user.role === "admin") {
-          const usersData = await userService.getUsers();
-          usersCount = usersData.length || 0;
-
-          billsList = await billService.getBills(branchParam ? { branchId: branchParam } : {});
-        } else {
-          billsList = await billService.getBillsByAccountant(
-            user._id,
-            branchParam ? { branchId: branchParam } : {}
-          );
-        }
-
-        // Calculate today's sales and payment method breakdown in store timezone
-        const todayStr = getLocalDateString(new Date());
-        let todaySales = 0;
-        let todayRetailSales = 0;
-        let todayWholesaleSales = 0;
-        let todayBillsCount = 0;
-        let cashAmount = 0;
-        let cashCount = 0;
-        let cardAmount = 0;
-        let cardCount = 0;
-        let onlineAmount = 0;
-        let onlineCount = 0;
-
-        billsList.forEach((bill) => {
-          const billDate = getLocalDateString(bill.createdAt);
-          if (billDate === todayStr) {
-            todaySales += bill.totalAmount || 0;
-            todayBillsCount += 1;
-
-            if (bill.billType === "wholesale") {
-              todayWholesaleSales += bill.totalAmount || 0;
-            } else {
-              todayRetailSales += bill.totalAmount || 0;
-            }
-
-            const mode = normalizePaymentMethod(bill.paymentMethod);
-            if (mode === "cash") {
-              cashAmount += bill.totalAmount || 0;
-              cashCount += 1;
-            } else if (mode === "card") {
-              cardAmount += bill.totalAmount || 0;
-              cardCount += 1;
-            } else if (mode === "online") {
-              onlineAmount += bill.totalAmount || 0;
-              onlineCount += 1;
-            }
-          }
-        });
-
-        setStats({
-          products: productsCount,
-          bills: todayBillsCount,
-          users: user.role === "admin" ? usersCount : "N/A",
-          sales: todaySales,
-          retailSales: todayRetailSales,
-          wholesaleSales: todayWholesaleSales,
-          cashAmount,
-          cashCount,
-          cardAmount,
-          cardCount,
-          onlineAmount,
-          onlineCount,
-        });
-
-        // Filter and set today's bills only
-        const todayBills = billsList.filter((bill) => {
-          return getLocalDateString(bill.createdAt) === todayStr;
-        });
-
-        const sorted = [...todayBills].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-        );
-        setRecentBills(sorted);
-      } catch (err) {
-        console.error("Dashboard statistics loading failed:", err);
-        showError("Failed to load dashboard data. Check backend connection.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user, selectedBranch, showError]);
+    if (isError) showError("Failed to load dashboard data. Check backend connection.");
+  }, [isError, showError]);
 
   const handleSearchBillsSubmit = (e) => {
     e.preventDefault();
@@ -191,9 +82,16 @@ const Dashboard = () => {
     }
   };
 
-  const handleViewBill = (bill) => {
-    setSelectedBill(bill);
-    setIsInvoiceOpen(true);
+  // The dashboard list has no products, so load the full bill only when "view" is clicked
+  const handleViewBill = async (bill) => {
+    try {
+      const full = await billService.getBillById(bill.invoiceNumber);
+      setSelectedBill(full);
+      setIsInvoiceOpen(true);
+    } catch (err) {
+      console.error(err);
+      showError("Could not load invoice details.");
+    }
   };
 
   const handlePrint = () => {

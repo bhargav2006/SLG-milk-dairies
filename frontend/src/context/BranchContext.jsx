@@ -1,33 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import branchService from "../services/branchService";
 import { useAuth } from "./AuthContext";
 
 const BranchContext = createContext(null);
+const NO_BRANCHES = []; // stable empty array so memos below don't re-run every render
 
 export const BranchProvider = ({ children }) => {
   const { user } = useAuth();
-  const [branches, setBranches] = useState([]);
+  const queryClient = useQueryClient();
   const [selectedBranch, setSelectedBranch] = useState(
     localStorage.getItem("dairy_selected_branch") || "all"
   );
-  const [loadingBranches, setLoadingBranches] = useState(false);
 
-  const fetchBranches = useCallback(async () => {
-    if (!user) return;
-    try {
-      setLoadingBranches(true);
-      const data = await branchService.getBranches();
-      setBranches(data);
-    } catch (error) {
-      console.error("Failed to load branches:", error);
-    } finally {
-      setLoadingBranches(false);
-    }
-  }, [user]);
+  // Branches almost never change: cache for 10 minutes instead of re-fetching on every page
+  const { data: branches = NO_BRANCHES, isFetching: loadingBranches } = useQuery({
+    queryKey: ["branches"],
+    queryFn: () => branchService.getBranches(),
+    enabled: !!user,
+    staleTime: 10 * 60_000,
+  });
 
-  useEffect(() => {
-    fetchBranches();
-  }, [fetchBranches]);
+  // Call this after creating / editing / deleting a branch
+  const refreshBranches = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ["branches"] }),
+    [queryClient]
+  );
 
   useEffect(() => {
     if (selectedBranch) {
@@ -56,7 +54,7 @@ export const BranchProvider = ({ children }) => {
         setSelectedBranch,
         currentBranch,
         loadingBranches,
-        refreshBranches: fetchBranches,
+        refreshBranches,
       }}
     >
       {children}

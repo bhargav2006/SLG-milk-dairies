@@ -11,12 +11,20 @@ const {
   updateBill,
   deleteBill,
 } = require("../controllers/billController");
+const { getTodayDashboard } = require("../controllers/dashboardController");
+const { listBills, getBillSummary } = require("../controllers/billQueryController");
 
 // Create a new bill (admin and accountant)
 router.post("/", protect, createBill);
 
-// Get bills (admin gets all/filtered by branch, accountant gets assigned branch bills)
+// Get ALL bills (old endpoint - heavy; the pages no longer use it)
 router.get("/", protect, getBills);
+
+// --- New fast endpoints. Single-segment paths like /list and /summary MUST stay
+// --- above "/:invoiceNumber", otherwise Express treats "list" as an invoice number.
+router.get("/dashboard/today", protect, getTodayDashboard);
+router.get("/list", protect, listBills);
+router.get("/summary", protect, getBillSummary);
 
 // Get bills by customer Number (admin and accountant )
 router.get("/customer/:customerNumber", protect, getBillByCustomerNumber);

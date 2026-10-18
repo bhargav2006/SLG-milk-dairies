@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { useBranch } from "../context/BranchContext";
 import { useToast } from "../context/ToastContext";
@@ -27,6 +28,7 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
   const { user } = useAuth();
   const { selectedBranch, currentBranch } = useBranch();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
+  const queryClient = useQueryClient();
 
   // POS State
   const [customerNumber, setCustomerNumber] = useState("");
@@ -309,11 +311,17 @@ const CreateBill = ({ billType = "retail", isEditMode = false }) => {
       if (isEditMode) {
         const updatedBill = await billService.updateBill(invoiceNumber, billData);
         showSuccess("Invoice updated successfully!");
+        queryClient.invalidateQueries({ queryKey: ["bills"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        queryClient.invalidateQueries({ queryKey: ["products"] });
         setCreatedBill(updatedBill);
         setIsInvoiceOpen(true);
       } else {
         const newBill = await billService.createBill(billData);
         showSuccess("Invoice generated successfully!");
+        queryClient.invalidateQueries({ queryKey: ["bills"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        queryClient.invalidateQueries({ queryKey: ["products"] });
 
         // Log the standalone receipt link to the console for external email operations
         // console.log(

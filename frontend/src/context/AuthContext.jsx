@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import authService from "../services/authService";
 import { registerLogoutHandler } from "../services/api";
+import { queryClient } from "../queryClient";
 
 const AuthContext = createContext(null);
 
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("dairy_token");
     setToken(null);
     setUser(null);
+    queryClient.clear();
     setLoading(false);
   }, []);
 

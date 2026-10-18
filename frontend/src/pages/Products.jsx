@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import useDebounce from "../utils/useDebounce";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useBranch } from "../context/BranchContext";
@@ -29,12 +31,6 @@ const Products = () => {
   const [viewMode, setViewMode] = useState(() => {
     return localStorage.getItem("product_view_mode") || "grid";
   });
-
-  // Products State
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
 
   // Filters State
   const [search, setSearch] = useState("");
@@ -99,55 +95,54 @@ const Products = () => {
     localStorage.setItem("product_view_mode", viewMode);
   }, [viewMode]);
 
-  // Load products with query filters
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = {
-        page,
-        limit,
-        branchId: selectedBranch !== "all" ? selectedBranch : undefined,
-        search: search.trim() || undefined,
-        category: category || undefined,
-        productType: productTypeFilter || undefined,
-        minPrice: minPrice || undefined,
-        maxPrice: maxPrice || undefined,
-        sortBy:
-          sortBy === "name-asc" || sortBy === "name-desc"
-            ? "name"
-            : sortBy === "price-asc" || sortBy === "price-desc"
-              ? "price"
-              : sortBy === "serialNumber-asc" || sortBy === "serialNumber-desc"
-                ? "serialNumber"
-                : sortBy,
-        order:
-          sortBy === "name-desc" ||
-          sortBy === "price-desc" ||
-          sortBy === "serialNumber-desc"
-            ? "desc"
-            : "asc",
-      };
+  const queryClient = useQueryClient();
+  const debouncedSearch = useDebounce(search, 400);
 
-      const data = await productService.getProducts(params);
-      setProducts(data.products || []);
-      setTotalPages(data.pages || 1);
-      setTotalProducts(data.total || 0);
-    } catch (err) {
-      console.error(err);
-      showError("Failed to fetch products");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, selectedBranch, search, category, productTypeFilter, minPrice, maxPrice, sortBy, showError]);
+  const params = useMemo(
+    () => ({
+      page,
+      limit,
+      branchId: selectedBranch !== "all" ? selectedBranch : undefined,
+      search: debouncedSearch.trim() || undefined,
+      category: category || undefined,
+      productType: productTypeFilter || undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      sortBy:
+        sortBy === "name-asc" || sortBy === "name-desc"
+          ? "name"
+          : sortBy === "price-asc" || sortBy === "price-desc"
+            ? "price"
+            : sortBy === "serialNumber-asc" || sortBy === "serialNumber-desc"
+              ? "serialNumber"
+              : sortBy,
+      order:
+        sortBy === "name-desc" || sortBy === "price-desc" || sortBy === "serialNumber-desc"
+          ? "desc"
+          : "asc",
+    }),
+    [page, selectedBranch, debouncedSearch, category, productTypeFilter, minPrice, maxPrice, sortBy],
+  );
+
+  // Cached for 60s per filter/page combination; old rows stay visible while the next page loads
+  const { data, isLoading: loading, isError } = useQuery({
+    queryKey: ["products", params],
+    queryFn: () => productService.getProducts(params),
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  });
+  const products = data?.products || [];
+  const totalPages = data?.pages || 1;
+  const totalProducts = data?.total || 0;
+
+  useEffect(() => {
+    if (isError) showError("Failed to fetch products");
+  }, [isError, showError]);
 
   useEffect(() => {
     // Reset page to 1 when filters change to avoid paging issues
     setPage(1);
   }, [search, category, productTypeFilter, minPrice, maxPrice, sortBy]);
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -175,7 +170,8 @@ const Products = () => {
       setDeleteModalOpen(false);
       setProductToDelete(null);
       // Reload products catalog
-      loadProducts();
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     } catch (err) {
       console.error(err);
       showError(err.response?.data?.message || "Failed to delete product");
